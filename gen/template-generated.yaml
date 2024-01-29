@@ -1,0 +1,593 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'AWS SAM Template for making API Gateway with APIGatewayRole for invoking
+  lambda functions. Generate lambda functions according to docs\Visitor Management
+  System Swagger 1.yaml
+
+  '
+Globals:
+  Function:
+    Timeout: 3
+    Runtime: python3.7
+    Environment:
+      Variables:
+        Stage:
+          Ref: Stage
+        BucketName:
+          Fn::ImportValue: BucketName
+Parameters:
+  Stage:
+    Type: String
+    Default: dev
+    AllowedValues:
+    - dev
+    - prod
+    Description: Stage name
+Resources:
+  ApiGatewayRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: ${AWS::StackName}-ApiGatewayRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - apigateway.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Policies:
+      - PolicyName:
+          Fn::Sub: ${AWS::StackName}-ApiGatewayRolePolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - lambda:InvokeFunction
+            Resource:
+            - Fn::GetAtt:
+              - VMSLoginGET
+              - Arn
+            - Fn::GetAtt:
+              - VMSVisitorGET
+              - Arn
+            - Fn::GetAtt:
+              - VMSVisitorPOST
+              - Arn
+            - Fn::GetAtt:
+              - VMSVisitorIdGET
+              - Arn
+            - Fn::GetAtt:
+              - VMSVisitorIdPUT
+              - Arn
+            - Fn::GetAtt:
+              - VMSVisitGET
+              - Arn
+            - Fn::GetAtt:
+              - VMSVisitPOST
+              - Arn
+            - Fn::GetAtt:
+              - VMSVisitIdGET
+              - Arn
+            - Fn::GetAtt:
+              - VMSVisitIdPATCH
+              - Arn
+            - Fn::GetAtt:
+              - VMSCardGET
+              - Arn
+            - Fn::GetAtt:
+              - VMSCardPOST
+              - Arn
+            - Fn::GetAtt:
+              - VMSCardIdGET
+              - Arn
+            - Fn::GetAtt:
+              - VMSCardIdPUT
+              - Arn
+            - Fn::GetAtt:
+              - VMSCardIdDELETE
+              - Arn
+            - Fn::GetAtt:
+              - VMSApprovalGET
+              - Arn
+            - Fn::GetAtt:
+              - VMSApprovalPOST
+              - Arn
+            - Fn::GetAtt:
+              - VMSApprovalIdGET
+              - Arn
+            - Fn::GetAtt:
+              - VMSApprovalIdPATCH
+              - Arn
+    Metadata:
+      SamResourceId: ApiGatewayRole
+  VMSApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName:
+        Ref: Stage
+      DefinitionBody:
+        Fn::Transform:
+          Name: AWS::Include
+          Parameters:
+            Location: s3://udbhav-code-sam/04ef3fb488defd8df16f14222de897d7
+      GatewayResponses:
+        DEFAULT_4XX:
+          ResponseParameters:
+            Headers:
+              Access-Control-Allow-Origin: '''*'''
+              Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'''
+              Access-Control-Allow-Methods: '''GET,OPTIONS,POST,PUT,DELETE'''
+          ResponseTemplates:
+            application/json: "{\n    \"error\" : {\n        \"message\": \"$inputRoot.message\"\
+              ,\n        \"code\": \"$inputRoot.errorCode\"\n    }\n    \"status\"\
+              \ : $context \n}\n"
+        DEFAULT_5XX:
+          ResponseParameters:
+            Headers:
+              Access-Control-Allow-Origin: '''*'''
+              Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'''
+              Access-Control-Allow-Methods: '''GET,OPTIONS,POST,PUT,DELETE'''
+          ResponseTemplates:
+            application/json: "{\n    \"error\" : {\n        \"message\": \"$inputRoot.message\"\
+              ,\n        \"code\": \"$inputRoot.errorCode\"\n    }\n    \"status\"\
+              \ : $context    \n}\n"
+    Metadata:
+      SamResourceId: VMSApiGateway
+  VMSLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName:
+        Fn::Sub: VMS-Layer-${Stage}
+      Description: VMS Lambda Layer
+      ContentUri: s3://udbhav-code-sam/ac5312eb37ec2a4e44c73c8e79af48c8
+      CompatibleRuntimes:
+      - python3.7
+    Metadata:
+      SamResourceId: VMSLayer
+  VMSLoginGET:
+    Type: AWS::Serverless::Function
+    Properties:
+      Environment:
+        Variables:
+          UserPoolClientId:
+            Fn::ImportValue: UserPoolClientId
+          UserPoolId:
+            Fn::ImportValue: UserPoolId
+      FunctionName:
+        Fn::Sub: VMS-login-GET-${Stage}
+      CodeUri: s3://udbhav-code-sam/1a74929be8f7cbab8452a60b5946dbb6
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Layers:
+      - Ref: VMSLayer
+      Events:
+        VMSLoginGET:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /login/{proxy+}
+            Method: post
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Fn::ImportValue: DynamoDBTable
+    Metadata:
+      SamResourceId: VMSLoginGET
+  VMSVisitorGET:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: VMS-visitor-GET-${Stage}
+      CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Layers:
+      - Ref: VMSLayer
+      Events:
+        VMSVisitorGET:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /visitor/{proxy+}
+            Method: get
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Fn::ImportValue: DynamoDBTable
+    Metadata:
+      SamResourceId: VMSVisitorGET
+  VMSVisitorPOST:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: VMS-visitor-POST-${Stage}
+      CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Layers:
+      - Ref: VMSLayer
+      Events:
+        VMSVisitorPOST:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /visitor/{proxy+}
+            Method: post
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Fn::ImportValue: DynamoDBTable
+    Metadata:
+      SamResourceId: VMSVisitorPOST
+  VMSVisitorIdGET:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: VMS-visitor-id-GET-${Stage}
+      CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Layers:
+      - Ref: VMSLayer
+      Events:
+        VMSVisitorVisitorIdGET:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /visitor/{id}/{proxy+}
+            Method: get
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Fn::ImportValue: DynamoDBTable
+    Metadata:
+      SamResourceId: VMSVisitorIdGET
+  VMSVisitorIdPUT:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: VMS-visitor-id-PUT-${Stage}
+      CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Layers:
+      - Ref: VMSLayer
+      Events:
+        VMSVisitorVisitorIdPUT:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /visitor/{id}/{proxy+}
+            Method: put
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Fn::ImportValue: DynamoDBTable
+    Metadata:
+      SamResourceId: VMSVisitorIdPUT
+  VMSVisitGET:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: VMS-visit-GET-${Stage}
+      CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Layers:
+      - Ref: VMSLayer
+      Events:
+        VMSVisitGET:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /visit/{proxy+}
+            Method: get
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Fn::ImportValue: DynamoDBTable
+    Metadata:
+      SamResourceId: VMSVisitGET
+  VMSVisitPOST:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: VMS-visit-POST-${Stage}
+      CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Layers:
+      - Ref: VMSLayer
+      Events:
+        VMSVisitPOST:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /visit/{proxy+}
+            Method: post
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Fn::ImportValue: DynamoDBTable
+    Metadata:
+      SamResourceId: VMSVisitPOST
+  VMSVisitIdGET:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: VMS-visit-id-GET-${Stage}
+      CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Layers:
+      - Ref: VMSLayer
+      Events:
+        VMSVisitVisitIdGET:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /visit/{id}/{proxy+}
+            Method: get
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Fn::ImportValue: DynamoDBTable
+    Metadata:
+      SamResourceId: VMSVisitIdGET
+  VMSVisitIdPATCH:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: VMS-visit-id-PATCH-${Stage}
+      CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Layers:
+      - Ref: VMSLayer
+      Events:
+        VMSVisitVisitIdPATCH:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /visit/{id}/{proxy+}
+            Method: patch
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Fn::ImportValue: DynamoDBTable
+    Metadata:
+      SamResourceId: VMSVisitIdPATCH
+  VMSCardGET:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: VMS-card-GET-${Stage}
+      CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Layers:
+      - Ref: VMSLayer
+      Events:
+        VMSCardGET:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /card/{proxy+}
+            Method: get
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Fn::ImportValue: DynamoDBTable
+    Metadata:
+      SamResourceId: VMSCardGET
+  VMSCardPOST:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: VMS-card-POST-${Stage}
+      CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Layers:
+      - Ref: VMSLayer
+      Events:
+        VMSCardPOST:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /card/{proxy+}
+            Method: post
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Fn::ImportValue: DynamoDBTable
+    Metadata:
+      SamResourceId: VMSCardPOST
+  VMSCardIdGET:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: VMS-card-id-GET-${Stage}
+      CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Layers:
+      - Ref: VMSLayer
+      Events:
+        VMSCardCardIdGET:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /card/{id}/{proxy+}
+            Method: get
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Fn::ImportValue: DynamoDBTable
+    Metadata:
+      SamResourceId: VMSCardIdGET
+  VMSCardIdPUT:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: VMS-card-id-PUT-${Stage}
+      CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Layers:
+      - Ref: VMSLayer
+      Events:
+        VMSCardCardIdPUT:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /card/{id}/{proxy+}
+            Method: put
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Fn::ImportValue: DynamoDBTable
+    Metadata:
+      SamResourceId: VMSCardIdPUT
+  VMSCardIdDELETE:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: VMS-card-id-DELETE-${Stage}
+      CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Layers:
+      - Ref: VMSLayer
+      Events:
+        VMSCardCardIdDELETE:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /card/{id}/{proxy+}
+            Method: delete
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Fn::ImportValue: DynamoDBTable
+    Metadata:
+      SamResourceId: VMSCardIdDELETE
+  VMSApprovalGET:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: VMS-approval-GET-${Stage}
+      CodeUri: s3://udbhav-code-sam/4f4f1d14fcbeb14a29ac4d8a7178a669
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Layers:
+      - Ref: VMSLayer
+      Events:
+        VMSApprovalGET:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /approval/{proxy+}
+            Method: get
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Fn::ImportValue: DynamoDBTable
+    Metadata:
+      SamResourceId: VMSApprovalGET
+  VMSApprovalPOST:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: VMS-approval-POST-${Stage}
+      CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Layers:
+      - Ref: VMSLayer
+      Events:
+        VMSApprovalPOST:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /approval/{proxy+}
+            Method: post
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Fn::ImportValue: DynamoDBTable
+    Metadata:
+      SamResourceId: VMSApprovalPOST
+  VMSApprovalIdGET:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: VMS-approval-id-GET-${Stage}
+      CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Layers:
+      - Ref: VMSLayer
+      Events:
+        VMSApprovalApprovalIdGET:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /approval/{id}/{proxy+}
+            Method: get
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Fn::ImportValue: DynamoDBTable
+    Metadata:
+      SamResourceId: VMSApprovalIdGET
+  VMSApprovalIdPATCH:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: VMS-approval-id-PATCH-${Stage}
+      CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Layers:
+      - Ref: VMSLayer
+      Events:
+        VMSApprovalApprovalIdPATCH:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /approval/{id}/{proxy+}
+            Method: patch
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Fn::ImportValue: DynamoDBTable
+    Metadata:
+      SamResourceId: VMSApprovalIdPATCH
+Outputs:
+  VMSApiEndpoint:
+    Description: VMS API Gateway endpoint URL
+    Value:
+      Fn::Sub: https://${VMSApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${Stage}

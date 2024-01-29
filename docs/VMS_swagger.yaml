@@ -1,0 +1,1654 @@
+openapi: 3.0.0
+info:
+    title: Visitor Management System
+    version: 1.0.0
+tags:
+    - name: Authentication
+      description: User authentication operations
+    - name: Visitor
+      description: Operations related to visitors
+    - name: Visit
+      description: Operations related to visits
+    - name: Card
+      description: Operations related to ID cards
+    - name: Approval
+      description: Operations related to approvals
+    - name: Report
+      description: Operations related to reports
+
+paths:
+    /login:
+        post:
+            summary: Login user
+            operationId: loginUser
+            tags:
+                - Authentication
+            requestBody:
+                description: User credentials for login
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            required:
+                                - username
+                                - password
+                            type: object
+                            properties:
+                                username:
+                                    type: string
+                                password:
+                                    type: string
+            responses:
+                "200":
+                    description: Successful login
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    data:
+                                        type: object
+                                        properties:
+                                            access_token:
+                                                type: string
+                                                example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+                                            token_type:
+                                                type: string
+                                                example: Bearer
+                                    status:
+                                        type: string
+                                        description: status
+                                        example: success
+
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error401"
+
+                "400":
+                    description: Bad Request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+
+                "500":
+                    description: Internal Server Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error500"
+
+            x-amazon-apigateway-integration:
+                credentials:
+                    Fn::GetAtt: ApiGatewayRole.Arn
+                uri:
+                    Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${VMSLoginGET.Arn}/invocations
+                responses:
+                    default:
+                        statusCode: "200"
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                contentHandling: CONVERT_TO_TEXT
+                type: aws_proxy
+
+    /visitor:
+        get:
+            summary: Get visitor's List based on query
+            operationId: getVisitorList
+            tags:
+                - Visitor
+            parameters:
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                      type: number
+                - name: nextPageToken
+                  in: query
+                  required: false
+                  schema:
+                      type: number
+                - name: name
+                  in: query
+                  required: false
+                  schema:
+                      type: string
+                - name: phoneNumber
+                  in: query
+                  required: false
+                  schema:
+                      type: number
+                - name: organization
+                  in: query
+                  required: false
+                  schema:
+                      type: string
+                - name: currentlyVisiting
+                  in: query
+                  required: false
+                  schema:
+                      type: boolean
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    data:
+                                        type: object
+                                        properties:
+                                            visitors:
+                                                type: array
+                                                items:
+                                                    $ref: "#/components/schemas/visitor"
+                                            nextPageToken:
+                                                type: string
+                                    status:
+                                        type: string
+                                        description: status
+                                        example: success
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error401"
+
+                "400":
+                    description: Bad Request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+
+                "500":
+                    description: Internal Server Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error500"
+
+            x-amazon-apigateway-integration:
+                credentials:
+                    Fn::GetAtt: ApiGatewayRole.Arn
+                uri:
+                    Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${VMSVisitorGET.Arn}/invocations
+                responses:
+                    default:
+                        statusCode: "200"
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                contentHandling: CONVERT_TO_TEXT
+                type: aws_proxy
+
+            security:
+                - CognitoUserPool: []
+
+        post:
+            summary: Create new Visitor
+            operationId: createVisitor
+            tags:
+                - Visitor
+            requestBody:
+                description: Visitor details for creation
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            required:
+                                - first_name
+                                - last_name
+                                - phone_number
+                                - id_photo_blob
+                            type: object
+                            properties:
+                                firstName:
+                                    type: string
+                                lastName:
+                                    type: string
+                                phoneNumber:
+                                    type: number
+                                email:
+                                    type: string
+                                organisation:
+                                    type: string
+                                address:
+                                    type: string
+                                vistorPhotoBlob:
+                                    type: string
+                                idPhotoBlob:
+                                    type: string
+                                idProofNumber:
+                                    type: string
+            responses:
+                "201":
+                    description: Visitor created successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    data:
+                                        type: object
+                                        properties:
+                                            visitorId:
+                                                type: string
+                                                example: "V123"
+                                    status:
+                                        type: string
+                                        description: status
+                                        example: success
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error401"
+
+                "400":
+                    description: Bad Request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+
+                "500":
+                    description: Internal Server Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error500"
+            x-amazon-apigateway-integration:
+                credentials:
+                    Fn::GetAtt: ApiGatewayRole.Arn
+                uri:
+                    Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${VMSVisitorPOST.Arn}/invocations
+                responses:
+                    default:
+                        statusCode: "201"
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                contentHandling: CONVERT_TO_TEXT
+                type: aws_proxy
+            security:
+                - CognitoUserPool: []
+
+    /visitor/{id}:
+        get:
+            summary: Get visitor detail
+            operationId: getVisitorDetail
+            tags:
+                - Visitor
+            parameters:
+                - name: id
+                  in: path
+                  description: ID of the visitor
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    data:
+                                        $ref: "#/components/schemas/visitor"
+                                    status:
+                                        type: string
+                                        description: status
+                                        example: success
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error401"
+
+                "400":
+                    description: Bad Request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+
+                "404":
+                    description: Not Found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+
+                "500":
+                    description: Internal Server Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error500"
+            x-amazon-apigateway-integration:
+                credentials:
+                    Fn::GetAtt: ApiGatewayRole.Arn
+                uri:
+                    Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${VMSVisitorIdGET.Arn}/invocations
+                responses:
+                    default:
+                        statusCode: "200"
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                contentHandling: CONVERT_TO_TEXT
+                type: aws_proxy
+                
+            security:
+                - CognitoUserPool: []
+        put:
+            summary: Modify Visitor Details
+            operationId: modifyVisitorDetails
+            tags:
+                - Visitor
+            parameters:
+                - name: id
+                  in: path
+                  description: ID of the visitor
+                  required: true
+                  schema:
+                      type: string
+            requestBody:
+                description: Updated visitor details
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                firstName:
+                                    type: string
+                                lastName:
+                                    type: string
+                                phoneNumber:
+                                    type: number
+                                email:
+                                    type: string
+                                organisation:
+                                    type: string
+                                address:
+                                    type: string
+                                vistorPhotoBlob:
+                                    type: string
+                                idPhotoBlob:
+                                    type: string
+                                idProofNumber:
+                                    type: string
+            responses:
+                "200":
+                    description: Visitor details modified successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    data:
+                                        $ref: "#/components/schemas/visitor"
+                                    status:
+                                        type: string
+                                        description: status
+                                        example: success
+                "400":
+                    description: Bad Request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+                "404":
+                    description: Visitor not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+                "500":
+                    description: Internal Server Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+
+            x-amazon-apigateway-integration:
+                credentials:
+                    Fn::GetAtt: ApiGatewayRole.Arn
+                uri:
+                    Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${VMSVisitorIdPUT.Arn}/invocations
+                responses:
+                    default:
+                        statusCode: "200"
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                contentHandling: CONVERT_TO_TEXT
+                type: aws_proxy
+            security:
+                - CognitoUserPool: []
+
+    /visit:
+        get:
+            summary: Get Visits Details according to query
+            operationId: getVisitDetails
+            tags:
+                - Visit
+            parameters:
+                - name: pageSize
+                  in: query
+                  required: true
+                  schema:
+                      type: number
+                - name: nextPageToken
+                  in: query
+                  required: false
+                  schema:
+                      type: number
+                - name: name
+                  in: query
+                  required: false
+                  schema:
+                      type: string
+                - name: startDate
+                  in: query
+                  required: false
+                  schema:
+                      type: string
+                - name: endDate
+                  in: query
+                  required: false
+                  schema:
+                      type: number
+                - name: organization
+                  in: query
+                  required: false
+                  schema:
+                      type: string
+                - name: approver
+                  in: query
+                  required: false
+                  schema:
+                      type: string
+
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    data:
+                                        type: object
+                                        properties:
+                                            visitors:
+                                                type: array
+                                                items:
+                                                    $ref: "#/components/schemas/visitDetail"
+
+                                    status:
+                                        type: string
+                                        description: status
+                                        example: success
+                "400":
+                    description: Bad Request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error401"
+
+                "500":
+                    description: Internal Server Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error500"
+            x-amazon-apigateway-integration:
+                credentials:
+                    Fn::GetAtt: ApiGatewayRole.Arn
+                uri:
+                    Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${VMSVisitGET.Arn}/invocations
+                responses:
+                    default:
+                        statusCode: "200"
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                contentHandling: CONVERT_TO_TEXT
+                type: aws_proxy
+            security:
+                - CognitoUserPool: []
+        post:
+            summary: Create new visit of Visitor
+            operationId: createVisit
+            tags:
+                - Visit
+            requestBody:
+                description: Visit details for creation
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - date
+                                - checkInTime
+                                - purpose
+                                - checkedInBy
+                                - visitType
+                                - visitorId
+                            properties:
+                                date:
+                                    type: string
+                                checkInTime:
+                                    type: string
+                                purpose:
+                                    type: string
+                                checkedInBy:
+                                    type: string
+                                visitType:
+                                    type: string
+                                visitorId:
+                                    type: string
+                                toMeet:
+                                    type: string
+                                comments:
+                                    type: string
+
+            responses:
+                "201":
+                    description: Visitor created successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    data:
+                                        type: object
+                                        properties:
+                                            date:
+                                                type: string
+                                            checkInTime:
+                                                type: string
+                                            purpose:
+                                                type: string
+                                            checkedInBy:
+                                                type: string
+                                            visitType:
+                                                type: string
+                                            visitorId:
+                                                type: string
+                                            toMeet:
+                                                type: string
+                                            comments:
+                                                type: string
+                                            approvalId:
+                                                type: string
+                                    status:
+                                        type: string
+                                        description: status
+                                        example: success
+
+                "400":
+                    description: Bad Request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+                "500":
+                    description: Internal Server Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+            x-amazon-apigateway-integration:
+                credentials:
+                    Fn::GetAtt: ApiGatewayRole.Arn
+                uri:
+                    Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${VMSVisitPOST.Arn}/invocations
+                responses:
+                    default:
+                        statusCode: "201"
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                contentHandling: CONVERT_TO_TEXT
+                type: aws_proxy
+            security:
+                - CognitoUserPool: []
+
+    /visit/{id}:
+        get:
+            summary: Get a particular visit
+            operationId: getVisit
+            tags:
+                - Visit
+            parameters:
+                - name: id
+                  in: path
+                  description: ID of the visit
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                "200":
+                    description: Successful retrieval of visit details
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    data:
+                                        $ref: "#/components/schemas/visit"
+                                    status:
+                                        type: string
+                                        description: status
+                                        example: success
+                "400":
+                    description: Bad Request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error401"
+                "404":
+                    description: Visitor not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+                "500":
+                    description: Internal Server Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error500"
+            x-amazon-apigateway-integration:
+                credentials:
+                    Fn::GetAtt: ApiGatewayRole.Arn
+                uri:
+                    Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${VMSVisitIdGET.Arn}/invocations
+                responses:
+                    default:
+                        statusCode: "200"
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                contentHandling: CONVERT_TO_TEXT
+                type: aws_proxy
+            security:
+                - CognitoUserPool: []
+        patch:
+            summary: Checkout Visitor
+            operationId: checkoutVisitor
+            tags:
+                - Visit
+            parameters:
+                - name: id
+                  in: path
+                  description: ID of the visit
+                  required: true
+                  schema:
+                      type: string
+            requestBody:
+                description: Visit details for creation
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                checkOutTime:
+                                    type: string
+
+            responses:
+                "200":
+                    description: Visitor checked out successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    data:
+                                        type: object
+                                        properties:
+                                            message:
+                                                type: string
+
+                                    status:
+                                        type: string
+                                        description: status
+                                        example: success
+                "400":
+                    description: Bad Request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error401"
+                "404":
+                    description: Visit not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+                "500":
+                    description: Internal Server Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error500"
+            x-amazon-apigateway-integration:
+                credentials:
+                    Fn::GetAtt: ApiGatewayRole.Arn
+                uri:
+                    Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${VMSVisitIdPATCH.Arn}/invocations
+                responses:
+                    default:
+                        statusCode: "200"
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                contentHandling: CONVERT_TO_TEXT
+                type: aws_proxy
+            security:
+                - CognitoUserPool: []
+
+    /card:
+        get:
+            summary: Get all cards, filtering on basis of card status
+            operationId: getAllCards
+            tags:
+                - Card
+            parameters:
+                - name: status
+                  in: query
+                  description: Filter cards based on status
+                  required: true
+                  schema:
+                      type: string
+                      enum:
+                          - inactive
+                          - active
+                          - discarded
+
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    data:
+                                        type: array
+                                        items:
+                                            type: object
+                                            properties:
+                                                cardId:
+                                                    type: string
+                                                    description: Card ID
+                                                status:
+                                                    type: string
+                                                    description: Status
+                                                visitId:
+                                                    type: string
+                                                    description: Visit ID
+                                                visitorId:
+                                                    type: string
+                                                    description: Visitor ID
+                                        example:
+                                            - cardId: "123"
+                                              status: "active"
+                                              visitId: "456"
+                                              visitorId: "789"
+                                            - cardId: "456"
+                                              status: "inactive"
+                                              visitId: "789"
+                                              visitorId: "123"
+
+                                    status:
+                                        type: string
+                                        description: Status
+                                        example: success
+
+                "400":
+                    description: Bad Request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error401"
+                "500":
+                    description: Internal Server Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error500"
+            x-amazon-apigateway-integration:
+                credentials:
+                    Fn::GetAtt: ApiGatewayRole.Arn
+                uri:
+                    Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${VMSCardGET.Arn}/invocations
+                responses:
+                    default:
+                        statusCode: "200"
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                contentHandling: CONVERT_TO_TEXT
+                type: aws_proxy
+            security:
+                - CognitoUserPool: []
+        post:
+            summary: Create a new ID Card
+            operationId: createCard
+            tags:
+                - Card
+            requestBody:
+                description: Card details for creation
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                cardId:
+                                    type: string
+
+            responses:
+                "200":
+                    description: Card created successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    data:
+                                        type: object
+                                        properties:
+                                            cardId:
+                                                type: string
+                                                description: Card ID
+                                            status:
+                                                type: string
+                                                description: Status
+
+                                    status:
+                                        type: string
+                                        description: status
+                                        example: success
+                "400":
+                    description: Bad Request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error401"
+                "500":
+                    description: Internal Server Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error500"
+            x-amazon-apigateway-integration:
+                credentials:
+                    Fn::GetAtt: ApiGatewayRole.Arn
+                uri:
+                    Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${VMSCardPOST.Arn}/invocations
+                responses:
+                    default:
+                        statusCode: "201"
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                contentHandling: CONVERT_TO_TEXT
+                type: aws_proxy
+            security:
+                - CognitoUserPool: []
+
+    /card/{id}:
+        get:
+            summary: Get a particular card
+            operationId: getCard
+            tags:
+                - Card
+            parameters:
+                - name: id
+                  in: path
+                  description: ID of the card
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    data:
+                                        type: object
+                                        properties:
+                                            cardId:
+                                                type: string
+                                                description: Card ID
+                                            status:
+                                                type: string
+                                                description: Status
+                                            visitId:
+                                                type: string
+                                                description: Visit ID
+                                            visitorId:
+                                                type: string
+                                                description: visitorId
+
+                                    status:
+                                        type: string
+                                        description: status
+                                        example: success
+
+                "400":
+                    description: Bad Request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error401"
+                "404":
+                    description: Card not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+                "500":
+                    description: Internal Server Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error500"
+            x-amazon-apigateway-integration:
+                credentials:
+                    Fn::GetAtt: ApiGatewayRole.Arn
+                uri:
+                    Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${VMSCardIdGET.Arn}/invocations
+                responses:
+                    default:
+                        statusCode: "200"
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                contentHandling: CONVERT_TO_TEXT
+                type: aws_proxy
+            security:
+                - CognitoUserPool: []
+        put:
+            summary: Change status of a particular card
+            operationId: changeCardStatus
+            tags:
+                - Card
+            parameters:
+                - name: id
+                  in: path
+                  description: ID of the card
+                  required: true
+                  schema:
+                      type: string
+            requestBody:
+                description: Updated card details
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                status:
+                                    type: string
+                                    description: status of card
+                            example: { "status": "discarded" }
+
+            responses:
+                "200":
+                    description: Card status updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    data:
+                                        type: object
+                                        properties:
+                                            cardId:
+                                                type: string
+                                                description: Card ID
+                                            status:
+                                                type: string
+                                                description: Status
+
+                                    status:
+                                        type: string
+                                        description: status
+                                        example: success
+                "400":
+                    description: Bad Request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error401"
+                "404":
+                    description: card not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: object
+                                        properties:
+                                            code:
+                                                type: string
+                                                example: "404"
+                                            message:
+                                                type: string
+                                                example: "Card not found"
+                                    status:
+                                        type: string
+                                        example: "failure"
+                "500":
+                    description: Internal Server Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error500"
+            x-amazon-apigateway-integration:
+                credentials:
+                    Fn::GetAtt: ApiGatewayRole.Arn
+                uri:
+                    Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${VMSCardIdPUT.Arn}/invocations
+                responses:
+                    default:
+                        statusCode: "200"
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                contentHandling: CONVERT_TO_TEXT
+                type: aws_proxy
+            security:
+                - CognitoUserPool: []
+        delete:
+            summary: Delete a particular card
+            operationId: deleteCard
+            tags:
+                - Card
+            parameters:
+                - name: id
+                  in: path
+                  description: ID of the card
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                "200":
+                    description: Card deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    data:
+                                        type: object
+                                        properties:
+                                            status:
+                                                type: string
+                                                example: card deleted successfully
+                                    status:
+                                        type: string
+                                        description: status
+                                        example: success
+                "400":
+                    description: Bad Request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error401"
+                "404":
+                    description: card not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: object
+                                        properties:
+                                            code:
+                                                type: string
+                                                example: "404"
+                                            message:
+                                                type: string
+                                                example: "Card not found"
+                                    status:
+                                        type: string
+                                        example: "failure"
+                "500":
+                    description: Internal Server Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error500"
+            x-amazon-apigateway-integration:
+                credentials:
+                    Fn::GetAtt: ApiGatewayRole.Arn
+                uri:
+                    Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${VMSCardIdDELETE.Arn}/invocations
+                responses:
+                    default:
+                        statusCode: "200"
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                contentHandling: CONVERT_TO_TEXT
+                type: aws_proxy
+            security:
+                - CognitoUserPool: []
+
+    /approval:
+        get:
+            summary: Get all approvals, filter on basis of status
+            operationId: getAllApprovals
+            tags:
+                - Approval
+            parameters:
+                - name: status
+                  in: query
+                  description: Filter approvals based on status
+                  required: false
+                  schema:
+                      type: string
+            responses:
+                "200":
+                    description: Successful retrieval of approvals
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/visitorApproval"
+
+                "400":
+                    description: Bad Request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error401"
+                "500":
+                    description: Internal Server Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error500"
+            x-amazon-apigateway-integration:
+                credentials:
+                    Fn::GetAtt: ApiGatewayRole.Arn
+                uri:
+                    Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${VMSApprovalGET.Arn}/invocations
+                responses:
+                    default:
+                        statusCode: "200"
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                contentHandling: CONVERT_TO_TEXT
+                type: aws_proxy
+            security:
+                - CognitoUserPool: []
+        post:
+            summary: Create new approval
+            operationId: createApproval
+            tags:
+                - Approval
+            requestBody:
+                description: Approval details for creation
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                visitId:
+                                    type: string
+
+            responses:
+                "201":
+                    description: Approval created successfully
+
+                "400":
+                    description: Bad Request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error401"
+                "500":
+                    description: Internal Server Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error500"
+            x-amazon-apigateway-integration:
+                credentials:
+                    Fn::GetAtt: ApiGatewayRole.Arn
+                uri:
+                    Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${VMSApprovalPOST.Arn}/invocations
+                responses:
+                    default:
+                        statusCode: "201"
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                contentHandling: CONVERT_TO_TEXT
+                type: aws_proxy
+            security:
+                - CognitoUserPool: []
+
+    /approval/{id}:
+        get:
+            summary: Get a single approval
+            operationId: getApproval
+            tags:
+                - Approval
+            parameters:
+                - name: id
+                  in: path
+                  description: ID of the approval
+                  required: true
+                  schema:
+                      type: string
+
+            responses:
+                "200":
+                    description: Successful retrieval of approval details
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/visitorApproval"
+
+                "400":
+                    description: Bad Request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error401"
+                "404":
+                    description: Visit not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+                "500":
+                    description: Internal Server Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error500"
+            x-amazon-apigateway-integration:
+                credentials:
+                    Fn::GetAtt: ApiGatewayRole.Arn
+                uri:
+                    Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${VMSApprovalIdGET.Arn}/invocations
+                responses:
+                    default:
+                        statusCode: "200"
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                contentHandling: CONVERT_TO_TEXT
+                type: aws_proxy
+            security:
+                - CognitoUserPool: []
+        patch:
+            summary: Update approval
+            operationId: updateApproval
+            tags:
+                - Approval
+            parameters:
+                - name: id
+                  in: path
+                  description: ID of the approval
+                  required: true
+                  schema:
+                      type: string
+            requestBody:
+                description: approval status by admin
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                status:
+                                    type: string
+                                    example: approved
+            responses:
+                "200":
+                    description: Visitor approved successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    data:
+                                        type: object
+                                        properties:
+                                            status:
+                                                type: string
+                                                example: approved
+                                    status:
+                                        type: string
+                                        description: status
+                                        example: success
+                "400":
+                    description: Bad Request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error401"
+                "500":
+                    description: Internal Server Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error500"
+            x-amazon-apigateway-integration:
+                credentials:
+                    Fn::GetAtt: ApiGatewayRole.Arn
+                uri:
+                    Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${VMSApprovalIdPATCH.Arn}/invocations
+                responses:
+                    default:
+                        statusCode: "200"
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                contentHandling: CONVERT_TO_TEXT
+                type: aws_proxy
+            security:
+                - CognitoUserPool: []
+
+
+components:
+    securitySchemes:
+        CognitoUserPool:
+            type: apiKey
+            in: header
+            name: Authorization
+            x-amazon-apigateway-authtype: cognito_user_pools,
+            x-amazon-apigateway-authorizer:
+                type: cognito_user_pools
+                providerARNs:
+                    - Fn::ImportValue: CognitoPoolArn
+    schemas:
+        Error:
+            type: object
+            properties:
+                error:
+                    type: object
+                    properties:
+                        code:
+                            type: string
+                            example: "4**"
+                        message:
+                            type: string
+                            example: "Requirement Specific Error Message"
+                status:
+                    type: string
+                    example: "failure"
+
+        Error401:
+            type: object
+            properties:
+                error:
+                    type: object
+                    properties:
+                        code:
+                            type: string
+                            example: "401"
+                        message:
+                            type: string
+                            example: "You are not authorized to access this resource"
+                status:
+                    type: string
+                    example: "failure"
+
+        Error500:
+            type: object
+            properties:
+                error:
+                    type: object
+                    properties:
+                        code:
+                            type: string
+                            example: "500"
+                        message:
+                            type: string
+                            example: "Internal Server Error"
+                status:
+                    type: string
+                    example: "failure"
+
+        visitor:
+            type: object
+            properties:
+                firstName:
+                    type: string
+                    example: "Rahul"
+                lastName:
+                    type: string
+                    example: "Sharma"
+                phoneNumber:
+                    type: number
+                    example: 9876543210
+                email:
+                    type: string
+                    example: "rahul.sharma@example.com"
+                organisation:
+                    type: string
+                    example: "Tech Solutions India"
+                address:
+                    type: string
+                    example: "123 MG Road, Bangalore"
+                vistorPhotoUrl:
+                    type: string
+                    example: "s3://your-bucket-name/rahul_photo.jpg"
+                idPhotoUrl:
+                    type: string
+                    example: "s3://your-bucket-name/rahul_id.jpg"
+                visitorId:
+                    type: string
+                    example: "V123"
+                currentVisitId:
+                    type: string
+                    example: "CV456"
+
+        visitDetail:
+            type: object
+            properties:
+                firstName:
+                    type: string
+                    example: "Arjun"
+                lastName:
+                    type: string
+                    example: "Patel"
+                phoneNumber:
+                    type: number
+                    example: 8765432109
+                email:
+                    type: string
+                    example: "Arjun.patel@example.com"
+                organisation:
+                    type: string
+                    example: "Finance Solutions Mumbai"
+                address:
+                    type: string
+                    example: "456 Marine Drive, Mumbai"
+                vistorPhotoUrl:
+                    type: string
+                    example: "s3://your-bucket-name/Arjun_photo.jpg"
+                idPhotoUrl:
+                    type: string
+                    example: "s3://your-bucket-name/Arjun_id.jpg"
+                visitorId:
+                    type: string
+                    example: "V789"
+                currentVisitId:
+                    type: string
+                    example: "CV012"
+                visits:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/visit"
+                nextPageToken:
+                    type: string
+                    example: "abc123"
+
+        visit:
+            type: object
+            properties:
+                date:
+                    type: string
+                    example: "2024-02-15"
+                checkInTime:
+                    type: string
+                    example: "10:30 AM"
+                checkOutTime:
+                    type: string
+                    example: "04:45 PM"
+                purpose:
+                    type: string
+                    example: "Client Meeting"
+                toMeet:
+                    type: string
+                    example: "Amit Verma"
+                comments:
+                    type: string
+                    example: "No assests submitted"
+                wgCardID:
+                    type: string
+                    example: "WG-IND-001"
+                checkedInBy:
+                    type: string
+                    example: "Sneha Goyal"
+                approvalId:
+                    type: string
+                    example: "APR567"
+                visitType:
+                    type: string
+                    example: "Official"
+
+        visitorApproval:
+            type: object
+            properties:
+                firstName:
+                    type: string
+                    example: "Arjun"
+                lastName:
+                    type: string
+                    example: "Patel"
+                phoneNumber:
+                    type: number
+                    example: 8765432109
+                email:
+                    type: string
+                    example: "Arjun.patel@example.com"
+                organisation:
+                    type: string
+                    example: "Finance Solutions Mumbai"
+                address:
+                    type: string
+                    example: "456 Marine Drive, Mumbai"
+                vistorPhotoUrl:
+                    type: string
+                    example: "s3://your-bucket-name/Arjun_photo.jpg"
+                idPhotoUrl:
+                    type: string
+                    example: "s3://your-bucket-name/Arjun_id.jpg"
+                visitorId:
+                    type: string
+                    example: "V789"
+                currentVisitId:
+                    type: string
+                    example: "CV012"
+                currentVisit:
+                    $ref: "#/components/schemas/visit"
