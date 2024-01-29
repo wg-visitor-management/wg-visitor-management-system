@@ -8,13 +8,15 @@ Description: 'AWS SAM Template for making API Gateway with APIGatewayRole for in
 Globals:
   Function:
     Timeout: 3
-    Runtime: python3.7
+    Runtime: python3.11
     Environment:
       Variables:
         Stage:
           Ref: Stage
         BucketName:
           Fn::ImportValue: BucketName
+        DynamoDBTableName:
+          Fn::ImportValue: DynamoDBTable
 Parameters:
   Stage:
     Type: String
@@ -121,20 +123,12 @@ Resources:
               Access-Control-Allow-Origin: '''*'''
               Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'''
               Access-Control-Allow-Methods: '''GET,OPTIONS,POST,PUT,DELETE'''
-          ResponseTemplates:
-            application/json: "{\n    \"error\" : {\n        \"message\": \"$inputRoot.message\"\
-              ,\n        \"code\": \"$inputRoot.errorCode\"\n    }\n    \"status\"\
-              \ : $context \n}\n"
         DEFAULT_5XX:
           ResponseParameters:
             Headers:
               Access-Control-Allow-Origin: '''*'''
               Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'''
               Access-Control-Allow-Methods: '''GET,OPTIONS,POST,PUT,DELETE'''
-          ResponseTemplates:
-            application/json: "{\n    \"error\" : {\n        \"message\": \"$inputRoot.message\"\
-              ,\n        \"code\": \"$inputRoot.errorCode\"\n    }\n    \"status\"\
-              \ : $context    \n}\n"
     Metadata:
       SamResourceId: VMSApiGateway
   VMSLayer:
@@ -143,9 +137,9 @@ Resources:
       LayerName:
         Fn::Sub: VMS-Layer-${Stage}
       Description: VMS Lambda Layer
-      ContentUri: s3://udbhav-code-sam/ac5312eb37ec2a4e44c73c8e79af48c8
+      ContentUri: s3://udbhav-code-sam/25d17bc1f8dfcdee10a568c983dd2298
       CompatibleRuntimes:
-      - python3.7
+      - python3.11
     Metadata:
       SamResourceId: VMSLayer
   VMSLoginGET:
@@ -161,7 +155,7 @@ Resources:
         Fn::Sub: VMS-login-GET-${Stage}
       CodeUri: s3://udbhav-code-sam/1a74929be8f7cbab8452a60b5946dbb6
       Handler: app.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.11
       Layers:
       - Ref: VMSLayer
       Events:
@@ -185,7 +179,7 @@ Resources:
         Fn::Sub: VMS-visitor-GET-${Stage}
       CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.11
       Layers:
       - Ref: VMSLayer
       Events:
@@ -209,7 +203,7 @@ Resources:
         Fn::Sub: VMS-visitor-POST-${Stage}
       CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.11
       Layers:
       - Ref: VMSLayer
       Events:
@@ -233,7 +227,7 @@ Resources:
         Fn::Sub: VMS-visitor-id-GET-${Stage}
       CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.11
       Layers:
       - Ref: VMSLayer
       Events:
@@ -257,7 +251,7 @@ Resources:
         Fn::Sub: VMS-visitor-id-PUT-${Stage}
       CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.11
       Layers:
       - Ref: VMSLayer
       Events:
@@ -281,7 +275,7 @@ Resources:
         Fn::Sub: VMS-visit-GET-${Stage}
       CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.11
       Layers:
       - Ref: VMSLayer
       Events:
@@ -305,7 +299,7 @@ Resources:
         Fn::Sub: VMS-visit-POST-${Stage}
       CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.11
       Layers:
       - Ref: VMSLayer
       Events:
@@ -329,7 +323,7 @@ Resources:
         Fn::Sub: VMS-visit-id-GET-${Stage}
       CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.11
       Layers:
       - Ref: VMSLayer
       Events:
@@ -353,7 +347,7 @@ Resources:
         Fn::Sub: VMS-visit-id-PATCH-${Stage}
       CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.11
       Layers:
       - Ref: VMSLayer
       Events:
@@ -377,7 +371,7 @@ Resources:
         Fn::Sub: VMS-card-GET-${Stage}
       CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.11
       Layers:
       - Ref: VMSLayer
       Events:
@@ -401,7 +395,7 @@ Resources:
         Fn::Sub: VMS-card-POST-${Stage}
       CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.11
       Layers:
       - Ref: VMSLayer
       Events:
@@ -425,7 +419,7 @@ Resources:
         Fn::Sub: VMS-card-id-GET-${Stage}
       CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.11
       Layers:
       - Ref: VMSLayer
       Events:
@@ -449,7 +443,7 @@ Resources:
         Fn::Sub: VMS-card-id-PUT-${Stage}
       CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.11
       Layers:
       - Ref: VMSLayer
       Events:
@@ -473,7 +467,7 @@ Resources:
         Fn::Sub: VMS-card-id-DELETE-${Stage}
       CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.11
       Layers:
       - Ref: VMSLayer
       Events:
@@ -497,7 +491,7 @@ Resources:
         Fn::Sub: VMS-approval-GET-${Stage}
       CodeUri: s3://udbhav-code-sam/4f4f1d14fcbeb14a29ac4d8a7178a669
       Handler: app.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.11
       Layers:
       - Ref: VMSLayer
       Events:
@@ -521,7 +515,7 @@ Resources:
         Fn::Sub: VMS-approval-POST-${Stage}
       CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.11
       Layers:
       - Ref: VMSLayer
       Events:
@@ -545,7 +539,7 @@ Resources:
         Fn::Sub: VMS-approval-id-GET-${Stage}
       CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.11
       Layers:
       - Ref: VMSLayer
       Events:
@@ -569,7 +563,7 @@ Resources:
         Fn::Sub: VMS-approval-id-PATCH-${Stage}
       CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.11
       Layers:
       - Ref: VMSLayer
       Events:

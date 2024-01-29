@@ -33,9 +33,9 @@ Outputs:
         Description: The name of the created DynamoDB table
         Value: !Ref DynamoDBTable
         Export:
-            Name: !Sub "DynamoDBTable"
+            Name: "DynamoDBTable"
     DynamoDBTableArn:
         Description: The Amazon Resource Name (ARN) of the created DynamoDB table
         Value: !GetAtt DynamoDBTable.Arn
         Export:
-            Name: !Sub "DynamoDBTableArn"
+            Name: "DynamoDBTableArn"

@@ -7,11 +7,12 @@ Description: >
 Globals:
     Function:
         Timeout: 3
-        Runtime: python3.7
+        Runtime: python3.11
         Environment:
             Variables:
                 Stage: !Ref Stage
                 BucketName: !ImportValue BucketName
+                DynamoDBTableName: !ImportValue DynamoDBTable
 
 Parameters:
     Stage:
@@ -83,15 +84,6 @@ Resources:
                             Access-Control-Allow-Origin: "'*'"
                             Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
                             Access-Control-Allow-Methods: "'GET,OPTIONS,POST,PUT,DELETE'"
-                    ResponseTemplates:
-                        application/json: |
-                            {
-                                "error" : {
-                                    "message": "$inputRoot.message",
-                                    "code": "$inputRoot.errorCode"
-                                }
-                                "status" : $context 
-                            }
 
                 DEFAULT_5XX:
                     ResponseParameters:
@@ -100,24 +92,16 @@ Resources:
                             Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
                             Access-Control-Allow-Methods: "'GET,OPTIONS,POST,PUT,DELETE'"
 
-                    ResponseTemplates:
-                        application/json: |
-                            {
-                                "error" : {
-                                    "message": "$inputRoot.message",
-                                    "code": "$inputRoot.errorCode"
-                                }
-                                "status" : $context    
-                            }
+
 
     VMSLayer:
         Type: AWS::Serverless::LayerVersion
         Properties:
             LayerName: !Sub VMS-Layer-${Stage}
             Description: VMS Lambda Layer
-            ContentUri: ./src/VMSLayer
+            ContentUri: ./src/common
             CompatibleRuntimes:
-                - python3.7
+                - python3.11
 
     VMSLoginGET:
         Type: AWS::Serverless::Function
@@ -128,9 +112,9 @@ Resources:
                     UserPoolId: !ImportValue UserPoolId
 
             FunctionName: !Sub VMS-login-GET-${Stage}
-            CodeUri: ./src/VMSLogin
+            CodeUri: ./src/functions/login
             Handler: app.lambda_handler
-            Runtime: python3.7
+            Runtime: python3.11
             Layers:
                 - !Ref VMSLayer
 
@@ -149,9 +133,9 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub VMS-visitor-GET-${Stage}
-            CodeUri: ./src/VMSVisitorGET
+            CodeUri: ./src/functions/get_visitor
             Handler: app.lambda_handler
-            Runtime: python3.7
+            Runtime: python3.11
             Layers:
                 - !Ref VMSLayer
             Events:
@@ -168,9 +152,9 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub VMS-visitor-POST-${Stage}
-            CodeUri: ./src/VMSVisitorPOST
+            CodeUri: ./src/functions/post_visitor
             Handler: app.lambda_handler
-            Runtime: python3.7
+            Runtime: python3.11
             Layers:
                 - !Ref VMSLayer
             Events:
@@ -187,9 +171,9 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub VMS-visitor-id-GET-${Stage}
-            CodeUri: ./src/VMSVisitorIdGET
+            CodeUri: ./src/functions/get_visitor_id
             Handler: app.lambda_handler
-            Runtime: python3.7
+            Runtime: python3.11
             Layers:
                 - !Ref VMSLayer
             Events:
@@ -206,9 +190,9 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub VMS-visitor-id-PUT-${Stage}
-            CodeUri: ./src/VMSVisitorIdPUT
+            CodeUri: ./src/functions/put_visitor_id
             Handler: app.lambda_handler
-            Runtime: python3.7
+            Runtime: python3.11
             Layers:
                 - !Ref VMSLayer
             Events:
@@ -226,9 +210,9 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub VMS-visit-GET-${Stage}
-            CodeUri: ./src/VMSVisitGET
+            CodeUri: ./src/functions/get_visit
             Handler: app.lambda_handler
-            Runtime: python3.7
+            Runtime: python3.11
             Layers:
                 - !Ref VMSLayer
             Events:
@@ -245,9 +229,9 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub VMS-visit-POST-${Stage}
-            CodeUri: ./src/VMSVisitPOST
+            CodeUri: ./src/functions/post_visit
             Handler: app.lambda_handler
-            Runtime: python3.7
+            Runtime: python3.11
             Layers:
                 - !Ref VMSLayer
             Events:
@@ -264,9 +248,9 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub VMS-visit-id-GET-${Stage}
-            CodeUri: ./src/VMSVisitIdGET
+            CodeUri: ./src/functions/get_visit_id
             Handler: app.lambda_handler
-            Runtime: python3.7
+            Runtime: python3.11
             Layers:
                 - !Ref VMSLayer
             Events:
@@ -283,9 +267,9 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub VMS-visit-id-PATCH-${Stage}
-            CodeUri: ./src/VMSVisitIdPATCH
+            CodeUri: ./src/functions/patch_visit_id
             Handler: app.lambda_handler
-            Runtime: python3.7
+            Runtime: python3.11
             Layers:
                 - !Ref VMSLayer
             Events:
@@ -303,9 +287,9 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub VMS-card-GET-${Stage}
-            CodeUri: ./src/VMSCardGET
+            CodeUri: ./src/functions/get_card
             Handler: app.lambda_handler
-            Runtime: python3.7
+            Runtime: python3.11
             Layers:
                 - !Ref VMSLayer
             Events:
@@ -322,9 +306,9 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub VMS-card-POST-${Stage}
-            CodeUri: ./src/VMSCardPOST
+            CodeUri: ./src/functions/post_card
             Handler: app.lambda_handler
-            Runtime: python3.7
+            Runtime: python3.11
             Layers:
                 - !Ref VMSLayer
             Events:
@@ -341,9 +325,9 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub VMS-card-id-GET-${Stage}
-            CodeUri: ./src/VMSCardIdGET
+            CodeUri: ./src/functions/get_card_id
             Handler: app.lambda_handler
-            Runtime: python3.7
+            Runtime: python3.11
             Layers:
                 - !Ref VMSLayer
             Events:
@@ -360,9 +344,9 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub VMS-card-id-PUT-${Stage}
-            CodeUri: ./src/VMSCardIdPUT
+            CodeUri: ./src/functions/put_card_id
             Handler: app.lambda_handler
-            Runtime: python3.7
+            Runtime: python3.11
             Layers:
                 - !Ref VMSLayer
             Events:
@@ -379,9 +363,9 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub VMS-card-id-DELETE-${Stage}
-            CodeUri: ./src/VMSCardIdDELETE
+            CodeUri: ./src/functions/delete_card_id
             Handler: app.lambda_handler
-            Runtime: python3.7
+            Runtime: python3.11
             Layers:
                 - !Ref VMSLayer
             Events:
@@ -399,9 +383,9 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub VMS-approval-GET-${Stage}
-            CodeUri: ./src/VMSApprovalGET
+            CodeUri: ./src/functions/get_approval
             Handler: app.lambda_handler
-            Runtime: python3.7
+            Runtime: python3.11
             Layers:
                 - !Ref VMSLayer
             Events:
@@ -418,9 +402,9 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub VMS-approval-POST-${Stage}
-            CodeUri: ./src/VMSApprovalPOST
+            CodeUri: ./src/functions/post_approval
             Handler: app.lambda_handler
-            Runtime: python3.7
+            Runtime: python3.11
             Layers:
                 - !Ref VMSLayer
             Events:
@@ -437,9 +421,9 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub VMS-approval-id-GET-${Stage}
-            CodeUri: ./src/VMSApprovalIdGET
+            CodeUri: ./src/functions/get_approval_id
             Handler: app.lambda_handler
-            Runtime: python3.7
+            Runtime: python3.11
             Layers:
                 - !Ref VMSLayer
             Events:
@@ -456,9 +440,9 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub VMS-approval-id-PATCH-${Stage}
-            CodeUri: ./src/VMSApprovalIdPATCH
+            CodeUri: ./src/functions/patch_approval_id
             Handler: app.lambda_handler
-            Runtime: python3.7
+            Runtime: python3.11
             Layers:
                 - !Ref VMSLayer
             Events:

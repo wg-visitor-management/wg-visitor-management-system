@@ -14,7 +14,7 @@ env_variables = {
 }
 cognito_stack = {
     "stack_name": "cognito-stack",
-    "template_body_url": "cnf_templates/cognito.yaml",
+    "template_body_url": "cfn/cognito.yaml",
     "parameters": [
         {"ParameterKey": "Stage", "ParameterValue": env_variables.get("stage_name")},
         {"ParameterKey": "UserPoolName", "ParameterValue": "vms-user-pool"},
@@ -27,7 +27,7 @@ cognito_stack = {
 }
 dynamodb_stack = {
     "stack_name": "dynamodb-stack",
-    "template_body_url": "cnf_templates/dynamodb.yaml",
+    "template_body_url": "cfn/dynamodb.yaml",
     "parameters": [
         {"ParameterKey": "Stage", "ParameterValue": env_variables.get("stage_name")},
         {"ParameterKey": "TableName", "ParameterValue": "vms-database"},
@@ -36,7 +36,7 @@ dynamodb_stack = {
 }
 iam_stack = {
     "stack_name": "iam-stack",
-    "template_body_url": "cnf_templates/iam_policy.yaml",
+    "template_body_url": "cfn/iam_policy.yaml",
     "parameters": [
         {"ParameterKey": "Stage", "ParameterValue": env_variables.get("stage_name")},
         {"ParameterKey": "RoleName", "ParameterValue": "vms-lambda-role-common"},
@@ -46,7 +46,7 @@ iam_stack = {
 
 static_content_bucket_stack = {
     "stack_name": "static-content-bucket-stack",
-    "template_body_url": "cnf_templates/static_content_bucket.yaml",
+    "template_body_url": "cfn/static_content_bucket.yaml",
     "parameters": [
         {"ParameterKey": "BucketName", "ParameterValue": "vms-static-content-test"}
     ],
@@ -116,10 +116,10 @@ def apigateway_lambda_deploy_sam():
 
 
 def main():
-    # deploy_stack(**cognito_stack, action="update")
-    # deploy_stack(**iam_stack, action="update")
-    # deploy_stack(**static_content_bucket_stack, action="update")
-    # deploy_stack(**dynamodb_stack, action="update")
+    deploy_stack(**cognito_stack, action="update")
+    deploy_stack(**iam_stack, action="update")
+    deploy_stack(**static_content_bucket_stack, action="update")
+    deploy_stack(**dynamodb_stack, action="update")
     apigateway_lambda_deploy_sam()
 
 
