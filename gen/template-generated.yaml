@@ -137,7 +137,7 @@ Resources:
       LayerName:
         Fn::Sub: VMS-Layer-${Stage}
       Description: VMS Lambda Layer
-      ContentUri: s3://udbhav-code-sam/25d17bc1f8dfcdee10a568c983dd2298
+      ContentUri: s3://udbhav-code-sam/5f4e0385c2753f957fa2c41041ae93c2
       CompatibleRuntimes:
       - python3.11
     Metadata:
@@ -393,7 +393,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: VMS-card-POST-${Stage}
-      CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
+      CodeUri: s3://udbhav-code-sam/4ec14921f3018c451268f6653124010a
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
