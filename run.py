@@ -54,18 +54,30 @@ static_content_bucket_stack = {
 }
 
 
-def deploy_stack(stack_name, template_body_url, parameters, capabilities, action):
-    template_body = open(template_body_url).read()
-    logger.info(f"Creating stack: {stack_name}\n")
+def check_if_stack_exists(stack_name):
     try:
-        if action == "create":
+        response = client_cf.describe_stacks(StackName=stack_name)
+    except Exception as error:
+        logger.error(f"Error describing stack: {stack_name}")
+        logger.error(error)
+        return False
+    else:
+        logger.info(f"Stack: {stack_name} exists!")
+        return True
+
+def deploy_stack(stack_name, template_body_url, parameters, capabilities):
+    template_body = open(template_body_url).read()
+    logger.info(f"Deploying stack: {stack_name}\n")
+
+    try:
+        if not check_if_stack_exists(stack_name):
             response = client_cf.create_stack(
                 StackName=stack_name,
                 TemplateBody=template_body,
                 Parameters=parameters,
                 Capabilities=capabilities,
             )
-        elif action == "update":
+        else:
             response = client_cf.update_stack(
                 StackName=stack_name,
                 TemplateBody=template_body,
@@ -73,18 +85,15 @@ def deploy_stack(stack_name, template_body_url, parameters, capabilities, action
                 Capabilities=capabilities,
             )
     except Exception as error:
-        logger.error(f"Error creating stack: ")
         logger.error(error)
     else:
-        logger.info(f"Waiting for stack: {stack_name} to be created...")
+        logger.info(f"Waiting for stack: {stack_name} to be deployed...")
         waiter = client_cf.get_waiter("stack_create_complete")
         waiter.wait(
             StackName=stack_name, WaiterConfig={"Delay": 10, "MaxAttempts": 100}
         )
-        logger.info(f"Stack: {stack_name} created successfully!")
-
+        logger.info(f"Stack: {stack_name} deployed successfully!")
         return response
-
 
 def run_command(command):
     try:
@@ -116,10 +125,10 @@ def apigateway_lambda_deploy_sam():
 
 
 def main():
-    deploy_stack(**cognito_stack, action="update")
-    deploy_stack(**iam_stack, action="update")
-    deploy_stack(**static_content_bucket_stack, action="update")
-    deploy_stack(**dynamodb_stack, action="update")
+    deploy_stack(**cognito_stack)
+    deploy_stack(**iam_stack)
+    deploy_stack(**static_content_bucket_stack)
+    deploy_stack(**dynamodb_stack)
     apigateway_lambda_deploy_sam()
 
 
