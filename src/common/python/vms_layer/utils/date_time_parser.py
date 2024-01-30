@@ -2,12 +2,12 @@
 import time
 
 
-def date_To_epoch(date):
+def date_to_epoch(date):
     """Converts a datetime string to epoch time."""
     return int(time.mktime(time.strptime(date, "%Y-%m-%dT%H:%M:%S")))
 
 
-def epoch_To_date(epoch):
+def epoch_to_date(epoch):
     """Converts an epoch time to a date string."""
     return time.strftime("%d-%m-%Y", time.localtime(epoch))
 
