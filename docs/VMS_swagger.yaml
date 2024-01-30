@@ -13,8 +13,7 @@ tags:
       description: Operations related to ID cards
     - name: Approval
       description: Operations related to approvals
-    - name: Report
-      description: Operations related to reports
+
 
 paths:
     /login:
@@ -132,6 +131,7 @@ paths:
                                         type: string
                                         description: status
                                         example: success
+                    
 
                 "401":
                     description: Unauthorized
