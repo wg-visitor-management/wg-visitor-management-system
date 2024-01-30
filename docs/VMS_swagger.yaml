@@ -94,6 +94,79 @@ paths:
                 contentHandling: CONVERT_TO_TEXT
                 type: aws_proxy
 
+    /forgot_password:
+        post:
+            summary: Forgot password
+            operationId: forgotPassword
+            tags:
+                - Authentication
+            requestBody:
+                description: User credentials for login
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            required:
+                                - username
+                            type: object
+                            properties:
+                                username:
+                                    type: string
+                                new-password:
+                                    type: string
+            responses:
+                "200":
+                    description: Successful login
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    data:
+                                        type: object
+                                        properties:
+                                            message:
+                                                type: string
+                                                example: "Password reset code sent successfully"
+                                    status:
+                                        type: string
+                                        description: status
+                                        example: success
+
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error401"
+
+                "400":
+                    description: Bad Request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+
+                "500":
+                    description: Internal Server Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error500"
+
+            x-amazon-apigateway-integration:
+                credentials:
+                    Fn::GetAtt: ApiGatewayRole.Arn
+                uri:
+                    Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${VMSForgotPasswordPOST.Arn}/invocations
+                responses:
+                    default:
+                        statusCode: "200"
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                contentHandling: CONVERT_TO_TEXT
+                type: aws_proxy
+
     /visitor:
         get:
             summary: Get visitor's List based on query
