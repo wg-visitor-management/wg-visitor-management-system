@@ -10,7 +10,10 @@ from vms_layer.helpers.db_helper import DBHelper
 from vms_layer.utils.date_time_parser import current_time_epoch
 from vms_layer.helpers.response_parser import ParseResponse
 from vms_layer.utils.s3_signed_url_generator import generate_presigned_url
+from vms_layer.utils.handle_errors import handle_errors
+from vms_layer.utils.loggers import get_logger
 
+logger = get_logger("POST_/visitor")
 db_helper = DBHelper(os.environ["DynamoDBTableName"])
 bucket_name = os.environ["BucketName"]
 
@@ -19,7 +22,10 @@ bucket_name = os.environ["BucketName"]
 
 @validate_schema(schema=visitor_schema)
 @rbac
+@handle_errors
 def lambda_handler(event, context):
+    logger.debug(event)
+
     epoch_current = current_time_epoch()
     request_body = json.loads(event["body"])
     visitor_id = f"detail#{request_body['firstName']}{request_body['lastName']}#{epoch_current}"

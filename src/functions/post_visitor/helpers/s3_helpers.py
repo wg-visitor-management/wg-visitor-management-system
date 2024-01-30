@@ -1,4 +1,8 @@
 import boto3
+from vms_layer.utils.loggers import get_logger
+from vms_layer.utils.custom_errors import FailedToUploadImageError
+
+logger = get_logger(__name__)
 s3 = boto3.client("s3")
 
 
@@ -12,8 +16,6 @@ def upload_mime_image_binary_to_s3(
             Body=binary_data,
             ContentType=content_type,
         )
-        print(response)
     except Exception as error:
-        print(error)
-        return False
+        raise FailedToUploadImageError(error.message if hasattr(error, "message") else str(error))
     return True
