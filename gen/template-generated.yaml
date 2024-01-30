@@ -142,7 +142,7 @@ Resources:
       LayerName:
         Fn::Sub: VMS-Layer-${Stage}
       Description: VMS Lambda Layer
-      ContentUri: s3://vms-static-content/540cd25e30e0febdae6b357c1090f25e
+      ContentUri: s3://vms-static-content/e5f2f4f75724ee7cce24148d2059b54e
       CompatibleRuntimes:
       - python3.11
     Metadata:
@@ -243,7 +243,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: VMS-visitor-POST-${Stage}
-      CodeUri: s3://vms-static-content/07a1d3f319465a41087a60a275f02dd5
+      CodeUri: s3://vms-static-content/7fdc350c6d59bbeca6fd19014ef403f9
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:

@@ -1,2 +1,4 @@
 config.py
 src/common/python/lib
+update_layer.py
+vms_layer.zip
