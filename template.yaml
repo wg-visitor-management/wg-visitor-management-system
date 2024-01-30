@@ -1,0 +1,485 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+    AWS SAM Template for making API Gateway with APIGatewayRole for invoking lambda functions.
+    Generate lambda functions according to docs\Visitor Management System Swagger 1.yaml
+
+Globals:
+    Function:
+        Timeout: 3
+        Runtime: python3.11
+        Environment:
+            Variables:
+                Stage: !Ref Stage
+                BucketName: !ImportValue BucketName
+                DynamoDBTableName: !ImportValue DynamoDBTable
+
+Parameters:
+    Stage:
+        Type: String
+        Default: dev
+        AllowedValues:
+            - dev
+            - prod
+        Description: Stage name
+
+Resources:
+    ApiGatewayRole:
+        Type: AWS::IAM::Role
+        Properties:
+            RoleName: !Sub ${AWS::StackName}-ApiGatewayRole
+            AssumeRolePolicyDocument:
+                Version: "2012-10-17"
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service:
+                              - apigateway.amazonaws.com
+                      Action:
+                          - sts:AssumeRole
+            Policies:
+                - PolicyName: !Sub ${AWS::StackName}-ApiGatewayRolePolicy
+                  PolicyDocument:
+                      Version: "2012-10-17"
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                                - lambda:InvokeFunction
+                            Resource:
+                                [
+                                    !GetAtt VMSLoginGET.Arn,
+                                    !GetAtt VMSVisitorGET.Arn,
+                                    !GetAtt VMSVisitorPOST.Arn,
+                                    !GetAtt VMSVisitorIdGET.Arn,
+                                    !GetAtt VMSVisitorIdPUT.Arn,
+                                    !GetAtt VMSVisitGET.Arn,
+                                    !GetAtt VMSVisitPOST.Arn,
+                                    !GetAtt VMSVisitIdGET.Arn,
+                                    !GetAtt VMSVisitIdPATCH.Arn,
+                                    !GetAtt VMSCardGET.Arn,
+                                    !GetAtt VMSCardPOST.Arn,
+                                    !GetAtt VMSCardIdGET.Arn,
+                                    !GetAtt VMSCardIdPUT.Arn,
+                                    !GetAtt VMSCardIdDELETE.Arn,
+                                    !GetAtt VMSApprovalGET.Arn,
+                                    !GetAtt VMSApprovalPOST.Arn,
+                                    !GetAtt VMSApprovalIdGET.Arn,
+                                    !GetAtt VMSApprovalIdPATCH.Arn,
+                                ]
+
+    VMSApiGateway:
+        Type: AWS::Serverless::Api
+        Properties:
+            StageName: !Ref Stage
+
+            DefinitionBody:
+                Fn::Transform:
+                    Name: AWS::Include
+                    Parameters:
+                        Location: docs/VMS_swagger.yaml
+            GatewayResponses:
+                DEFAULT_4XX:
+                    ResponseParameters:
+                        Headers:
+                            Access-Control-Allow-Origin: "'*'"
+                            Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                            Access-Control-Allow-Methods: "'GET,OPTIONS,POST,PUT,DELETE'"
+
+                DEFAULT_5XX:
+                    ResponseParameters:
+                        Headers:
+                            Access-Control-Allow-Origin: "'*'"
+                            Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                            Access-Control-Allow-Methods: "'GET,OPTIONS,POST,PUT,DELETE'"
+
+    VMSLayer:
+        Type: AWS::Serverless::LayerVersion
+        Properties:
+            LayerName: !Sub VMS-Layer-${Stage}
+            Description: VMS Lambda Layer
+            ContentUri: ./src/common
+            CompatibleRuntimes:
+                - python3.11
+
+    VMSLoginGET:
+        Type: AWS::Serverless::Function
+        Properties:
+            Environment:
+                Variables:
+                    UserPoolClientId: !ImportValue UserPoolClientId
+                    UserPoolId: !ImportValue UserPoolId
+
+            FunctionName: !Sub VMS-login-GET-${Stage}
+            CodeUri: ./src/functions/login
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Layers:
+                - !Ref VMSLayer
+
+            Events:
+                VMSLoginGET:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /login/{proxy+}
+                        Method: post
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName: !ImportValue DynamoDBTable
+    VMSForgotPasswordPOST:
+        Type: AWS::Serverless::Function
+        Properties:
+            Environment:
+                Variables:
+                    UserPoolClientId: !ImportValue UserPoolClientId
+                    UserPoolId: !ImportValue UserPoolId
+
+            FunctionName: !Sub VMS-forgot-password-POST-${Stage}
+            CodeUri: ./src/functions/post_forgot_password
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Layers:
+                - !Ref VMSLayer
+
+            Events:
+                VMSForgotPasswordPOST:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /forgot_password/{proxy+}
+                        Method: post
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName: !ImportValue DynamoDBTable
+
+    VMSVisitorGET:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: !Sub VMS-visitor-GET-${Stage}
+            CodeUri: ./src/functions/get_visitor
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Layers:
+                - !Ref VMSLayer
+            Events:
+                VMSVisitorGET:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /visitor/{proxy+}
+                        Method: get
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName: !ImportValue DynamoDBTable
+    VMSVisitorPOST:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: !Sub VMS-visitor-POST-${Stage}
+            CodeUri: ./src/functions/post_visitor
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Layers:
+                - !Ref VMSLayer
+            Events:
+                VMSVisitorPOST:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /visitor/{proxy+}
+                        Method: post
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName: !ImportValue DynamoDBTable
+    VMSVisitorIdGET:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: !Sub VMS-visitor-id-GET-${Stage}
+            CodeUri: ./src/functions/get_visitor_id
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Layers:
+                - !Ref VMSLayer
+            Events:
+                VMSVisitorVisitorIdGET:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /visitor/{id}/{proxy+}
+                        Method: get
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName: !ImportValue DynamoDBTable
+    VMSVisitorIdPUT:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: !Sub VMS-visitor-id-PUT-${Stage}
+            CodeUri: ./src/functions/put_visitor_id
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Layers:
+                - !Ref VMSLayer
+            Events:
+                VMSVisitorVisitorIdPUT:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /visitor/{id}/{proxy+}
+                        Method: put
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName: !ImportValue DynamoDBTable
+
+    VMSVisitGET:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: !Sub VMS-visit-GET-${Stage}
+            CodeUri: ./src/functions/get_visit
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Layers:
+                - !Ref VMSLayer
+            Events:
+                VMSVisitGET:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /visit/{proxy+}
+                        Method: get
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName: !ImportValue DynamoDBTable
+    VMSVisitPOST:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: !Sub VMS-visit-POST-${Stage}
+            CodeUri: ./src/functions/post_visit
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Layers:
+                - !Ref VMSLayer
+            Events:
+                VMSVisitPOST:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /visit/{proxy+}
+                        Method: post
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName: !ImportValue DynamoDBTable
+    VMSVisitIdGET:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: !Sub VMS-visit-id-GET-${Stage}
+            CodeUri: ./src/functions/get_visit_id
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Layers:
+                - !Ref VMSLayer
+            Events:
+                VMSVisitVisitIdGET:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /visit/{id}/{proxy+}
+                        Method: get
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName: !ImportValue DynamoDBTable
+    VMSVisitIdPATCH:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: !Sub VMS-visit-id-PATCH-${Stage}
+            CodeUri: ./src/functions/patch_visit_id
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Layers:
+                - !Ref VMSLayer
+            Events:
+                VMSVisitVisitIdPATCH:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /visit/{id}/{proxy+}
+                        Method: patch
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName: !ImportValue DynamoDBTable
+
+    VMSCardGET:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: !Sub VMS-card-GET-${Stage}
+            CodeUri: ./src/functions/get_card
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Layers:
+                - !Ref VMSLayer
+            Events:
+                VMSCardGET:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /card/{proxy+}
+                        Method: get
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName: !ImportValue DynamoDBTable
+    VMSCardPOST:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: !Sub VMS-card-POST-${Stage}
+            CodeUri: ./src/functions/post_card
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Layers:
+                - !Ref VMSLayer
+            Events:
+                VMSCardPOST:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /card/{proxy+}
+                        Method: post
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName: !ImportValue DynamoDBTable
+    VMSCardIdGET:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: !Sub VMS-card-id-GET-${Stage}
+            CodeUri: ./src/functions/get_card_id
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Layers:
+                - !Ref VMSLayer
+            Events:
+                VMSCardCardIdGET:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /card/{id}/{proxy+}
+                        Method: get
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName: !ImportValue DynamoDBTable
+    VMSCardIdPUT:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: !Sub VMS-card-id-PUT-${Stage}
+            CodeUri: ./src/functions/put_card_id
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Layers:
+                - !Ref VMSLayer
+            Events:
+                VMSCardCardIdPUT:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /card/{id}/{proxy+}
+                        Method: put
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName: !ImportValue DynamoDBTable
+    VMSCardIdDELETE:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: !Sub VMS-card-id-DELETE-${Stage}
+            CodeUri: ./src/functions/delete_card_id
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Layers:
+                - !Ref VMSLayer
+            Events:
+                VMSCardCardIdDELETE:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /card/{id}/{proxy+}
+                        Method: delete
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName: !ImportValue DynamoDBTable
+
+    VMSApprovalGET:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: !Sub VMS-approval-GET-${Stage}
+            CodeUri: ./src/functions/get_approval
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Layers:
+                - !Ref VMSLayer
+            Events:
+                VMSApprovalGET:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /approval/{proxy+}
+                        Method: get
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName: !ImportValue DynamoDBTable
+    VMSApprovalPOST:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: !Sub VMS-approval-POST-${Stage}
+            CodeUri: ./src/functions/post_approval
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Layers:
+                - !Ref VMSLayer
+            Events:
+                VMSApprovalPOST:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /approval/{proxy+}
+                        Method: post
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName: !ImportValue DynamoDBTable
+    VMSApprovalIdGET:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: !Sub VMS-approval-id-GET-${Stage}
+            CodeUri: ./src/functions/get_approval_id
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Layers:
+                - !Ref VMSLayer
+            Events:
+                VMSApprovalApprovalIdGET:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /approval/{id}/{proxy+}
+                        Method: get
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName: !ImportValue DynamoDBTable
+    VMSApprovalIdPATCH:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: !Sub VMS-approval-id-PATCH-${Stage}
+            CodeUri: ./src/functions/patch_approval_id
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Layers:
+                - !Ref VMSLayer
+            Events:
+                VMSApprovalApprovalIdPATCH:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /approval/{id}/{proxy+}
+                        Method: patch
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName: !ImportValue DynamoDBTable
+
+Outputs:
+    VMSApiEndpoint:
+        Description: "VMS API Gateway endpoint URL"
+        Value: !Sub "https://${VMSApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${Stage}"

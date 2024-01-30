@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CloudFormation Template for an AWS IAM Role
+
+Parameters:
+    RoleName:
+        Type: String
+        Description: "Name of the IAM role"
+        MinLength: 1
+        MaxLength: 80
+        Default: "lambda-iam-role"
+    Stage:
+        Type: String
+        Description: "The name of the stage"
+        Default: "dev"
+Resources:
+    LambdaIAMRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Version: "2012-10-17"
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service:
+                              - lambda.amazonaws.com
+                      Action:
+                          - sts:AssumeRole
+            RoleName: !Sub "${RoleName}-${Stage}"
+            Policies:
+                - PolicyName: CloudWatchLogsPolicy
+                  PolicyDocument:
+                      Version: "2012-10-17"
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                                - logs:CreateLogStream
+                                - logs:PutLogEvents
+                            Resource: "*"
+                - PolicyName: S3Policy
+                  PolicyDocument:
+                      Version: "2012-10-17"
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                                - s3:GetObject
+                                - s3:PutObject
+                            Resource: !Join ["", [!ImportValue BucketArn, "/*"]]
+
+Outputs:
+    LambdaIAMRoleArn:
+        Description: "ARN of the IAM role"
+        Value: !GetAtt LambdaIAMRole.Arn
+        Export:
+            Name: "LambdaIAMRoleArn"
+    LambdaIAMRoleName:
+        Description: "Name of the IAM role"
+        Value: !Ref LambdaIAMRole
+        Export:
+            Name: "LambdaIAMRoleName"

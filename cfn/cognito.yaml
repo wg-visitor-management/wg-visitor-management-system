@@ -1,0 +1,61 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CloudFormation Template for an AWS Cognito User Pool
+Parameters:
+    Stage:
+        Type: String
+        Description: Stage of the deployment
+        Default: dev
+        AllowedValues:
+            - dev
+            - prod
+    UserPoolName:
+        Type: String
+        Description: Name of the Cognito User Pool
+        Default: vms-user-pool
+    UserPoolClientName:
+        Type: String
+        Description: Name of the Cognito User Pool Client
+        Default: vms-user-pool-client
+Resources:
+    UserPool:
+        Type: AWS::Cognito::UserPool
+        Properties:
+            UserPoolName: VMSUserPool
+            UsernameAttributes:
+                - email
+            AutoVerifiedAttributes:
+                - email
+            Policies:
+                PasswordPolicy:
+                    MinimumLength: 8
+                    RequireNumbers: true
+
+    UserPoolClient:
+        Type: AWS::Cognito::UserPoolClient
+        Properties:
+            UserPoolId: !Ref UserPool
+            ClientName: VMSUserPoolClient
+            GenerateSecret: false
+            ExplicitAuthFlows:
+                - ALLOW_USER_PASSWORD_AUTH
+                - ALLOW_USER_SRP_AUTH
+                - ALLOW_REFRESH_TOKEN_AUTH
+            SupportedIdentityProviders:
+                - COGNITO
+
+Outputs:
+    CognitoPoolArn:
+        Description: ARN of the created Cognito User Pool
+        Value: !GetAtt UserPool.Arn
+        Export:
+            Name: CognitoPoolArn
+    UserPoolId:
+        Description: ID of the created Cognito User Pool
+        Value: !Ref UserPool
+        Export:
+            Name: UserPoolId
+    UserPoolClientId:
+        Description: ID of the created Cognito User Pool Client
+        Value: !Ref UserPoolClient
+        Export:
+            Name: UserPoolClientId
