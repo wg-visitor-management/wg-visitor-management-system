@@ -7,20 +7,40 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 client_cf = boto3.client("cloudformation")
 
+constants = {
+    "BucketName": "vms-static-content",
+    "UserPoolName": "vms-user-pool",
+    "UserPoolClientName": "vms-user-pool-client",
+    "TableName": "vms-database",
+    "RoleName": "vms-lambda-role-common",
+}
+
+
+outputs = {}
+
 env_variables = {
-    "stage_name": sam_config.STAGE_NAME,
-    "stack_name": "api-gateway-lambda-sam",
+    "ENVIRONMENT": sam_config.ENVIRONMENT,
+    "sam_stack_name": "api-gateway-lambda-sam",
     "s3_bucket": sam_config.BUCKET_NAME,
+}
+
+static_content_bucket_stack = {
+    "stack_name": "static-content-bucket-stack",
+    "template_body_url": "cfn/static_content_bucket.yaml",
+    "parameters": [
+        {"ParameterKey": "BucketName", "ParameterValue": constants.get("BucketName")},
+    ],
+    "capabilities": ["CAPABILITY_IAM"],
 }
 cognito_stack = {
     "stack_name": "cognito-stack",
     "template_body_url": "cfn/cognito.yaml",
     "parameters": [
-        {"ParameterKey": "Stage", "ParameterValue": env_variables.get("stage_name")},
-        {"ParameterKey": "UserPoolName", "ParameterValue": "vms-user-pool"},
+        {"ParameterKey": "Environment", "ParameterValue": env_variables.get("ENVIRONMENT")},
+        {"ParameterKey": "UserPoolName", "ParameterValue": constants.get("UserPoolName")},
         {
             "ParameterKey": "UserPoolClientName",
-            "ParameterValue": "vms-user-pool-client",
+            "ParameterValue": constants.get("UserPoolClientName"),
         },
     ],
     "capabilities": ["CAPABILITY_IAM"],
@@ -29,34 +49,33 @@ dynamodb_stack = {
     "stack_name": "dynamodb-stack",
     "template_body_url": "cfn/dynamodb.yaml",
     "parameters": [
-        {"ParameterKey": "Stage", "ParameterValue": env_variables.get("stage_name")},
-        {"ParameterKey": "TableName", "ParameterValue": "vms-database"},
+        {"ParameterKey": "Environment", "ParameterValue": env_variables.get("ENVIRONMENT")},
+        {"ParameterKey": "TableName", "ParameterValue": constants.get("TableName")},
     ],
     "capabilities": ["CAPABILITY_IAM"],
 }
+
 iam_stack = {
     "stack_name": "iam-stack",
     "template_body_url": "cfn/iam_policy.yaml",
     "parameters": [
-        {"ParameterKey": "Stage", "ParameterValue": env_variables.get("stage_name")},
-        {"ParameterKey": "RoleName", "ParameterValue": "vms-lambda-role-common"},
+        {"ParameterKey": "Environment", "ParameterValue": env_variables.get("ENVIRONMENT")},
+        {"ParameterKey": "RoleName", "ParameterValue": constants.get("RoleName")},
+        {"ParameterKey": "BucketArn", "ParameterValue": f"{outputs.get('BucketArn')}"},
+        {"ParameterKey": "DynamoDBTableArn", "ParameterValue": f"{outputs.get('DynamoDBTableArn')}"},
     ],
     "capabilities": ["CAPABILITY_IAM", "CAPABILITY_NAMED_IAM"],
 }
 
-static_content_bucket_stack = {
-    "stack_name": "static-content-bucket-stack",
-    "template_body_url": "cfn/static_content_bucket.yaml",
-    "parameters": [
-        {"ParameterKey": "BucketName", "ParameterValue": "vms-static-content-test"}
-    ],
-    "capabilities": ["CAPABILITY_IAM"],
-}
 
-
-def check_if_stack_exists(stack_name):
+def extract_outputs(response):
+    for output in response["Stacks"][0]["Outputs"]:
+        outputs[output["OutputKey"]] = output["OutputValue"]
+    
+def get_stack_outputs(stack_name):
     try:
         response = client_cf.describe_stacks(StackName=stack_name)
+        extract_outputs(response)
     except Exception as error:
         logger.error(f"Error describing stack: {stack_name}")
         logger.error(error)
@@ -70,13 +89,14 @@ def deploy_stack(stack_name, template_body_url, parameters, capabilities):
     logger.info(f"Deploying stack: {stack_name}\n")
 
     try:
-        if not check_if_stack_exists(stack_name):
+        if not get_stack_outputs(stack_name):
             response = client_cf.create_stack(
                 StackName=stack_name,
                 TemplateBody=template_body,
                 Parameters=parameters,
                 Capabilities=capabilities,
             )
+            extract_outputs(response)        
         else:
             response = client_cf.update_stack(
                 StackName=stack_name,
@@ -116,19 +136,25 @@ def apigateway_lambda_deploy_sam():
     deploy_command = (
         "sam deploy "
         "--template-file gen/template-generated.yaml "
-        f"--stack-name {env_variables.get('stack_name')} "
+        f"--stack-name {env_variables.get('sam_stack_name')} "
         "--capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM "
-        f"--parameter-overrides Stage={env_variables.get('stage_name')}"
+        f"--parameter-overrides Environment={env_variables.get('ENVIRONMENT')} "
+        f"BucketName={outputs.get('BucketName')} "
+        f"DynamoDBTable={outputs.get('DynamoDBTableName')} "
+        f"UserPoolId={outputs.get('UserPoolId')} "
+        f"UserPoolClientId={outputs.get('UserPoolClientId')} "
+        f"LambdaIAMRoleArn={outputs.get('LambdaIAMRoleArn')} "
+
     )
     logger.info("Deploying SAM application...")
     run_command(deploy_command)
 
 
 def main():
-    deploy_stack(**cognito_stack)
-    deploy_stack(**iam_stack)
     deploy_stack(**static_content_bucket_stack)
+    deploy_stack(**cognito_stack)
     deploy_stack(**dynamodb_stack)
+    deploy_stack(**iam_stack)
     apigateway_lambda_deploy_sam()
 
 

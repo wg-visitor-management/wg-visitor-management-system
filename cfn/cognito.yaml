@@ -1,9 +1,9 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: CloudFormation Template for an AWS Cognito User Pool
 Parameters:
-    Stage:
+    Environment:
         Type: String
-        Description: Stage of the deployment
+        Description: Environment of the deployment
         Default: dev
         AllowedValues:
             - dev
@@ -47,15 +47,9 @@ Outputs:
     CognitoPoolArn:
         Description: ARN of the created Cognito User Pool
         Value: !GetAtt UserPool.Arn
-        Export:
-            Name: CognitoPoolArn
     UserPoolId:
         Description: ID of the created Cognito User Pool
         Value: !Ref UserPool
-        Export:
-            Name: UserPoolId
     UserPoolClientId:
         Description: ID of the created Cognito User Pool Client
         Value: !Ref UserPoolClient
-        Export:
-            Name: UserPoolClientId

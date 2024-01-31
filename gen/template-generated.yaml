@@ -11,25 +11,40 @@ Globals:
     Runtime: python3.11
     Environment:
       Variables:
-        Stage:
-          Ref: Stage
+        Environment:
+          Ref: Environment
         BucketName:
-          Fn::ImportValue: BucketName
+          Ref: BucketName
         DynamoDBTableName:
-          Fn::ImportValue: DynamoDBTable
+          Ref: DynamoDBTable
   Api:
     Cors:
       AllowMethods: '''DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'''
       AllowHeaders: '''Content-Type,X-Amz-Date,X-Amz-Security-Token,Authorization,X-Api-Key,X-Requested-With,Accept,Access-Control-Allow-Methods,Access-Control-Allow-Origin,Access-Control-Allow-Headers'''
       AllowOrigin: '''*'''
 Parameters:
-  Stage:
+  Environment:
     Type: String
     Default: dev
     AllowedValues:
     - dev
     - prod
-    Description: Stage name
+    Description: Environment name
+  BucketName:
+    Type: String
+    Description: Name of the S3 bucket
+  DynamoDBTable:
+    Type: String
+    Description: Name of the DynamoDB table
+  UserPoolClientId:
+    Type: String
+    Description: User Pool Client ID
+  UserPoolId:
+    Type: String
+    Description: User Pool ID
+  LambdaIAMRoleArn:
+    Type: String
+    Description: ARN of the Lambda IAM Role
 Resources:
   ApiGatewayRole:
     Type: AWS::IAM::Role
@@ -115,7 +130,7 @@ Resources:
     Type: AWS::Serverless::Api
     Properties:
       StageName:
-        Ref: Stage
+        Ref: Environment
       DefinitionBody:
         Fn::Transform:
           Name: AWS::Include
@@ -140,9 +155,9 @@ Resources:
     Type: AWS::Serverless::LayerVersion
     Properties:
       LayerName:
-        Fn::Sub: VMS-Layer-${Stage}
+        Fn::Sub: VMS-Layer-${Environment}
       Description: VMS Lambda Layer
-      ContentUri: s3://abhi-code-sam/c11a4501a87db4925853a8a5c27e41e1
+      ContentUri: s3://abhi-code-sam/eed5b8f6ccd9ba2bcd90da84869edb1b
       CompatibleRuntimes:
       - python3.11
     Metadata:
@@ -153,11 +168,11 @@ Resources:
       Environment:
         Variables:
           UserPoolClientId:
-            Fn::ImportValue: UserPoolClientId
+            Ref: UserPoolClientId
           UserPoolId:
-            Fn::ImportValue: UserPoolId
+            Ref: UserPoolId
       FunctionName:
-        Fn::Sub: VMS-login-GET-${Stage}
+        Fn::Sub: VMS-login-GET-${Environment}
       CodeUri: s3://abhi-code-sam/a6a9c7dc69149c39bc5b1603ca433a86
       Handler: app.lambda_handler
       Runtime: python3.11
@@ -181,7 +196,7 @@ Resources:
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
-            Fn::ImportValue: DynamoDBTable
+            Ref: DynamoDBTable
     Metadata:
       SamResourceId: VMSLoginGET
   VMSForgotPasswordPOST:
@@ -190,18 +205,18 @@ Resources:
       Environment:
         Variables:
           UserPoolClientId:
-            Fn::ImportValue: UserPoolClientId
+            Ref: UserPoolClientId
           UserPoolId:
-            Fn::ImportValue: UserPoolId
+            Ref: UserPoolId
       FunctionName:
-        Fn::Sub: VMS-forgot-password-POST-${Stage}
+        Fn::Sub: VMS-forgot-password-POST-${Environment}
       CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
       - Ref: VMSLayer
       Role:
-        Fn::ImportValue: LambdaIAMRoleArn
+        Ref: LambdaIAMRoleArn
       Events:
         VMSForgotPasswordPOST:
           Type: Api
@@ -213,14 +228,14 @@ Resources:
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
-            Fn::ImportValue: DynamoDBTable
+            Ref: DynamoDBTable
     Metadata:
       SamResourceId: VMSForgotPasswordPOST
   VMSVisitorGET:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-visitor-GET-${Stage}
+        Fn::Sub: VMS-visitor-GET-${Environment}
       CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
@@ -237,21 +252,21 @@ Resources:
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
-            Fn::ImportValue: DynamoDBTable
+            Ref: DynamoDBTable
     Metadata:
       SamResourceId: VMSVisitorGET
   VMSVisitorPOST:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-visitor-POST-${Stage}
-      CodeUri: s3://abhi-code-sam/4cfaa339e5415cd0d2f69d671da2f6cb
+        Fn::Sub: VMS-visitor-POST-${Environment}
+      CodeUri: s3://abhi-code-sam/9ae57b7943bc0e41ecfa8163195322bf
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
       - Ref: VMSLayer
       Role:
-        Fn::ImportValue: LambdaIAMRoleArn
+        Ref: LambdaIAMRoleArn
       Events:
         VMSVisitorPOST:
           Type: Api
@@ -270,15 +285,15 @@ Resources:
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
-            Fn::ImportValue: DynamoDBTable
+            Ref: DynamoDBTable
     Metadata:
       SamResourceId: VMSVisitorPOST
   VMSVisitorIdGET:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-visitor-id-GET-${Stage}
-      CodeUri: s3://abhi-code-sam/5e7274b74e4da03c24d7a3bf62a531ac
+        Fn::Sub: VMS-visitor-id-GET-${Environment}
+      CodeUri: s3://abhi-code-sam/cdfda503bee7a39166b1307606c3f29f
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -294,14 +309,14 @@ Resources:
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
-            Fn::ImportValue: DynamoDBTable
+            Ref: DynamoDBTable
     Metadata:
       SamResourceId: VMSVisitorIdGET
   VMSVisitorIdPUT:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-visitor-id-PUT-${Stage}
+        Fn::Sub: VMS-visitor-id-PUT-${Environment}
       CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
@@ -318,14 +333,14 @@ Resources:
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
-            Fn::ImportValue: DynamoDBTable
+            Ref: DynamoDBTable
     Metadata:
       SamResourceId: VMSVisitorIdPUT
   VMSVisitGET:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-visit-GET-${Stage}
+        Fn::Sub: VMS-visit-GET-${Environment}
       CodeUri: s3://abhi-code-sam/5dd609556fbadb5b72528d07a94f9db6
       Handler: app.lambda_handler
       Runtime: python3.11
@@ -342,14 +357,14 @@ Resources:
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
-            Fn::ImportValue: DynamoDBTable
+            Ref: DynamoDBTable
     Metadata:
       SamResourceId: VMSVisitGET
   VMSVisitPOST:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-visit-POST-${Stage}
+        Fn::Sub: VMS-visit-POST-${Environment}
       CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
@@ -366,21 +381,21 @@ Resources:
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
-            Fn::ImportValue: DynamoDBTable
+            Ref: DynamoDBTable
     Metadata:
       SamResourceId: VMSVisitPOST
   VMSVisitIdGET:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-visit-id-GET-${Stage}
+        Fn::Sub: VMS-visit-id-GET-${Environment}
       CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
       - Ref: VMSLayer
       Role:
-        Fn::ImportValue: LambdaIAMRoleArn
+        Ref: LambdaIAMRoleArn
       Events:
         VMSVisitVisitIdGET:
           Type: Api
@@ -392,14 +407,14 @@ Resources:
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
-            Fn::ImportValue: DynamoDBTable
+            Ref: DynamoDBTable
     Metadata:
       SamResourceId: VMSVisitIdGET
   VMSVisitIdPATCH:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-visit-id-PATCH-${Stage}
+        Fn::Sub: VMS-visit-id-PATCH-${Environment}
       CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
@@ -416,14 +431,14 @@ Resources:
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
-            Fn::ImportValue: DynamoDBTable
+            Ref: DynamoDBTable
     Metadata:
       SamResourceId: VMSVisitIdPATCH
   VMSCardGET:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-card-GET-${Stage}
+        Fn::Sub: VMS-card-GET-${Environment}
       CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
@@ -440,15 +455,15 @@ Resources:
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
-            Fn::ImportValue: DynamoDBTable
+            Ref: DynamoDBTable
     Metadata:
       SamResourceId: VMSCardGET
   VMSCardPOST:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-card-POST-${Stage}
-      CodeUri: s3://abhi-code-sam/fbf474208fdcc0ecebf28c2b41f0b666
+        Fn::Sub: VMS-card-POST-${Environment}
+      CodeUri: s3://abhi-code-sam/4707a1f6c30f304b01ddb8263399b0e2
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -464,14 +479,14 @@ Resources:
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
-            Fn::ImportValue: DynamoDBTable
+            Ref: DynamoDBTable
     Metadata:
       SamResourceId: VMSCardPOST
   VMSCardIdGET:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-card-id-GET-${Stage}
+        Fn::Sub: VMS-card-id-GET-${Environment}
       CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
@@ -488,14 +503,14 @@ Resources:
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
-            Fn::ImportValue: DynamoDBTable
+            Ref: DynamoDBTable
     Metadata:
       SamResourceId: VMSCardIdGET
   VMSCardIdPUT:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-card-id-PUT-${Stage}
+        Fn::Sub: VMS-card-id-PUT-${Environment}
       CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
@@ -512,14 +527,14 @@ Resources:
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
-            Fn::ImportValue: DynamoDBTable
+            Ref: DynamoDBTable
     Metadata:
       SamResourceId: VMSCardIdPUT
   VMSCardIdDELETE:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-card-id-DELETE-${Stage}
+        Fn::Sub: VMS-card-id-DELETE-${Environment}
       CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
@@ -536,14 +551,14 @@ Resources:
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
-            Fn::ImportValue: DynamoDBTable
+            Ref: DynamoDBTable
     Metadata:
       SamResourceId: VMSCardIdDELETE
   VMSApprovalGET:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-approval-GET-${Stage}
+        Fn::Sub: VMS-approval-GET-${Environment}
       CodeUri: s3://abhi-code-sam/4f4f1d14fcbeb14a29ac4d8a7178a669
       Handler: app.lambda_handler
       Runtime: python3.11
@@ -560,14 +575,14 @@ Resources:
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
-            Fn::ImportValue: DynamoDBTable
+            Ref: DynamoDBTable
     Metadata:
       SamResourceId: VMSApprovalGET
   VMSApprovalPOST:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-approval-POST-${Stage}
+        Fn::Sub: VMS-approval-POST-${Environment}
       CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
@@ -584,14 +599,14 @@ Resources:
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
-            Fn::ImportValue: DynamoDBTable
+            Ref: DynamoDBTable
     Metadata:
       SamResourceId: VMSApprovalPOST
   VMSApprovalIdGET:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-approval-id-GET-${Stage}
+        Fn::Sub: VMS-approval-id-GET-${Environment}
       CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
@@ -608,14 +623,14 @@ Resources:
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
-            Fn::ImportValue: DynamoDBTable
+            Ref: DynamoDBTable
     Metadata:
       SamResourceId: VMSApprovalIdGET
   VMSApprovalIdPATCH:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-approval-id-PATCH-${Stage}
+        Fn::Sub: VMS-approval-id-PATCH-${Environment}
       CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
@@ -632,11 +647,11 @@ Resources:
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
-            Fn::ImportValue: DynamoDBTable
+            Ref: DynamoDBTable
     Metadata:
       SamResourceId: VMSApprovalIdPATCH
 Outputs:
   VMSApiEndpoint:
     Description: VMS API Gateway endpoint URL
     Value:
-      Fn::Sub: https://${VMSApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${Stage}
+      Fn::Sub: https://${VMSApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${Environment}

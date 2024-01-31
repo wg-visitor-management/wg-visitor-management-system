@@ -8,10 +8,23 @@ Parameters:
         MinLength: 1
         MaxLength: 80
         Default: "lambda-iam-role"
-    Stage:
+    Environment:
         Type: String
-        Description: "The name of the stage"
+        Description: "The name of the Environment"
         Default: "dev"
+        AllowedValues:
+            - dev
+            - prod
+    BucketArn:
+        Type: String
+        Description: "Name of the Bucket"
+        MinLength: 1
+        MaxLength: 80
+    DynamoDBTableArn:
+        Type: String
+        Description: "Name of the DynamoDB table"
+        MinLength: 1
+        MaxLength: 80
 Resources:
     LambdaIAMRole:
         Type: AWS::IAM::Role
@@ -25,7 +38,7 @@ Resources:
                               - lambda.amazonaws.com
                       Action:
                           - sts:AssumeRole
-            RoleName: !Sub "${RoleName}-${Stage}"
+            RoleName: !Sub "${RoleName}-${Environment}"
             Policies:
                 - PolicyName: CloudWatchLogsPolicy
                   PolicyDocument:
@@ -44,7 +57,7 @@ Resources:
                             Action:
                                 - s3:GetObject
                                 - s3:PutObject
-                            Resource: !Join ["", [!ImportValue BucketArn, "/*"]]
+                            Resource: !Join ["", [!Ref BucketArn, "/*"]]
 
                 - PolicyName: DynamoDBPolicy
                   PolicyDocument:
@@ -57,16 +70,12 @@ Resources:
                                 - dynamodb:GetItem
                                 - dynamodb:Query
                                 - dynamodb:UpdateItem
-                            Resource: !ImportValue DynamoDBTableArn
+                            Resource: !Ref DynamoDBTableArn
 
 Outputs:
     LambdaIAMRoleArn:
         Description: "ARN of the IAM role"
         Value: !GetAtt LambdaIAMRole.Arn
-        Export:
-            Name: "LambdaIAMRoleArn"
     LambdaIAMRoleName:
         Description: "Name of the IAM role"
         Value: !Ref LambdaIAMRole
-        Export:
-            Name: "LambdaIAMRoleName"
