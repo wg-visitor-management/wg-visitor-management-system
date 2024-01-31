@@ -1,10 +1,7 @@
 
 
-def parse_request_body_to_object(request_body, visitor_id, picture_name_self, picture_name_id):
+def parse_request_body_to_object(request_body, picture_name_self, picture_name_id):
     body = {}
-    
-    body["PK"] = "visitor"
-    body["SK"] = visitor_id
     body["firstName"] = request_body["firstName"]
     body["lastName"] = request_body["lastName"]
     body["phoneNumber"] = request_body["phoneNumber"]
