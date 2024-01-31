@@ -46,6 +46,19 @@ Resources:
                                 - s3:PutObject
                             Resource: !Join ["", [!ImportValue BucketArn, "/*"]]
 
+                - PolicyName: DynamoDBPolicy
+                  PolicyDocument:
+                      Version: "2012-10-17"
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                                - dynamodb:PutItem
+                                - dynamodb:DeleteItem
+                                - dynamodb:GetItem
+                                - dynamodb:Query
+                                - dynamodb:UpdateItem
+                            Resource: !ImportValue DynamoDBTableArn
+
 Outputs:
     LambdaIAMRoleArn:
         Description: "ARN of the IAM role"

@@ -31,7 +31,6 @@ def get_error_response(error):
                     traceback.format_exc()
                 )
             )
-
     return ParseResponse(
         error.message if hasattr(error, "message") else str(error),
         status_code).return_response()
@@ -45,4 +44,3 @@ def error_parser(error):
         return message
     except Exception as e:
         return error.message.split("\n")[0]
-    

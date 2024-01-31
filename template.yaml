@@ -13,7 +13,7 @@ Globals:
                 Stage: !Ref Stage
                 BucketName: !ImportValue BucketName
                 DynamoDBTableName: !ImportValue DynamoDBTable
-    Api:      
+    Api:
         Cors:
             AllowMethods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
             AllowHeaders: "'Content-Type,X-Amz-Date,X-Amz-Security-Token,Authorization,X-Api-Key,X-Requested-With,Accept,Access-Control-Allow-Methods,Access-Control-Allow-Origin,Access-Control-Allow-Headers'"
@@ -83,7 +83,7 @@ Resources:
                     Parameters:
                         Location: docs/VMS_swagger.yaml
 
-            GatewayResponses:          
+            GatewayResponses:
                 DEFAULT_4XX:
                     ResponseParameters:
                         Headers:
@@ -154,6 +154,8 @@ Resources:
             Layers:
                 - !Ref VMSLayer
 
+            Role: !ImportValue LambdaIAMRoleArn
+
             Events:
                 VMSForgotPasswordPOST:
                     Type: Api
@@ -193,6 +195,7 @@ Resources:
             Runtime: python3.11
             Layers:
                 - !Ref VMSLayer
+            Role: !ImportValue LambdaIAMRoleArn
             Events:
                 VMSVisitorPOST:
                     Type: Api
@@ -200,6 +203,13 @@ Resources:
                         RestApiId: !Ref VMSApiGateway
                         Path: /visitor/{proxy+}
                         Method: post
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /visitor/{proxy+}
+                        Method: options
+
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !ImportValue DynamoDBTable
@@ -289,6 +299,7 @@ Resources:
             Runtime: python3.11
             Layers:
                 - !Ref VMSLayer
+            Role: !ImportValue LambdaIAMRoleArn
             Events:
                 VMSVisitVisitIdGET:
                     Type: Api

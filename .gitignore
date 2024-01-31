@@ -2,3 +2,6 @@ config.py
 src/common/python/lib
 update_layer.py
 vms_layer.zip
+template.yaml
+testing.py
+iam_policy.yaml

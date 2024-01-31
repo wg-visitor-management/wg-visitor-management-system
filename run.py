@@ -1,16 +1,16 @@
 import subprocess
 import boto3
 import logging
-import config
+import sam_config
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 client_cf = boto3.client("cloudformation")
 
 env_variables = {
-    "stage_name": config.STAGE_NAME,
+    "stage_name": sam_config.STAGE_NAME,
     "stack_name": "api-gateway-lambda-sam",
-    "s3_bucket": config.BUCKET_NAME,
+    "s3_bucket": sam_config.BUCKET_NAME,
 }
 cognito_stack = {
     "stack_name": "cognito-stack",

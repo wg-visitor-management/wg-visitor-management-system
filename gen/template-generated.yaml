@@ -120,7 +120,7 @@ Resources:
         Fn::Transform:
           Name: AWS::Include
           Parameters:
-            Location: s3://vms-static-content/81c539156faacbb2248e6f904e122632
+            Location: s3://abhi-code-sam/d7e7fa49f5be9707c46ed743b59672ae
       GatewayResponses:
         DEFAULT_4XX:
           ResponseParameters:
@@ -142,7 +142,7 @@ Resources:
       LayerName:
         Fn::Sub: VMS-Layer-${Stage}
       Description: VMS Lambda Layer
-      ContentUri: s3://vms-static-content/e5f2f4f75724ee7cce24148d2059b54e
+      ContentUri: s3://abhi-code-sam/c11a4501a87db4925853a8a5c27e41e1
       CompatibleRuntimes:
       - python3.11
     Metadata:
@@ -158,7 +158,7 @@ Resources:
             Fn::ImportValue: UserPoolId
       FunctionName:
         Fn::Sub: VMS-login-GET-${Stage}
-      CodeUri: s3://vms-static-content/a6a9c7dc69149c39bc5b1603ca433a86
+      CodeUri: s3://abhi-code-sam/a6a9c7dc69149c39bc5b1603ca433a86
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -195,11 +195,13 @@ Resources:
             Fn::ImportValue: UserPoolId
       FunctionName:
         Fn::Sub: VMS-forgot-password-POST-${Stage}
-      CodeUri: s3://vms-static-content/7a4deecd340a215a5800d60c122f14e5
+      CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
       - Ref: VMSLayer
+      Role:
+        Fn::ImportValue: LambdaIAMRoleArn
       Events:
         VMSForgotPasswordPOST:
           Type: Api
@@ -219,7 +221,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: VMS-visitor-GET-${Stage}
-      CodeUri: s3://vms-static-content/7a4deecd340a215a5800d60c122f14e5
+      CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -243,11 +245,13 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: VMS-visitor-POST-${Stage}
-      CodeUri: s3://vms-static-content/7fdc350c6d59bbeca6fd19014ef403f9
+      CodeUri: s3://abhi-code-sam/4cfaa339e5415cd0d2f69d671da2f6cb
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
       - Ref: VMSLayer
+      Role:
+        Fn::ImportValue: LambdaIAMRoleArn
       Events:
         VMSVisitorPOST:
           Type: Api
@@ -256,6 +260,13 @@ Resources:
               Ref: VMSApiGateway
             Path: /visitor/{proxy+}
             Method: post
+        Options:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /visitor/{proxy+}
+            Method: options
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
@@ -267,7 +278,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: VMS-visitor-id-GET-${Stage}
-      CodeUri: s3://vms-static-content/7a4deecd340a215a5800d60c122f14e5
+      CodeUri: s3://abhi-code-sam/5e7274b74e4da03c24d7a3bf62a531ac
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -291,7 +302,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: VMS-visitor-id-PUT-${Stage}
-      CodeUri: s3://vms-static-content/7a4deecd340a215a5800d60c122f14e5
+      CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -315,7 +326,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: VMS-visit-GET-${Stage}
-      CodeUri: s3://vms-static-content/5dd609556fbadb5b72528d07a94f9db6
+      CodeUri: s3://abhi-code-sam/5dd609556fbadb5b72528d07a94f9db6
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -339,7 +350,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: VMS-visit-POST-${Stage}
-      CodeUri: s3://vms-static-content/7a4deecd340a215a5800d60c122f14e5
+      CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -363,11 +374,13 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: VMS-visit-id-GET-${Stage}
-      CodeUri: s3://vms-static-content/7a4deecd340a215a5800d60c122f14e5
+      CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
       - Ref: VMSLayer
+      Role:
+        Fn::ImportValue: LambdaIAMRoleArn
       Events:
         VMSVisitVisitIdGET:
           Type: Api
@@ -387,7 +400,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: VMS-visit-id-PATCH-${Stage}
-      CodeUri: s3://vms-static-content/7a4deecd340a215a5800d60c122f14e5
+      CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -411,7 +424,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: VMS-card-GET-${Stage}
-      CodeUri: s3://vms-static-content/7a4deecd340a215a5800d60c122f14e5
+      CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -435,7 +448,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: VMS-card-POST-${Stage}
-      CodeUri: s3://vms-static-content/fbf474208fdcc0ecebf28c2b41f0b666
+      CodeUri: s3://abhi-code-sam/fbf474208fdcc0ecebf28c2b41f0b666
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -459,7 +472,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: VMS-card-id-GET-${Stage}
-      CodeUri: s3://vms-static-content/7a4deecd340a215a5800d60c122f14e5
+      CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -483,7 +496,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: VMS-card-id-PUT-${Stage}
-      CodeUri: s3://vms-static-content/7a4deecd340a215a5800d60c122f14e5
+      CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -507,7 +520,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: VMS-card-id-DELETE-${Stage}
-      CodeUri: s3://vms-static-content/7a4deecd340a215a5800d60c122f14e5
+      CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -531,7 +544,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: VMS-approval-GET-${Stage}
-      CodeUri: s3://vms-static-content/4f4f1d14fcbeb14a29ac4d8a7178a669
+      CodeUri: s3://abhi-code-sam/4f4f1d14fcbeb14a29ac4d8a7178a669
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -555,7 +568,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: VMS-approval-POST-${Stage}
-      CodeUri: s3://vms-static-content/7a4deecd340a215a5800d60c122f14e5
+      CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -579,7 +592,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: VMS-approval-id-GET-${Stage}
-      CodeUri: s3://vms-static-content/7a4deecd340a215a5800d60c122f14e5
+      CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -603,7 +616,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: VMS-approval-id-PATCH-${Stage}
-      CodeUri: s3://vms-static-content/7a4deecd340a215a5800d60c122f14e5
+      CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
