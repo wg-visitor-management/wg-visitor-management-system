@@ -1,29 +1,81 @@
 {
     "ACCESS_CONTROL_LIST": {
         "admin": {
-            "/card": ["GET", "POST"],
-            "/card/{id}": ["GET", "PUT", "DELETE"],
-            "/approval": ["GET", "POST"],
-            "/approval/{id}": ["GET", "PATCH"],
-            "/visitor": ["GET", "POST"],
-            "/visitor/{id}": ["GET", "PUT"],
-            "/visit": ["GET", "POST"],
-            "/visit/{id}": ["GET", "PATCH"]
+            "/card": [
+                "GET",
+                "POST"
+            ],
+            "/card/{id}": [
+                "GET",
+                "PUT",
+                "DELETE"
+            ],
+            "/approval": [
+                "GET",
+                "POST"
+            ],
+            "/approval/{id}": [
+                "GET",
+                "PATCH"
+            ],
+            "/visitor": [
+                "GET",
+                "POST"
+            ],
+            "/visitor/{id}": [
+                "GET",
+                "PUT"
+            ],
+            "/visit": [
+                "GET",
+                "POST"
+            ],
+            "/visit/{id}": [
+                "GET",
+                "PATCH"
+            ]
         },
         "users": {
-            "/card": ["GET"],
-            "/card/{id}": ["GET", "PUT"],
-            "/approval": ["GET", "POST"],
-            "/approval/{id}": ["GET"],
-            "/visitor": ["GET", "POST"],
-            "/visitor/{id}": ["GET", "PUT"],
-            "/visit": ["GET", "POST"],
-            "/visit/{id}": ["GET", "PATCH"]
+            "/card": [
+                "GET"
+            ],
+            "/card/{id}": [
+                "GET",
+                "PUT"
+            ],
+            "/approval": [
+                "GET",
+                "POST"
+            ],
+            "/approval/{id}": [
+                "GET"
+            ],
+            "/visitor": [
+                "GET",
+                "POST"
+            ],
+            "/visitor/{id}": [
+                "GET",
+                "PUT"
+            ],
+            "/visit": [
+                "GET",
+                "POST"
+            ],
+            "/visit/{id}": [
+                "GET",
+                "PATCH"
+            ]
         }
     },
     "LOG_CONFIGURATIONS": {
         "LOG_LEVEL": "DEBUG",
         "LOG_FORMAT": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         "LOG_DATE_FORMAT": "%Y-%m-%d %H:%M:%S"
+    },
+    "CARD_STATUS": {
+        "AVAILABLE": "available",
+        "OCCUPIED": "occupied",
+        "DISCARDERED": "discarded"
     }
 }

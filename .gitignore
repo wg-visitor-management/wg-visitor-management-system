@@ -5,3 +5,4 @@ vms_layer.zip
 template.yaml
 testing.py
 iam_policy.yaml
+template-generated.yaml

@@ -15,3 +15,7 @@ class ConflictError(Exception):
 class AuthenticationError(Exception):
     """Authentication Error"""
     pass
+
+class CardAlreadyExistsError(Exception):
+    """Card Already Exists Error"""
+    pass
