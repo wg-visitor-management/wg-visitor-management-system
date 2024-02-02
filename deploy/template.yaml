@@ -10,29 +10,53 @@ Globals:
         Runtime: python3.11
         Environment:
             Variables:
-                Stage: !Ref Stage
-                BucketName: !ImportValue BucketName
-                DynamoDBTableName: !ImportValue DynamoDBTable
-    Api:      
+                Environment: !Ref Environment
+                BucketName: !Ref BucketName
+                DynamoDBTableName: !Ref DynamoDBTable
+    Api:
         Cors:
             AllowMethods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
             AllowHeaders: "'Content-Type,X-Amz-Date,X-Amz-Security-Token,Authorization,X-Api-Key,X-Requested-With,Accept,Access-Control-Allow-Methods,Access-Control-Allow-Origin,Access-Control-Allow-Headers'"
             AllowOrigin: "'*'"
 
 Parameters:
-    Stage:
+    Environment:
         Type: String
         Default: dev
         AllowedValues:
             - dev
             - prod
-        Description: Stage name
+        Description: Environment name
+
+    BucketName:
+        Type: String
+        Description: Name of the S3 bucket
+
+    DynamoDBTable:
+        Type: String
+        Description: Name of the DynamoDB table
+
+    UserPoolClientId:
+        Type: String
+        Description: User Pool Client ID
+
+    UserPoolId:
+        Type: String
+        Description: User Pool ID
+
+    LambdaIAMRoleArn:
+        Type: String
+        Description: ARN of the Lambda IAM Role
+
+    CognitoPoolArn:
+        Type: String
+        Description: ARN of the Cognito Pool
 
 Resources:
     ApiGatewayRole:
         Type: AWS::IAM::Role
         Properties:
-            RoleName: !Sub ${AWS::StackName}-ApiGatewayRole
+            RoleName: !Sub ${Environment}--ApiGatewayRole
             AssumeRolePolicyDocument:
                 Version: "2012-10-17"
                 Statement:
@@ -43,7 +67,7 @@ Resources:
                       Action:
                           - sts:AssumeRole
             Policies:
-                - PolicyName: !Sub ${AWS::StackName}-ApiGatewayRolePolicy
+                - PolicyName: !Sub ${Environment}--ApiGatewayRolePolicy
                   PolicyDocument:
                       Version: "2012-10-17"
                       Statement:
@@ -75,15 +99,15 @@ Resources:
     VMSApiGateway:
         Type: AWS::Serverless::Api
         Properties:
-            StageName: !Ref Stage
+            StageName: !Ref Environment
 
             DefinitionBody:
                 Fn::Transform:
                     Name: AWS::Include
                     Parameters:
-                        Location: docs/VMS_swagger.yaml
+                        Location: ../docs/VMS_swagger.yaml
 
-            GatewayResponses:          
+            GatewayResponses:
                 DEFAULT_4XX:
                     ResponseParameters:
                         Headers:
@@ -101,9 +125,9 @@ Resources:
     VMSLayer:
         Type: AWS::Serverless::LayerVersion
         Properties:
-            LayerName: !Sub VMS-Layer-${Stage}
+            LayerName: !Sub ${Environment}-VMS-Layer
             Description: VMS Lambda Layer
-            ContentUri: ./src/common
+            ContentUri: ../src/common
             CompatibleRuntimes:
                 - python3.11
 
@@ -112,11 +136,11 @@ Resources:
         Properties:
             Environment:
                 Variables:
-                    UserPoolClientId: !ImportValue UserPoolClientId
-                    UserPoolId: !ImportValue UserPoolId
+                    UserPoolClientId: !Ref UserPoolClientId
+                    UserPoolId: !Ref UserPoolId
 
-            FunctionName: !Sub VMS-login-GET-${Stage}
-            CodeUri: ./src/functions/login
+            FunctionName: !Sub ${Environment}-VMS-login-GET
+            CodeUri: ../src/functions/login
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -138,21 +162,23 @@ Resources:
                         Method: options
             Policies:
                 - DynamoDBCrudPolicy:
-                      TableName: !ImportValue DynamoDBTable
+                      TableName: !Ref DynamoDBTable
     VMSForgotPasswordPOST:
         Type: AWS::Serverless::Function
         Properties:
             Environment:
                 Variables:
-                    UserPoolClientId: !ImportValue UserPoolClientId
-                    UserPoolId: !ImportValue UserPoolId
+                    UserPoolClientId: !Ref UserPoolClientId
+                    UserPoolId: !Ref UserPoolId
 
-            FunctionName: !Sub VMS-forgot-password-POST-${Stage}
-            CodeUri: ./src/functions/post_forgot_password
+            FunctionName: !Sub ${Environment}-VMS-forgot-password-POST
+            CodeUri: ../src/functions/post_forgot_password
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
                 - !Ref VMSLayer
+
+            Role: !Ref LambdaIAMRoleArn
 
             Events:
                 VMSForgotPasswordPOST:
@@ -163,13 +189,13 @@ Resources:
                         Method: post
             Policies:
                 - DynamoDBCrudPolicy:
-                      TableName: !ImportValue DynamoDBTable
+                      TableName: !Ref DynamoDBTable
 
     VMSVisitorGET:
         Type: AWS::Serverless::Function
         Properties:
-            FunctionName: !Sub VMS-visitor-GET-${Stage}
-            CodeUri: ./src/functions/get_visitor
+            FunctionName: !Sub ${Environment}-VMS-visitor-GET
+            CodeUri: ../src/functions/get_visitor
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -183,16 +209,17 @@ Resources:
                         Method: get
             Policies:
                 - DynamoDBCrudPolicy:
-                      TableName: !ImportValue DynamoDBTable
+                      TableName: !Ref DynamoDBTable
     VMSVisitorPOST:
         Type: AWS::Serverless::Function
         Properties:
-            FunctionName: !Sub VMS-visitor-POST-${Stage}
-            CodeUri: ./src/functions/post_visitor
+            FunctionName: !Sub ${Environment}-VMS-visitor-POST
+            CodeUri: ../src/functions/post_visitor
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
                 - !Ref VMSLayer
+            Role: !Ref LambdaIAMRoleArn
             Events:
                 VMSVisitorPOST:
                     Type: Api
@@ -200,14 +227,21 @@ Resources:
                         RestApiId: !Ref VMSApiGateway
                         Path: /visitor/{proxy+}
                         Method: post
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /visitor/{proxy+}
+                        Method: options
+
             Policies:
                 - DynamoDBCrudPolicy:
-                      TableName: !ImportValue DynamoDBTable
+                      TableName: !Ref DynamoDBTable
     VMSVisitorIdGET:
         Type: AWS::Serverless::Function
         Properties:
-            FunctionName: !Sub VMS-visitor-id-GET-${Stage}
-            CodeUri: ./src/functions/get_visitor_id
+            FunctionName: !Sub ${Environment}-VMS-visitor-id-GET
+            CodeUri: ../src/functions/get_visitor_id
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -221,12 +255,12 @@ Resources:
                         Method: get
             Policies:
                 - DynamoDBCrudPolicy:
-                      TableName: !ImportValue DynamoDBTable
+                      TableName: !Ref DynamoDBTable
     VMSVisitorIdPUT:
         Type: AWS::Serverless::Function
         Properties:
-            FunctionName: !Sub VMS-visitor-id-PUT-${Stage}
-            CodeUri: ./src/functions/put_visitor_id
+            FunctionName: !Sub ${Environment}-VMS-visitor-id-PUT
+            CodeUri: ../src/functions/put_visitor_id
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -240,13 +274,13 @@ Resources:
                         Method: put
             Policies:
                 - DynamoDBCrudPolicy:
-                      TableName: !ImportValue DynamoDBTable
+                      TableName: !Ref DynamoDBTable
 
     VMSVisitGET:
         Type: AWS::Serverless::Function
         Properties:
-            FunctionName: !Sub VMS-visit-GET-${Stage}
-            CodeUri: ./src/functions/get_visit
+            FunctionName: !Sub ${Environment}-VMS-visit-GET
+            CodeUri: ../src/functions/get_visit
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -260,12 +294,12 @@ Resources:
                         Method: get
             Policies:
                 - DynamoDBCrudPolicy:
-                      TableName: !ImportValue DynamoDBTable
+                      TableName: !Ref DynamoDBTable
     VMSVisitPOST:
         Type: AWS::Serverless::Function
         Properties:
-            FunctionName: !Sub VMS-visit-POST-${Stage}
-            CodeUri: ./src/functions/post_visit
+            FunctionName: !Sub ${Environment}-VMS-visit-POST
+            CodeUri: ../src/functions/post_visit
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -279,16 +313,17 @@ Resources:
                         Method: post
             Policies:
                 - DynamoDBCrudPolicy:
-                      TableName: !ImportValue DynamoDBTable
+                      TableName: !Ref DynamoDBTable
     VMSVisitIdGET:
         Type: AWS::Serverless::Function
         Properties:
-            FunctionName: !Sub VMS-visit-id-GET-${Stage}
-            CodeUri: ./src/functions/get_visit_id
+            FunctionName: !Sub ${Environment}-VMS-visit-id-GET
+            CodeUri: ../src/functions/get_visit_id
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
                 - !Ref VMSLayer
+            Role: !Ref LambdaIAMRoleArn
             Events:
                 VMSVisitVisitIdGET:
                     Type: Api
@@ -298,12 +333,12 @@ Resources:
                         Method: get
             Policies:
                 - DynamoDBCrudPolicy:
-                      TableName: !ImportValue DynamoDBTable
+                      TableName: !Ref DynamoDBTable
     VMSVisitIdPATCH:
         Type: AWS::Serverless::Function
         Properties:
-            FunctionName: !Sub VMS-visit-id-PATCH-${Stage}
-            CodeUri: ./src/functions/patch_visit_id
+            FunctionName: !Sub ${Environment}-VMS-visit-id-PATCH
+            CodeUri: ../src/functions/patch_visit_id
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -317,13 +352,13 @@ Resources:
                         Method: patch
             Policies:
                 - DynamoDBCrudPolicy:
-                      TableName: !ImportValue DynamoDBTable
+                      TableName: !Ref DynamoDBTable
 
     VMSCardGET:
         Type: AWS::Serverless::Function
         Properties:
-            FunctionName: !Sub VMS-card-GET-${Stage}
-            CodeUri: ./src/functions/get_card
+            FunctionName: !Sub ${Environment}-VMS-card-GET
+            CodeUri: ../src/functions/get_card
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -337,12 +372,12 @@ Resources:
                         Method: get
             Policies:
                 - DynamoDBCrudPolicy:
-                      TableName: !ImportValue DynamoDBTable
+                      TableName: !Ref DynamoDBTable
     VMSCardPOST:
         Type: AWS::Serverless::Function
         Properties:
-            FunctionName: !Sub VMS-card-POST-${Stage}
-            CodeUri: ./src/functions/post_card
+            FunctionName: !Sub ${Environment}-VMS-card-POST
+            CodeUri: ../src/functions/post_card
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -356,12 +391,12 @@ Resources:
                         Method: post
             Policies:
                 - DynamoDBCrudPolicy:
-                      TableName: !ImportValue DynamoDBTable
+                      TableName: !Ref DynamoDBTable
     VMSCardIdGET:
         Type: AWS::Serverless::Function
         Properties:
-            FunctionName: !Sub VMS-card-id-GET-${Stage}
-            CodeUri: ./src/functions/get_card_id
+            FunctionName: !Sub ${Environment}-VMS-card-id-GET
+            CodeUri: ../src/functions/get_card_id
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -375,12 +410,12 @@ Resources:
                         Method: get
             Policies:
                 - DynamoDBCrudPolicy:
-                      TableName: !ImportValue DynamoDBTable
+                      TableName: !Ref DynamoDBTable
     VMSCardIdPUT:
         Type: AWS::Serverless::Function
         Properties:
-            FunctionName: !Sub VMS-card-id-PUT-${Stage}
-            CodeUri: ./src/functions/put_card_id
+            FunctionName: !Sub ${Environment}-VMS-card-id-PUT
+            CodeUri: ../src/functions/put_card_id
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -394,12 +429,12 @@ Resources:
                         Method: put
             Policies:
                 - DynamoDBCrudPolicy:
-                      TableName: !ImportValue DynamoDBTable
+                      TableName: !Ref DynamoDBTable
     VMSCardIdDELETE:
         Type: AWS::Serverless::Function
         Properties:
-            FunctionName: !Sub VMS-card-id-DELETE-${Stage}
-            CodeUri: ./src/functions/delete_card_id
+            FunctionName: !Sub ${Environment}-VMS-card-id-DELETE
+            CodeUri: ../src/functions/delete_card_id
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -413,13 +448,13 @@ Resources:
                         Method: delete
             Policies:
                 - DynamoDBCrudPolicy:
-                      TableName: !ImportValue DynamoDBTable
+                      TableName: !Ref DynamoDBTable
 
     VMSApprovalGET:
         Type: AWS::Serverless::Function
         Properties:
-            FunctionName: !Sub VMS-approval-GET-${Stage}
-            CodeUri: ./src/functions/get_approval
+            FunctionName: !Sub ${Environment}-VMS-approval-GET
+            CodeUri: ../src/functions/get_approval
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -433,12 +468,12 @@ Resources:
                         Method: get
             Policies:
                 - DynamoDBCrudPolicy:
-                      TableName: !ImportValue DynamoDBTable
+                      TableName: !Ref DynamoDBTable
     VMSApprovalPOST:
         Type: AWS::Serverless::Function
         Properties:
-            FunctionName: !Sub VMS-approval-POST-${Stage}
-            CodeUri: ./src/functions/post_approval
+            FunctionName: !Sub ${Environment}-VMS-approval-POST
+            CodeUri: ../src/functions/post_approval
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -452,12 +487,12 @@ Resources:
                         Method: post
             Policies:
                 - DynamoDBCrudPolicy:
-                      TableName: !ImportValue DynamoDBTable
+                      TableName: !Ref DynamoDBTable
     VMSApprovalIdGET:
         Type: AWS::Serverless::Function
         Properties:
-            FunctionName: !Sub VMS-approval-id-GET-${Stage}
-            CodeUri: ./src/functions/get_approval_id
+            FunctionName: !Sub ${Environment}-VMS-approval-id-GET
+            CodeUri: ../src/functions/get_approval_id
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -471,12 +506,12 @@ Resources:
                         Method: get
             Policies:
                 - DynamoDBCrudPolicy:
-                      TableName: !ImportValue DynamoDBTable
+                      TableName: !Ref DynamoDBTable
     VMSApprovalIdPATCH:
         Type: AWS::Serverless::Function
         Properties:
-            FunctionName: !Sub VMS-approval-id-PATCH-${Stage}
-            CodeUri: ./src/functions/patch_approval_id
+            FunctionName: !Sub ${Environment}-VMS-approval-id-PATCH
+            CodeUri: ../src/functions/patch_approval_id
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -490,9 +525,9 @@ Resources:
                         Method: patch
             Policies:
                 - DynamoDBCrudPolicy:
-                      TableName: !ImportValue DynamoDBTable
+                      TableName: !Ref DynamoDBTable
 
 Outputs:
     VMSApiEndpoint:
         Description: "VMS API Gateway endpoint URL"
-        Value: !Sub "https://${VMSApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${Stage}"
+        Value: !Sub "https://${VMSApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"

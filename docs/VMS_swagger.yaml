@@ -13,8 +13,6 @@ tags:
       description: Operations related to ID cards
     - name: Approval
       description: Operations related to approvals
-
-
 paths:
     /login:
         post:
@@ -131,7 +129,6 @@ paths:
                                         type: string
                                         description: status
                                         example: success
-                    
 
                 "401":
                     description: Unauthorized
@@ -417,7 +414,7 @@ paths:
                 httpMethod: POST
                 contentHandling: CONVERT_TO_TEXT
                 type: aws_proxy
-                
+
             security:
                 - CognitoUserPool: []
         put:
@@ -1520,7 +1517,6 @@ paths:
             security:
                 - CognitoUserPool: []
 
-
 components:
     securitySchemes:
         CognitoUserPool:
@@ -1531,7 +1527,7 @@ components:
             x-amazon-apigateway-authorizer:
                 type: cognito_user_pools
                 providerARNs:
-                    - Fn::ImportValue: CognitoPoolArn
+                    - Fn::Sub: ${CognitoPoolArn}
     schemas:
         Error:
             type: object
