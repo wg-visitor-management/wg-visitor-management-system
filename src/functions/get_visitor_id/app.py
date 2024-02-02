@@ -13,8 +13,8 @@ logger = get_logger("GET_/visitor/:id")
 db_helper = DBHelper(os.environ["DynamoDBTableName"])
 bucket_name = os.environ["BucketName"]
 
-@rbac
 @handle_errors
+@rbac
 def lambda_handler(event, context):
     logger.debug(event)
     visitor_id = event["pathParameters"]["id"]

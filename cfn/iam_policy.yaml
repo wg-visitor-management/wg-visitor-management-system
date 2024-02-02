@@ -40,6 +40,15 @@ Resources:
                           - sts:AssumeRole
             RoleName: !Sub "${RoleName}-${Environment}"
             Policies:
+                - PolicyName: SESPolicy
+                  PolicyDocument:
+                      Version: "2012-10-17"
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                                - ses:SendEmail
+                                - ses:SendRawEmail
+                            Resource: "*"
                 - PolicyName: CloudWatchLogsPolicy
                   PolicyDocument:
                       Version: "2012-10-17"

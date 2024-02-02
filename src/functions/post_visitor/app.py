@@ -1,6 +1,6 @@
-import base64
-import json
 import os
+import json
+from datetime import datetime
 
 from helpers.body_parser import parse_request_body_to_object
 from helpers.s3_helpers import upload_mime_image_binary_to_s3
@@ -14,9 +14,8 @@ from vms_layer.utils.s3_signed_url_generator import generate_presigned_url
 from vms_layer.utils.handle_errors import handle_errors
 from vms_layer.utils.base64_parser import convert_to_base64
 from vms_layer.utils.loggers import get_logger
-from datetime import datetime
 
-logger = get_logger("POST_/visitor")
+logger = get_logger("POST /visitor")
 db_helper = DBHelper(os.environ["DynamoDBTableName"])
 bucket_name = os.environ["BucketName"]
 
@@ -29,9 +28,9 @@ def lambda_handler(event, context):
     current_year = datetime.now().year
     epoch_current = current_time_epoch()
     request_body = json.loads(event.get("body"))
-    first_name = request_body.get("firstName").lower()
+    first_name = request_body.get("firstName").replace(" ", "").lower()
     last_name = request_body.get("lastName").replace(" ", "").lower()
-    raw_visitor_id = f"{first_name}{last_name}#{epoch_current}"
+    raw_visitor_id = f"{epoch_current}"
     encoded_visitor_id = convert_to_base64(raw_visitor_id)
 
     visitor_id = f"detail#{raw_visitor_id}"
@@ -51,15 +50,14 @@ def lambda_handler(event, context):
 
     vistor_pk_body = parse_request_body_to_object(
         request_body, picture_name_self, picture_name_id)
+    history_pk_body = vistor_pk_body.copy()
     
     vistor_pk_body["PK"] = "visitor"
-    vistor_pk_body["SK"] = visitor_id
+    vistor_pk_body["SK"] = f"detail#{first_name}{last_name}#{raw_visitor_id}"
     db_helper.create_item(vistor_pk_body)
 
-    history_pk_body = parse_request_body_to_object(
-        request_body, picture_name_self, picture_name_id)
     history_pk_body["PK"] = f"detail_history#{current_year}"
-    history_pk_body["SK"] = f"detail#{visitor_id}#{epoch_current}"
+    history_pk_body["SK"] = f"{visitor_id}#{epoch_current}"
     db_helper.create_item(history_pk_body)
 
     profile_picture_url = generate_presigned_url(bucket_name, picture_name_self)

@@ -1,8 +1,7 @@
-config.py
 src/common/python/lib
+__pycache__
 update_layer.py
 vms_layer.zip
-template.yaml
 testing.py
-iam_policy.yaml
 template-generated.yaml
+gen/template-generated.yaml

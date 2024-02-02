@@ -7,7 +7,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 client_cf = boto3.client("cloudformation")
 
-constants = {
+configurations = {
     "BucketName": "vms-static-content",
     "UserPoolName": "vms-user-pool",
     "UserPoolClientName": "vms-user-pool-client",
@@ -28,7 +28,7 @@ static_content_bucket_stack = {
     "stack_name": "static-content-bucket-stack",
     "template_body_url": "cfn/static_content_bucket.yaml",
     "parameters": [
-        {"ParameterKey": "BucketName", "ParameterValue": constants.get("BucketName")},
+        {"ParameterKey": "BucketName", "ParameterValue": configurations.get("BucketName")},
     ],
     "capabilities": ["CAPABILITY_IAM"],
 }
@@ -37,10 +37,10 @@ cognito_stack = {
     "template_body_url": "cfn/cognito.yaml",
     "parameters": [
         {"ParameterKey": "Environment", "ParameterValue": env_variables.get("ENVIRONMENT")},
-        {"ParameterKey": "UserPoolName", "ParameterValue": constants.get("UserPoolName")},
+        {"ParameterKey": "UserPoolName", "ParameterValue": configurations.get("UserPoolName")},
         {
             "ParameterKey": "UserPoolClientName",
-            "ParameterValue": constants.get("UserPoolClientName"),
+            "ParameterValue": configurations.get("UserPoolClientName"),
         },
     ],
     "capabilities": ["CAPABILITY_IAM"],
@@ -50,7 +50,7 @@ dynamodb_stack = {
     "template_body_url": "cfn/dynamodb.yaml",
     "parameters": [
         {"ParameterKey": "Environment", "ParameterValue": env_variables.get("ENVIRONMENT")},
-        {"ParameterKey": "TableName", "ParameterValue": constants.get("TableName")},
+        {"ParameterKey": "TableName", "ParameterValue": configurations.get("TableName")},
     ],
     "capabilities": ["CAPABILITY_IAM"],
 }
@@ -60,7 +60,7 @@ iam_stack = {
     "template_body_url": "cfn/iam_policy.yaml",
     "parameters": [
         {"ParameterKey": "Environment", "ParameterValue": env_variables.get("ENVIRONMENT")},
-        {"ParameterKey": "RoleName", "ParameterValue": constants.get("RoleName")},
+        {"ParameterKey": "RoleName", "ParameterValue": configurations.get("RoleName")},
         {"ParameterKey": "BucketArn", "ParameterValue": f"{outputs.get('BucketArn')}"},
         {"ParameterKey": "DynamoDBTableArn", "ParameterValue": f"{outputs.get('DynamoDBTableArn')}"},
     ],
@@ -95,8 +95,7 @@ def deploy_stack(stack_name, template_body_url, parameters, capabilities):
                 TemplateBody=template_body,
                 Parameters=parameters,
                 Capabilities=capabilities,
-            )
-            extract_outputs(response)        
+            )       
         else:
             response = client_cf.update_stack(
                 StackName=stack_name,
@@ -106,13 +105,14 @@ def deploy_stack(stack_name, template_body_url, parameters, capabilities):
             )
     except Exception as error:
         logger.error(error)
-    else:
+    finally:
         logger.info(f"Waiting for stack: {stack_name} to be deployed...")
         waiter = client_cf.get_waiter("stack_create_complete")
         waiter.wait(
             StackName=stack_name, WaiterConfig={"Delay": 10, "MaxAttempts": 100}
         )
         logger.info(f"Stack: {stack_name} deployed successfully!")
+        get_stack_outputs(stack_name)
         return response
 
 def run_command(command):
@@ -144,6 +144,7 @@ def apigateway_lambda_deploy_sam():
         f"UserPoolId={outputs.get('UserPoolId')} "
         f"UserPoolClientId={outputs.get('UserPoolClientId')} "
         f"LambdaIAMRoleArn={outputs.get('LambdaIAMRoleArn')} "
+        f"CognitoPoolArn={outputs.get('CognitoPoolArn')} "
 
     )
     logger.info("Deploying SAM application...")

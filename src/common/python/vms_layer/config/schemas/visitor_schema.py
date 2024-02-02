@@ -11,5 +11,5 @@ visitor_schema = {
         "idPhotoBlob": {"type": "string"},
         "vistorPhotoBlob": {"type": "string"}
     },
-    "required": ["firstName", "lastName", "phoneNumber", "email", "organisation", "address", "idProofNumber", "idPhotoBlob", "vistorPhotoBlob"],
+    "required": ["firstName", "lastName", "phoneNumber", "email", "organisation", "address", "idProofNumber"],
 }

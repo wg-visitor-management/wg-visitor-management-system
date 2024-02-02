@@ -19,3 +19,7 @@ class AuthenticationError(Exception):
 class CardAlreadyExistsError(Exception):
     """Card Already Exists Error"""
     pass
+
+class InvalidCardIdError(Exception):
+    """Invalid Card Id Error"""
+    pass

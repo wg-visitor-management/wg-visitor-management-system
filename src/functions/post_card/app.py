@@ -14,9 +14,9 @@ db_helper = DBHelper(os.environ["DynamoDBTableName"])
 logger = get_logger("POST_/card")
 
 
+@handle_errors
 @validate_schema(schema=card_schema)
 @rbac
-@handle_errors
 def lambda_handler(event, context):
     logger.debug(event)
 
