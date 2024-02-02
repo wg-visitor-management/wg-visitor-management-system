@@ -19,6 +19,19 @@ configurations = {
     "ROLE_NAME": "vms-lambda-role-common",
 }
 
+def get_iam_stack(outputs, configurations=configurations):
+    iam_stack = {
+    "stack_name": "iam-stack",
+    "template_body_url": "cfn/iam_policy.yaml",
+    "parameters": [
+        {"ParameterKey": "RoleName", "ParameterValue": configurations.get("ROLE_NAME")},
+        {"ParameterKey": "Environment", "ParameterValue": configurations.get("ENVIRONMENT")},
+        {"ParameterKey": "BucketArn", "ParameterValue": outputs['BucketArn']},
+        {"ParameterKey": "DynamoDBTableArn", "ParameterValue": outputs['DynamoDBTableArn']},
+    ],
+    "capabilities": ["CAPABILITY_IAM", "CAPABILITY_NAMED_IAM"],
+    }
+    return iam_stack
 
 static_content_bucket_stack = {
     "stack_name": "static-content-bucket-stack",
@@ -51,21 +64,11 @@ dynamodb_stack = {
     "capabilities": ["CAPABILITY_IAM"],
 }
 
-iam_stack = {
-    "stack_name": "iam-stack",
-    "template_body_url": "cfn/iam_policy.yaml",
-    "parameters": [
-        {"ParameterKey": "Environment", "ParameterValue": configurations.get("ENVIRONMENT")},
-        {"ParameterKey": "RoleName", "ParameterValue": configurations.get("ROLE_NAME")},
-        {"ParameterKey": "BucketArn", "ParameterValue": f"{outputs.get('BucketArn')}"},
-        {"ParameterKey": "DynamoDBTableArn", "ParameterValue": f"{outputs.get('DynamoDBTableArn')}"},
-    ],
-    "capabilities": ["CAPABILITY_IAM", "CAPABILITY_NAMED_IAM"],
-}
 
 def extract_outputs(response):
     for output in response["Stacks"][0]["Outputs"]:
         outputs[output["OutputKey"]] = output["OutputValue"]
+        
     
 def get_stack_outputs(stack_name):
     try:
@@ -80,6 +83,7 @@ def get_stack_outputs(stack_name):
         return True
 
 def deploy_stack(stack_name, template_body_url, parameters, capabilities):
+    logger.info("Deploying stack: {} wiht params : {}" .format(stack_name, parameters))
     template_body = open(template_body_url).read()
     logger.info(f"Deploying stack: {stack_name}\n")
 
@@ -149,7 +153,7 @@ def main():
     deploy_stack(**static_content_bucket_stack)
     deploy_stack(**cognito_stack)
     deploy_stack(**dynamodb_stack)
-    deploy_stack(**iam_stack)
+    deploy_stack(**get_iam_stack(outputs))
     apigateway_lambda_deploy_sam()
 
 

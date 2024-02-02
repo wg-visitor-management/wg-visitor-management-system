@@ -5,3 +5,4 @@ vms_layer.zip
 testing.py
 template-generated.yaml
 gen/template-generated.yaml
+cognito_operations.py
