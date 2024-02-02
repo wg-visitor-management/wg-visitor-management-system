@@ -147,6 +147,8 @@ Resources:
                     UserPoolClientId: !ImportValue UserPoolClientId
                     UserPoolId: !ImportValue UserPoolId
 
+            Role: !ImportValue LambdaIAMRoleArn
+
             FunctionName: !Sub VMS-forgot-password-POST-${Stage}
             CodeUri: ./src/functions/post_forgot_password
             Handler: app.lambda_handler

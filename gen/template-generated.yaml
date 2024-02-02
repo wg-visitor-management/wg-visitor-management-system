@@ -142,7 +142,7 @@ Resources:
       LayerName:
         Fn::Sub: VMS-Layer-${Stage}
       Description: VMS Lambda Layer
-      ContentUri: s3://udbhav-code-sam/2d4a513fd2288193da0a5dc21ffd4aaf
+      ContentUri: s3://udbhav-code-sam/01898f1c0b4ae8a8e87606d47e7eee74
       CompatibleRuntimes:
       - python3.11
     Metadata:
@@ -193,9 +193,11 @@ Resources:
             Fn::ImportValue: UserPoolClientId
           UserPoolId:
             Fn::ImportValue: UserPoolId
+      Role:
+        Fn::ImportValue: LambdaIAMRoleArn
       FunctionName:
         Fn::Sub: VMS-forgot-password-POST-${Stage}
-      CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
+      CodeUri: s3://udbhav-code-sam/c3a9083d0b4b1288a1569f6c3d97bff8
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -315,7 +317,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: VMS-visit-GET-${Stage}
-      CodeUri: s3://udbhav-code-sam/5dd609556fbadb5b72528d07a94f9db6
+      CodeUri: s3://udbhav-code-sam/18b883cd7ed20657fd5271b72a25cd05
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -339,7 +341,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: VMS-visit-POST-${Stage}
-      CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
+      CodeUri: s3://udbhav-code-sam/aa06c41f679a19b0b9b229fe54f96966
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -363,7 +365,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: VMS-visit-id-GET-${Stage}
-      CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
+      CodeUri: s3://udbhav-code-sam/c75601aa7d14aee6bd8201e3100be61b
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -483,7 +485,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: VMS-card-id-PUT-${Stage}
-      CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
+      CodeUri: s3://udbhav-code-sam/10767ff311a89b174d53507cc830ccfd
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -555,7 +557,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: VMS-approval-POST-${Stage}
-      CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
+      CodeUri: s3://udbhav-code-sam/8f8a96693b6bfb8e5cf41133743fd15e
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -603,7 +605,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: VMS-approval-id-PATCH-${Stage}
-      CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
+      CodeUri: s3://udbhav-code-sam/ea7018adb67845f479750c172b7d057d
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:

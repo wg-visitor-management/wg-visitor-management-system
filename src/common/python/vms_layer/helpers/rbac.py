@@ -12,9 +12,7 @@ def rbac(func):
         if group:
             http_method = event.get("httpMethod")
             resource = event.get("resource")
-            allowed_methods = (
-                RBAC_CONFIG.get("ACCESS_CONTROL_LIST").get(group).get(resource)
-            )
+            allowed_methods = RBAC_CONFIG.get(group).get(resource)
             if allowed_methods and http_method in allowed_methods:
                 return func(event, context)
 
