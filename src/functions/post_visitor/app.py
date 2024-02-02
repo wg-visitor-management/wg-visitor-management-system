@@ -20,9 +20,9 @@ db_helper = DBHelper(os.getenv("DynamoDBTableName"))
 bucket_name = os.getenv("BucketName")
 
 
-@validate_schema(schema=visitor_schema)
-@rbac
 @handle_errors
+@rbac
+@validate_schema(schema=visitor_schema)
 def lambda_handler(event, context):
     logger.debug(event)
     current_year = datetime.now().year
