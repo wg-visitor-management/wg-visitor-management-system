@@ -23,3 +23,15 @@ class CardAlreadyExistsError(Exception):
 class InvalidCardIdError(Exception):
     """Invalid Card Id Error"""
     pass
+
+class NotAuthorizedException(Exception):
+    """Not Authorized Exception"""
+    pass
+
+class UserNotFoundException(Exception):
+    """User Not Found Exception"""
+    pass
+
+class VisitorNotFoundException(Exception):
+    """Visitor Not Found Exception"""
+    pass

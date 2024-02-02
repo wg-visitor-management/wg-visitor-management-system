@@ -38,7 +38,7 @@ Resources:
                               - lambda.amazonaws.com
                       Action:
                           - sts:AssumeRole
-            RoleName: !Sub "${RoleName}-${Environment}"
+            RoleName: !Sub "${Environment}-${RoleName}"
             Policies:
                 - PolicyName: SESPolicy
                   PolicyDocument:

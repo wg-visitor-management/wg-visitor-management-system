@@ -1527,7 +1527,7 @@ components:
             x-amazon-apigateway-authorizer:
                 type: cognito_user_pools
                 providerARNs:
-                    - Ref CognitoPoolArn
+                    - Fn::Sub: ${CognitoPoolArn}
     schemas:
         Error:
             type: object

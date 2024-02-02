@@ -14,9 +14,9 @@ from vms_layer.config.schemas.visitor_schema import visitor_schema
 from vms_layer.utils.date_time_parser import current_time_epoch
 from vms_layer.utils.s3_signed_url_generator import generate_presigned_url
 
-logger = get_logger("GET_/visitor/:id")
-db_helper = DBHelper(os.environ["DynamoDBTableName"])
-bucket_name = os.environ["BucketName"]
+logger = get_logger("GET /visitor/:id")
+db_helper = DBHelper(os.getenv("DynamoDBTableName"))
+bucket_name = os.getenv("BucketName")
 
 @handle_errors
 @rbac
@@ -29,8 +29,8 @@ def lambda_handler(event, context):
     visitor_id = event["pathParameters"]["id"]
     raw_visitor_id = base64_to_string(visitor_id)
 
-    old_first_name = request_body.get("oldFirstName").replace(" ", "").lower()
-    old_last_name = request_body.get("oldLastName").replace(" ", "").lower()
+    old_first_name = string_trim_lower(request_body.get("oldFirstName"))
+    old_last_name = string_trim_lower(request_body.get("oldLastName"))
     visitor_id = f"detail#{old_first_name}{old_last_name}#{raw_visitor_id}"
     visitor_history_id = f"detail#{raw_visitor_id}"
     picture_name_self = f"{raw_visitor_id}#photo_self"
@@ -50,7 +50,7 @@ def lambda_handler(event, context):
     return ParseResponse(updated_data.get("Attributes"), 200).return_response()
 
 def update_visitor_data(visitor_data, visitor_id, raw_visitor_id):
-    updated_visitor_id = f"detail#{visitor_data['firstName']}{visitor_data['lastName']}#{raw_visitor_id}"
+    updated_visitor_id = f"detail#{string_trim_lower(visitor_data['firstName'])}{string_trim_lower(visitor_data['lastName'])}#{raw_visitor_id}"
     visitor_data.update({"PK": "visitor", "SK": visitor_id})
     
     return db_helper.update_item(
@@ -87,3 +87,6 @@ def update_picture_urls(updated_data, bucket_name, picture_name_self, picture_na
     id_proof_picture_url = generate_presigned_url(bucket_name, picture_name_id)
     updated_data["Attributes"]["profilePictureUrl"] = profile_picture_url
     updated_data["Attributes"]["idProofPictureUrl"] = id_proof_picture_url
+
+def string_trim_lower(_string):
+    return _string.replace(" ", "").lower()

@@ -7,28 +7,24 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 client_cf = boto3.client("cloudformation")
 
-configurations = {
-    "BucketName": "vms-static-content",
-    "UserPoolName": "vms-user-pool",
-    "UserPoolClientName": "vms-user-pool-client",
-    "TableName": "vms-database",
-    "RoleName": "vms-lambda-role-common",
-}
-
-
 outputs = {}
-
-env_variables = {
+configurations = {
     "ENVIRONMENT": sam_config.ENVIRONMENT,
-    "sam_stack_name": "api-gateway-lambda-sam",
-    "s3_bucket": sam_config.BUCKET_NAME,
+    "S3_BUCKET_FOR_SAM": sam_config.BUCKET_NAME,
+    "SAM_STACK_NAME": "api-gateway-lambda-sam",
+    "BUCKET_NAME": "vms-static-content",
+    "USER_POOL_NAME": "vms-user-pool",
+    "USER_POOL_CLIENT_NAME": "vms-user-pool-client",
+    "TABLE_NAME": "vms-database",
+    "ROLE_NAME": "vms-lambda-role-common",
 }
+
 
 static_content_bucket_stack = {
     "stack_name": "static-content-bucket-stack",
     "template_body_url": "cfn/static_content_bucket.yaml",
     "parameters": [
-        {"ParameterKey": "BucketName", "ParameterValue": configurations.get("BucketName")},
+        {"ParameterKey": "BucketName", "ParameterValue": configurations.get("BUCKET_NAME")},
     ],
     "capabilities": ["CAPABILITY_IAM"],
 }
@@ -36,11 +32,11 @@ cognito_stack = {
     "stack_name": "cognito-stack",
     "template_body_url": "cfn/cognito.yaml",
     "parameters": [
-        {"ParameterKey": "Environment", "ParameterValue": env_variables.get("ENVIRONMENT")},
-        {"ParameterKey": "UserPoolName", "ParameterValue": configurations.get("UserPoolName")},
+        {"ParameterKey": "Environment", "ParameterValue": configurations.get("ENVIRONMENT")},
+        {"ParameterKey": "UserPoolName", "ParameterValue": configurations.get("USER_POOL_NAME")},
         {
             "ParameterKey": "UserPoolClientName",
-            "ParameterValue": configurations.get("UserPoolClientName"),
+            "ParameterValue": configurations.get("USER_POOL_CLIENT_NAME"),
         },
     ],
     "capabilities": ["CAPABILITY_IAM"],
@@ -49,8 +45,8 @@ dynamodb_stack = {
     "stack_name": "dynamodb-stack",
     "template_body_url": "cfn/dynamodb.yaml",
     "parameters": [
-        {"ParameterKey": "Environment", "ParameterValue": env_variables.get("ENVIRONMENT")},
-        {"ParameterKey": "TableName", "ParameterValue": configurations.get("TableName")},
+        {"ParameterKey": "Environment", "ParameterValue": configurations.get("ENVIRONMENT")},
+        {"ParameterKey": "TableName", "ParameterValue": configurations.get("TABLE_NAME")},
     ],
     "capabilities": ["CAPABILITY_IAM"],
 }
@@ -59,14 +55,13 @@ iam_stack = {
     "stack_name": "iam-stack",
     "template_body_url": "cfn/iam_policy.yaml",
     "parameters": [
-        {"ParameterKey": "Environment", "ParameterValue": env_variables.get("ENVIRONMENT")},
-        {"ParameterKey": "RoleName", "ParameterValue": configurations.get("RoleName")},
+        {"ParameterKey": "Environment", "ParameterValue": configurations.get("ENVIRONMENT")},
+        {"ParameterKey": "RoleName", "ParameterValue": configurations.get("ROLE_NAME")},
         {"ParameterKey": "BucketArn", "ParameterValue": f"{outputs.get('BucketArn')}"},
         {"ParameterKey": "DynamoDBTableArn", "ParameterValue": f"{outputs.get('DynamoDBTableArn')}"},
     ],
     "capabilities": ["CAPABILITY_IAM", "CAPABILITY_NAMED_IAM"],
 }
-
 
 def extract_outputs(response):
     for output in response["Stacks"][0]["Outputs"]:
@@ -113,7 +108,6 @@ def deploy_stack(stack_name, template_body_url, parameters, capabilities):
         )
         logger.info(f"Stack: {stack_name} deployed successfully!")
         get_stack_outputs(stack_name)
-        return response
 
 def run_command(command):
     try:
@@ -126,19 +120,19 @@ def run_command(command):
 def apigateway_lambda_deploy_sam():
     package_command = (
         "sam package "
-        f"--s3-bucket {env_variables.get('s3_bucket')} "
+        f"--s3-bucket {configurations.get('S3_BUCKET_FOR_SAM')} "
         "--template-file template.yaml "
-        "--output-template-file gen/template-generated.yaml"
+        "--output-template-file ../gen/template-generated.yaml"
     )
     logger.info("Packaging SAM application...")
     run_command(package_command)
 
     deploy_command = (
         "sam deploy "
-        "--template-file gen/template-generated.yaml "
-        f"--stack-name {env_variables.get('sam_stack_name')} "
+        "--template-file ../gen/template-generated.yaml "
+        f"--stack-name {configurations.get('SAM_STACK_NAME')} "
         "--capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM "
-        f"--parameter-overrides Environment={env_variables.get('ENVIRONMENT')} "
+        f"--parameter-overrides Environment={configurations.get('ENVIRONMENT')} "
         f"BucketName={outputs.get('BucketName')} "
         f"DynamoDBTable={outputs.get('DynamoDBTableName')} "
         f"UserPoolId={outputs.get('UserPoolId')} "

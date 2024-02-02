@@ -10,7 +10,7 @@ from vms_layer.helpers.response_parser import ParseResponse
 from vms_layer.config.config import CARD_STATUS
 from vms_layer.utils.custom_errors import CardAlreadyExistsError
 
-db_helper = DBHelper(os.environ["DynamoDBTableName"])
+db_helper = DBHelper(os.getenv("DynamoDBTableName"))
 logger = get_logger("POST_/card")
 
 

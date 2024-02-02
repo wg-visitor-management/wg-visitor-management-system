@@ -16,7 +16,7 @@ Resources:
     DynamoDBTable:
         Type: AWS::DynamoDB::Table
         Properties:
-            TableName: !Sub "${TableName}-${Environment}"
+            TableName: !Sub "${Environment}-${TableName}"
             AttributeDefinitions:
                 - AttributeName: "PK"
                   AttributeType: "S"

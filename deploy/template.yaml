@@ -105,7 +105,7 @@ Resources:
                 Fn::Transform:
                     Name: AWS::Include
                     Parameters:
-                        Location: docs/VMS_swagger.yaml
+                        Location: ../docs/VMS_swagger.yaml
 
             GatewayResponses:
                 DEFAULT_4XX:
@@ -127,7 +127,7 @@ Resources:
         Properties:
             LayerName: !Sub ${Environment}-VMS-Layer
             Description: VMS Lambda Layer
-            ContentUri: ./src/common
+            ContentUri: ../src/common
             CompatibleRuntimes:
                 - python3.11
 
@@ -140,7 +140,7 @@ Resources:
                     UserPoolId: !Ref UserPoolId
 
             FunctionName: !Sub ${Environment}-VMS-login-GET
-            CodeUri: ./src/functions/login
+            CodeUri: ../src/functions/login
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -172,7 +172,7 @@ Resources:
                     UserPoolId: !Ref UserPoolId
 
             FunctionName: !Sub ${Environment}-VMS-forgot-password-POST
-            CodeUri: ./src/functions/post_forgot_password
+            CodeUri: ../src/functions/post_forgot_password
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -195,7 +195,7 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub ${Environment}-VMS-visitor-GET
-            CodeUri: ./src/functions/get_visitor
+            CodeUri: ../src/functions/get_visitor
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -214,7 +214,7 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub ${Environment}-VMS-visitor-POST
-            CodeUri: ./src/functions/post_visitor
+            CodeUri: ../src/functions/post_visitor
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -241,7 +241,7 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub ${Environment}-VMS-visitor-id-GET
-            CodeUri: ./src/functions/get_visitor_id
+            CodeUri: ../src/functions/get_visitor_id
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -260,7 +260,7 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub ${Environment}-VMS-visitor-id-PUT
-            CodeUri: ./src/functions/put_visitor_id
+            CodeUri: ../src/functions/put_visitor_id
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -280,7 +280,7 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub ${Environment}-VMS-visit-GET
-            CodeUri: ./src/functions/get_visit
+            CodeUri: ../src/functions/get_visit
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -299,7 +299,7 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub ${Environment}-VMS-visit-POST
-            CodeUri: ./src/functions/post_visit
+            CodeUri: ../src/functions/post_visit
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -318,7 +318,7 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub ${Environment}-VMS-visit-id-GET
-            CodeUri: ./src/functions/get_visit_id
+            CodeUri: ../src/functions/get_visit_id
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -338,7 +338,7 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub ${Environment}-VMS-visit-id-PATCH
-            CodeUri: ./src/functions/patch_visit_id
+            CodeUri: ../src/functions/patch_visit_id
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -358,7 +358,7 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub ${Environment}-VMS-card-GET
-            CodeUri: ./src/functions/get_card
+            CodeUri: ../src/functions/get_card
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -377,7 +377,7 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub ${Environment}-VMS-card-POST
-            CodeUri: ./src/functions/post_card
+            CodeUri: ../src/functions/post_card
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -396,7 +396,7 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub ${Environment}-VMS-card-id-GET
-            CodeUri: ./src/functions/get_card_id
+            CodeUri: ../src/functions/get_card_id
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -415,7 +415,7 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub ${Environment}-VMS-card-id-PUT
-            CodeUri: ./src/functions/put_card_id
+            CodeUri: ../src/functions/put_card_id
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -434,7 +434,7 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub ${Environment}-VMS-card-id-DELETE
-            CodeUri: ./src/functions/delete_card_id
+            CodeUri: ../src/functions/delete_card_id
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -454,7 +454,7 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub ${Environment}-VMS-approval-GET
-            CodeUri: ./src/functions/get_approval
+            CodeUri: ../src/functions/get_approval
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -473,7 +473,7 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub ${Environment}-VMS-approval-POST
-            CodeUri: ./src/functions/post_approval
+            CodeUri: ../src/functions/post_approval
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -492,7 +492,7 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub ${Environment}-VMS-approval-id-GET
-            CodeUri: ./src/functions/get_approval_id
+            CodeUri: ../src/functions/get_approval_id
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:
@@ -511,7 +511,7 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub ${Environment}-VMS-approval-id-PATCH
-            CodeUri: ./src/functions/patch_approval_id
+            CodeUri: ../src/functions/patch_approval_id
             Handler: app.lambda_handler
             Runtime: python3.11
             Layers:

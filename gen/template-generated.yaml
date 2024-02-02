@@ -45,12 +45,15 @@ Parameters:
   LambdaIAMRoleArn:
     Type: String
     Description: ARN of the Lambda IAM Role
+  CognitoPoolArn:
+    Type: String
+    Description: ARN of the Cognito Pool
 Resources:
   ApiGatewayRole:
     Type: AWS::IAM::Role
     Properties:
       RoleName:
-        Fn::Sub: ${AWS::StackName}-ApiGatewayRole
+        Fn::Sub: ${Environment}--ApiGatewayRole
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -62,7 +65,7 @@ Resources:
           - sts:AssumeRole
       Policies:
       - PolicyName:
-          Fn::Sub: ${AWS::StackName}-ApiGatewayRolePolicy
+          Fn::Sub: ${Environment}--ApiGatewayRolePolicy
         PolicyDocument:
           Version: '2012-10-17'
           Statement:
@@ -135,7 +138,7 @@ Resources:
         Fn::Transform:
           Name: AWS::Include
           Parameters:
-            Location: s3://abhi-code-sam/d7e7fa49f5be9707c46ed743b59672ae
+            Location: s3://abhi-code-sam/29fbb56cacb14654758dfd6d478df3dd
       GatewayResponses:
         DEFAULT_4XX:
           ResponseParameters:
@@ -155,9 +158,9 @@ Resources:
     Type: AWS::Serverless::LayerVersion
     Properties:
       LayerName:
-        Fn::Sub: VMS-Layer-${Environment}
+        Fn::Sub: ${Environment}-VMS-Layer
       Description: VMS Lambda Layer
-      ContentUri: s3://abhi-code-sam/eed5b8f6ccd9ba2bcd90da84869edb1b
+      ContentUri: s3://abhi-code-sam/fcb92fa0c3f29157b671f4a45c7b164d
       CompatibleRuntimes:
       - python3.11
     Metadata:
@@ -172,8 +175,8 @@ Resources:
           UserPoolId:
             Ref: UserPoolId
       FunctionName:
-        Fn::Sub: VMS-login-GET-${Environment}
-      CodeUri: s3://abhi-code-sam/a6a9c7dc69149c39bc5b1603ca433a86
+        Fn::Sub: ${Environment}-VMS-login-GET
+      CodeUri: s3://abhi-code-sam/217795ac7f06c96a78d0d25fc89c8eb3
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -209,7 +212,7 @@ Resources:
           UserPoolId:
             Ref: UserPoolId
       FunctionName:
-        Fn::Sub: VMS-forgot-password-POST-${Environment}
+        Fn::Sub: ${Environment}-VMS-forgot-password-POST
       CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
@@ -235,7 +238,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-visitor-GET-${Environment}
+        Fn::Sub: ${Environment}-VMS-visitor-GET
       CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
@@ -259,8 +262,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-visitor-POST-${Environment}
-      CodeUri: s3://abhi-code-sam/9ae57b7943bc0e41ecfa8163195322bf
+        Fn::Sub: ${Environment}-VMS-visitor-POST
+      CodeUri: s3://abhi-code-sam/d7b711563c3a7f722e45f2a55464b2b1
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -292,8 +295,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-visitor-id-GET-${Environment}
-      CodeUri: s3://abhi-code-sam/cdfda503bee7a39166b1307606c3f29f
+        Fn::Sub: ${Environment}-VMS-visitor-id-GET
+      CodeUri: s3://abhi-code-sam/5861a0a1ec8f730fc0a565e6a393fab0
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -316,8 +319,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-visitor-id-PUT-${Environment}
-      CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
+        Fn::Sub: ${Environment}-VMS-visitor-id-PUT
+      CodeUri: s3://abhi-code-sam/ae2df3e19d574265c837abb57e15d7b9
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -340,7 +343,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-visit-GET-${Environment}
+        Fn::Sub: ${Environment}-VMS-visit-GET
       CodeUri: s3://abhi-code-sam/5dd609556fbadb5b72528d07a94f9db6
       Handler: app.lambda_handler
       Runtime: python3.11
@@ -364,7 +367,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-visit-POST-${Environment}
+        Fn::Sub: ${Environment}-VMS-visit-POST
       CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
@@ -388,7 +391,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-visit-id-GET-${Environment}
+        Fn::Sub: ${Environment}-VMS-visit-id-GET
       CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
@@ -414,7 +417,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-visit-id-PATCH-${Environment}
+        Fn::Sub: ${Environment}-VMS-visit-id-PATCH
       CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
@@ -438,8 +441,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-card-GET-${Environment}
-      CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
+        Fn::Sub: ${Environment}-VMS-card-GET
+      CodeUri: s3://abhi-code-sam/d653de2d9474875bd8750a3eb092fdeb
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -462,8 +465,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-card-POST-${Environment}
-      CodeUri: s3://abhi-code-sam/4707a1f6c30f304b01ddb8263399b0e2
+        Fn::Sub: ${Environment}-VMS-card-POST
+      CodeUri: s3://abhi-code-sam/90df315b256bfbede35181e26079ba51
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -486,8 +489,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-card-id-GET-${Environment}
-      CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
+        Fn::Sub: ${Environment}-VMS-card-id-GET
+      CodeUri: s3://abhi-code-sam/c86dc9bc0e995e9ba4d1b87ecf736108
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -510,7 +513,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-card-id-PUT-${Environment}
+        Fn::Sub: ${Environment}-VMS-card-id-PUT
       CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
@@ -534,7 +537,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-card-id-DELETE-${Environment}
+        Fn::Sub: ${Environment}-VMS-card-id-DELETE
       CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
@@ -558,7 +561,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-approval-GET-${Environment}
+        Fn::Sub: ${Environment}-VMS-approval-GET
       CodeUri: s3://abhi-code-sam/4f4f1d14fcbeb14a29ac4d8a7178a669
       Handler: app.lambda_handler
       Runtime: python3.11
@@ -582,7 +585,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-approval-POST-${Environment}
+        Fn::Sub: ${Environment}-VMS-approval-POST
       CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
@@ -606,7 +609,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-approval-id-GET-${Environment}
+        Fn::Sub: ${Environment}-VMS-approval-id-GET
       CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
@@ -630,7 +633,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: VMS-approval-id-PATCH-${Environment}
+        Fn::Sub: ${Environment}-VMS-approval-id-PATCH
       CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11

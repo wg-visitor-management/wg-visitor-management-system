@@ -2,8 +2,8 @@ import os
 import json
 from datetime import datetime
 
-from helpers.body_parser import parse_request_body_to_object
-from helpers.s3_helpers import upload_mime_image_binary_to_s3
+from helpers.body_parser import Body
+from vms_layer.helpers.s3_helpers import upload_mime_image_binary_to_s3
 from vms_layer.helpers.rbac import rbac
 from vms_layer.helpers.validate_schema import validate_schema
 from vms_layer.config.schemas.visitor_schema import visitor_schema
@@ -16,8 +16,8 @@ from vms_layer.utils.base64_parser import convert_to_base64
 from vms_layer.utils.loggers import get_logger
 
 logger = get_logger("POST /visitor")
-db_helper = DBHelper(os.environ["DynamoDBTableName"])
-bucket_name = os.environ["BucketName"]
+db_helper = DBHelper(os.getenv("DynamoDBTableName"))
+bucket_name = os.getenv("BucketName")
 
 
 @validate_schema(schema=visitor_schema)
@@ -48,17 +48,19 @@ def lambda_handler(event, context):
         request_body.get("idPhotoBlob"),
     )
 
-    vistor_pk_body = parse_request_body_to_object(
+    body = Body(
         request_body, picture_name_self, picture_name_id)
-    history_pk_body = vistor_pk_body.copy()
-    
-    vistor_pk_body["PK"] = "visitor"
-    vistor_pk_body["SK"] = f"detail#{first_name}{last_name}#{raw_visitor_id}"
-    db_helper.create_item(vistor_pk_body)
 
-    history_pk_body["PK"] = f"detail_history#{current_year}"
-    history_pk_body["SK"] = f"{visitor_id}#{epoch_current}"
-    db_helper.create_item(history_pk_body)
+    visitor_body = body.to_object()
+    history_body = visitor_body.copy()
+    
+    visitor_body["PK"] = "visitor"
+    visitor_body["SK"] = f"detail#{first_name}{last_name}#{raw_visitor_id}"
+    db_helper.create_item(visitor_body)
+
+    history_body["PK"] = f"detail_history#{current_year}"
+    history_body["SK"] = f"{visitor_id}#{epoch_current}"
+    db_helper.create_item(history_body)
 
     profile_picture_url = generate_presigned_url(bucket_name, picture_name_self)
     id_proof_picture_url = generate_presigned_url(bucket_name, picture_name_id)

@@ -1,5 +1,5 @@
 import json
-from vms_layer.utils.custom_errors import CardAlreadyExistsError, UnauthorizedError, ConflictError, AuthenticationError, FailedToUploadImageError, InvalidCardIdError
+from vms_layer.utils.custom_errors import CardAlreadyExistsError, NotAuthorizedException, UnauthorizedError, ConflictError, AuthenticationError, FailedToUploadImageError, InvalidCardIdError, UserNotFoundException, VisitorNotFoundException
 def load_configuration():
     """Load the configuration file and return the parameters"""
    
@@ -19,5 +19,8 @@ error_map = {
         FailedToUploadImageError: 500,
         CardAlreadyExistsError : 400,
         InvalidCardIdError : 400,
+        NotAuthorizedException : 403,
+        UserNotFoundException : 404,
+        VisitorNotFoundException : 404,
         Exception : 500
     }
