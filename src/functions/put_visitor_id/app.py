@@ -13,6 +13,7 @@ from vms_layer.helpers.validate_schema import validate_schema
 from vms_layer.config.schemas.visitor_schema import visitor_schema
 from vms_layer.utils.date_time_parser import current_time_epoch
 from vms_layer.utils.s3_signed_url_generator import generate_presigned_url
+from vms_layer.utils.custom_errors import VisitorNotFoundException
 
 logger = get_logger("GET /visitor/:id")
 db_helper = DBHelper(os.getenv("DynamoDBTableName"))
@@ -32,9 +33,16 @@ def lambda_handler(event, context):
     old_first_name = string_trim_lower(request_body.get("oldFirstName"))
     old_last_name = string_trim_lower(request_body.get("oldLastName"))
     visitor_id = f"detail#{old_first_name}{old_last_name}#{raw_visitor_id}"
+
+    visitor_details = db_helper.get_item({"PK": "visitor", "SK": visitor_id})
+    if not visitor_details:
+        raise VisitorNotFoundException("Visitor Not Found.")
+
+    
+
     visitor_history_id = f"detail#{raw_visitor_id}"
-    picture_name_self = f"{raw_visitor_id}#photo_self"
-    picture_name_id = f"{raw_visitor_id}#photo_id"
+    picture_name_self = visitor_details.get("profilePictureUrl")
+    picture_name_id = visitor_details.get("idProofPictureUrl")
 
     vistor_pk_body = parse_request_body_to_object(
         request_body, picture_name_self, picture_name_id)

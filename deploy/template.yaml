@@ -244,6 +244,7 @@ Resources:
             CodeUri: ../src/functions/get_visitor_id
             Handler: app.lambda_handler
             Runtime: python3.11
+            Role: !Ref LambdaIAMRoleArn
             Layers:
                 - !Ref VMSLayer
             Events:
@@ -263,6 +264,7 @@ Resources:
             CodeUri: ../src/functions/put_visitor_id
             Handler: app.lambda_handler
             Runtime: python3.11
+            Role: !Ref LambdaIAMRoleArn
             Layers:
                 - !Ref VMSLayer
             Events:
