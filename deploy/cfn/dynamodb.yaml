@@ -5,15 +5,18 @@ Parameters:
     TableName:
         Type: String
         Description: The name of the DynamoDB table
-    Stage:
+    Environment:
         Type: String
-        Description: The name of the stage (e.g., development, production)
+        Description: The name of the Environment
+        AllowedValues:
+            - dev
+            - prod
 
 Resources:
     DynamoDBTable:
         Type: AWS::DynamoDB::Table
         Properties:
-            TableName: !Sub "${TableName}-${Stage}"
+            TableName: !Sub "${Environment}-${TableName}"
             AttributeDefinitions:
                 - AttributeName: "PK"
                   AttributeType: "S"
@@ -32,10 +35,6 @@ Outputs:
     DynamoDBTableName:
         Description: The name of the created DynamoDB table
         Value: !Ref DynamoDBTable
-        Export:
-            Name: "DynamoDBTable"
     DynamoDBTableArn:
         Description: The Amazon Resource Name (ARN) of the created DynamoDB table
         Value: !GetAtt DynamoDBTable.Arn
-        Export:
-            Name: "DynamoDBTableArn"

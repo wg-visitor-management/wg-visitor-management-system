@@ -8,7 +8,7 @@ def validate_schema(schema):
         @wraps(func)
         def wrapper(event, context):
             try:
-                validate(json.loads(event["body"]), schema)
+                validate(json.loads(event.get("body")), schema)
             except ValidationError as e:
                 return {
                     "statusCode": 400,

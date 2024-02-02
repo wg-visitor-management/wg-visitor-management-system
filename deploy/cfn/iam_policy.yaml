@@ -8,10 +8,23 @@ Parameters:
         MinLength: 1
         MaxLength: 80
         Default: "lambda-iam-role"
-    Stage:
+    Environment:
         Type: String
-        Description: "The name of the stage"
+        Description: "The name of the Environment"
         Default: "dev"
+        AllowedValues:
+            - dev
+            - prod
+    BucketArn:
+        Type: String
+        Description: "Name of the Bucket"
+        MinLength: 1
+        MaxLength: 80
+    DynamoDBTableArn:
+        Type: String
+        Description: "Name of the DynamoDB table"
+        MinLength: 1
+        MaxLength: 80
 Resources:
     LambdaIAMRole:
         Type: AWS::IAM::Role
@@ -25,14 +38,24 @@ Resources:
                               - lambda.amazonaws.com
                       Action:
                           - sts:AssumeRole
-            RoleName: !Sub "${RoleName}-${Stage}"
+            RoleName: !Sub "${Environment}-${RoleName}"
             Policies:
+                - PolicyName: SESPolicy
+                  PolicyDocument:
+                      Version: "2012-10-17"
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                                - ses:SendEmail
+                                - ses:SendRawEmail
+                            Resource: "*"
                 - PolicyName: CloudWatchLogsPolicy
                   PolicyDocument:
                       Version: "2012-10-17"
                       Statement:
                           - Effect: Allow
                             Action:
+                                - logs:CreateLogGroup
                                 - logs:CreateLogStream
                                 - logs:PutLogEvents
                             Resource: "*"
@@ -44,16 +67,25 @@ Resources:
                             Action:
                                 - s3:GetObject
                                 - s3:PutObject
-                            Resource: !Join ["", [!ImportValue BucketArn, "/*"]]
+                            Resource: !Sub "${BucketArn}/*"
+
+                - PolicyName: DynamoDBPolicy
+                  PolicyDocument:
+                      Version: "2012-10-17"
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                                - dynamodb:PutItem
+                                - dynamodb:DeleteItem
+                                - dynamodb:GetItem
+                                - dynamodb:Query
+                                - dynamodb:UpdateItem
+                            Resource: !Ref DynamoDBTableArn
 
 Outputs:
     LambdaIAMRoleArn:
         Description: "ARN of the IAM role"
         Value: !GetAtt LambdaIAMRole.Arn
-        Export:
-            Name: "LambdaIAMRoleArn"
     LambdaIAMRoleName:
         Description: "Name of the IAM role"
         Value: !Ref LambdaIAMRole
-        Export:
-            Name: "LambdaIAMRoleName"

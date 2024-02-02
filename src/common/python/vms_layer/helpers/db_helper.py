@@ -1,10 +1,10 @@
 """Helper class for DynamoDB operations"""
 import boto3
-
-
+ 
+ 
 class DBHelper:
     """Helper class for DynamoDB operations"""
-
+ 
     def __init__(self, table_name):
         self.table_name = table_name
         self.dynamodb = boto3.resource("dynamodb")
@@ -19,7 +19,7 @@ class DBHelper:
         """Get an item from the table"""
         response = self.table.get_item(Key=key)
         return response.get("Item")
-
+ 
     def update_item(self, key, update_expression, expression_attribute_values):
         """Update an item in the table"""
         response = self.table.update_item(
@@ -34,7 +34,7 @@ class DBHelper:
         """Delete an item from the table"""
         response = self.table.delete_item(Key=key)
         return response
-
+ 
     def query_items(
         self,
         key_condition_expression,
@@ -50,20 +50,20 @@ class DBHelper:
             "ExpressionAttributeValues": expression_attribute_values,
             "Limit": page_size,
         }
-
+ 
         if filter_expression:
             query_params["FilterExpression"] = filter_expression
-
+ 
         if expression_attribute_names:
             query_params["ExpressionAttributeNames"] = expression_attribute_names
-
+ 
         if starting_token:
             query_params["ExclusiveStartKey"] = starting_token
-
+ 
         response = self.table.query(**query_params)
-
+ 
         return response
-
+ 
     def batch_get_items(self, keys):
         """Batch query items from the table"""
         response = self.table.batch_get_item(Keys=keys)
