@@ -6,3 +6,5 @@ testing.py
 template-generated.yaml
 gen/template-generated.yaml
 cognito_operations.py
+deploy/sam_config.py
+.env
