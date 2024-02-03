@@ -9,7 +9,7 @@ from vms_layer.utils.date_time_parser import date_to_epoch, epoch_to_date, extra
 
 from vms_layer.utils.handle_errors import handle_errors
 
-db_helper = DBHelper(os.environ.get("DynamoDBTableName"))
+db_helper = DBHelper(os.getenv("DynamoDBTableName"))
 logger = get_logger("GET /visit/:id")
 
 @handle_errors

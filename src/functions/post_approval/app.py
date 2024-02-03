@@ -19,7 +19,7 @@ from vms_layer.config.schemas.approval_schema import post_approval_schema
 
 client = boto3.client("ses")
 logger = get_logger("POST /approval")
-db_helper = DBHelper(os.environ.get("DynamoDBTableName"))
+db_helper = DBHelper(os.getenv("DynamoDBTableName"))
 
 
 @handle_errors

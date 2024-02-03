@@ -18,7 +18,7 @@ from vms_layer.utils.date_time_parser import (
 from vms_layer.config.schemas.approval_schema import patch_approval_schema
 
 logger = get_logger("PATCH /approval/:id")
-db_helper = DBHelper(os.environ.get("DynamoDBTableName"))
+db_helper = DBHelper(os.getenv("DynamoDBTableName"))
 
 def update_partition(
     db_helper,

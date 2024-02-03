@@ -9,7 +9,8 @@ from vms_layer.helpers.db_helper import DBHelper
 from vms_layer.config.schemas import card_update_schema
 
 logger = get_logger("POST /card/:id")
-db_helper = DBHelper(os.environ.get("DynamoDBTableName"))
+db_helper = DBHelper(os.getenv("DynamoDBTableName"))
+
 
 @handle_errors
 @rbac
@@ -21,14 +22,16 @@ def lambda_handler(event, context):
     visit_id = body.get("visit_id")
     card_status = body.get("status")
 
-    logger.info(f"Updating card {card_id} with visit_id {visit_id} and status {card_status}")
+    logger.info(
+        f"Updating card {card_id} with visit_id {visit_id} and status {card_status}"
+    )
     response = db_helper.update_item(
         key={"PK": f"card", "SK": f"card#{card_id}"},
-       update_expression = "SET visit_id = :visit_id, card_status = :status",
-        expression_attribute_values = {
-            ":visit_id": visit_id, 
+        update_expression="SET visit_id = :visit_id, card_status = :status",
+        expression_attribute_values={
+            ":visit_id": visit_id,
             ":status": card_status,
-        }
+        },
     )
     logger.debug(f"Response from db: {response}")
     logger.info(f"Card updated successfully")
