@@ -5,6 +5,7 @@ from vms_layer.config.config import LOG_CONFIG
 
 
 def get_logger(name):
+    """Returns a logger with the specified name and log level. If no log level is specified, default is INFO."""
     logger = logging.getLogger(name)
     logger.setLevel(LOG_CONFIG.get("LOG_LEVEL", "INFO"))
     formatter = logging.Formatter(

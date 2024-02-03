@@ -1193,143 +1193,8 @@ paths:
                 type: aws_proxy
             security:
                 - CognitoUserPool: []
-        delete:
-            summary: Delete a particular card
-            operationId: deleteCard
-            tags:
-                - Card
-            parameters:
-                - name: id
-                  in: path
-                  description: ID of the card
-                  required: true
-                  schema:
-                      type: string
-            responses:
-                "200":
-                    description: Card deleted successfully
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                                properties:
-                                    data:
-                                        type: object
-                                        properties:
-                                            status:
-                                                type: string
-                                                example: card deleted successfully
-                                    status:
-                                        type: string
-                                        description: status
-                                        example: success
-                "400":
-                    description: Bad Request
-                    content:
-                        application/json:
-                            schema:
-                                $ref: "#/components/schemas/Error"
-                "401":
-                    description: Unauthorized
-                    content:
-                        application/json:
-                            schema:
-                                $ref: "#/components/schemas/Error401"
-                "404":
-                    description: card not found
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                                properties:
-                                    error:
-                                        type: object
-                                        properties:
-                                            code:
-                                                type: string
-                                                example: "404"
-                                            message:
-                                                type: string
-                                                example: "Card not found"
-                                    status:
-                                        type: string
-                                        example: "failure"
-                "500":
-                    description: Internal Server Error
-                    content:
-                        application/json:
-                            schema:
-                                $ref: "#/components/schemas/Error500"
-            x-amazon-apigateway-integration:
-                credentials:
-                    Fn::GetAtt: ApiGatewayRole.Arn
-                uri:
-                    Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${VMSCardIdDELETE.Arn}/invocations
-                responses:
-                    default:
-                        statusCode: "200"
-                passthroughBehavior: when_no_match
-                httpMethod: POST
-                contentHandling: CONVERT_TO_TEXT
-                type: aws_proxy
-            security:
-                - CognitoUserPool: []
-
+        
     /approval:
-        get:
-            summary: Get all approvals, filter on basis of status
-            operationId: getAllApprovals
-            tags:
-                - Approval
-            parameters:
-                - name: status
-                  in: query
-                  description: Filter approvals based on status
-                  required: false
-                  schema:
-                      type: string
-            responses:
-                "200":
-                    description: Successful retrieval of approvals
-                    content:
-                        application/json:
-                            schema:
-                                type: array
-                                items:
-                                    $ref: "#/components/schemas/visitorApproval"
-
-                "400":
-                    description: Bad Request
-                    content:
-                        application/json:
-                            schema:
-                                $ref: "#/components/schemas/Error"
-                "401":
-                    description: Unauthorized
-                    content:
-                        application/json:
-                            schema:
-                                $ref: "#/components/schemas/Error401"
-                "500":
-                    description: Internal Server Error
-                    content:
-                        application/json:
-                            schema:
-                                $ref: "#/components/schemas/Error500"
-            x-amazon-apigateway-integration:
-                credentials:
-                    Fn::GetAtt: ApiGatewayRole.Arn
-                uri:
-                    Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${VMSApprovalGET.Arn}/invocations
-                responses:
-                    default:
-                        statusCode: "200"
-                passthroughBehavior: when_no_match
-                httpMethod: POST
-                contentHandling: CONVERT_TO_TEXT
-                type: aws_proxy
-            security:
-                - CognitoUserPool: []
         post:
             summary: Create new approval
             operationId: createApproval
@@ -1385,7 +1250,7 @@ paths:
 
     /approval/{id}:
         get:
-            summary: Get a single approval
+            summary: Get a particular approval
             operationId: getApproval
             tags:
                 - Approval
@@ -1396,15 +1261,27 @@ paths:
                   required: true
                   schema:
                       type: string
-
             responses:
                 "200":
-                    description: Successful retrieval of approval details
+                    description: OK
                     content:
                         application/json:
                             schema:
-                                $ref: "#/components/schemas/visitorApproval"
-
+                                type: object
+                                properties:
+                                    data:
+                                        type: object
+                                        properties:
+                                            visitId:
+                                                type: string
+                                                description: Visit ID
+                                            status:
+                                                type: string
+                                                description: Status
+                                    status:
+                                        type: string
+                                        description: status
+                                        example: success
                 "400":
                     description: Bad Request
                     content:
@@ -1418,7 +1295,7 @@ paths:
                             schema:
                                 $ref: "#/components/schemas/Error401"
                 "404":
-                    description: Visit not found
+                    description: Approval not found
                     content:
                         application/json:
                             schema:
@@ -1441,8 +1318,8 @@ paths:
                 httpMethod: POST
                 contentHandling: CONVERT_TO_TEXT
                 type: aws_proxy
-            security:
-                - CognitoUserPool: []
+
+  
         patch:
             summary: Update approval
             operationId: updateApproval

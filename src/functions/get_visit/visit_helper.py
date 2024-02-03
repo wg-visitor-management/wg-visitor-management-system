@@ -1,6 +1,4 @@
 import os
-import time
-import base64
 from vms_layer.utils.base64_parser import base64_to_string
 from vms_layer.utils.date_time_parser import current_time_epoch
 from vms_layer.utils.loggers import get_logger
@@ -106,7 +104,6 @@ class VisitHelper:
         for item in response:
             item.pop("PK")
             item.pop("SK")
-            logger.debug(f"Item: {item}")
             item["date"] = epoch_to_date(int(item["check_in_time"])).split("T")[0]
             item["check_in_time"] = epoch_to_date(int(item["check_in_time"])).split("T")[1]
             

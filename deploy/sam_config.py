@@ -1,2 +1,2 @@
-BUCKET_NAME = "abhi-code-sam"
+BUCKET_NAME = "udbhav-code-sam"
 ENVIRONMENT = "dev"

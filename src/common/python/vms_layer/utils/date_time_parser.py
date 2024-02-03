@@ -22,9 +22,6 @@ def date_to_epoch(date):
 def epoch_to_date(epoch):
     """Converts an epoch time to a date string."""
     return time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(epoch))
-
-
-    return time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(epoch))
  
  
 def extract_quarters_from_date_range(start_date, end_date):

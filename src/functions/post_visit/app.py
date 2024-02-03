@@ -1,6 +1,6 @@
-import base64
 import json
 import os
+from helpers.body_parser import Visit
 from vms_layer.helpers.validate_schema import validate_schema
 from vms_layer.utils.handle_errors import handle_errors
 from vms_layer.utils.loggers import get_logger
@@ -16,7 +16,7 @@ from vms_layer.utils.date_time_parser import (
 )
 from vms_layer.config.schemas.visit_schema import post_visit_schema
 
-db_helper = DBHelper(os.environ.get("DynamoDBTableName"))
+db_helper = DBHelper(os.getenv("DynamoDBTableName"))
 logger = get_logger("POST /visit")
 
 
@@ -34,20 +34,8 @@ def lambda_handler(event, context):
         event.get("requestContext").get("authorizer").get("claims").get("name")
     )
 
-    item_data = {
-        "PK": f"visit#{current_quarter}",
-        "SK": f"visit#{visitor_id}#{current_time}",
-        "name": body.get("name"),
-        "organization": body.get("organization"),
-        "ph_number": body.get("ph_number"),
-        "purpose": body.get("purpose"),
-        "checked_in_by": checked_in_by,
-        "visit_type": body.get("visit_type"),
-        "check_in_time": str(current_time),
-        "to_meet": body.get("to_meet"),
-        "card_id": body.get("card_id"),
-        "comments": body.get("comments"),
-    }
+    visit = Visit(body, current_quarter, visitor_id, current_time, checked_in_by)
+    item_data = visit.to_object()
 
     logger.info(f"Creating visit for visitor {visitor_id} with data: {item_data}")
     create_item_in_database(item_data, current_quarter, current_time, visitor_id)
