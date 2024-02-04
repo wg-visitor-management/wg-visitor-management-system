@@ -29,7 +29,7 @@ def lambda_handler(event, context):
     current_time = current_time_epoch()
     current_date = epoch_to_date(current_time)
     current_quarter = extract_quarters_from_date_range(current_date, current_date)[0]
-    visitor_id = base64_to_string(body.get("visitor_id"))
+    visitor_id = base64_to_string(body.get("visitorId"))
     checked_in_by = (
         event.get("requestContext").get("authorizer").get("claims").get("name")
     )
@@ -43,9 +43,9 @@ def lambda_handler(event, context):
 
     response_data = {
         "message": "Visit created successfully",
-        "visitor_id": body.get("visitor_id"),
-        "checked_in_by": checked_in_by,
-        "check_in_time": epoch_to_date(current_time),
+        "visitorId": body.get("visitorId"),
+        "checkedInBy": checked_in_by,
+        "checkInTime": epoch_to_date(current_time),
         "visitId": convert_to_base64(f"{visitor_id}#{current_time}") + "==",
     }
 

@@ -331,7 +331,6 @@ Resources:
             Runtime: python3.11
             Layers:
                 - !Ref VMSLayer
-            Role: !Ref LambdaIAMRoleArn
             Events:
                 VMSVisitVisitIdGET:
                     Type: Api

@@ -1,5 +1,7 @@
 class Visit:
-    def __init__(self, request_body, current_quarter, visitor_id, current_time, checked_in_by):
+    def __init__(
+        self, request_body, current_quarter, visitor_id, current_time, checked_in_by
+    ):
         self.request_body = request_body
         self.current_quarter = current_quarter
         self.visitor_id = visitor_id
@@ -15,8 +17,8 @@ class Visit:
         return self.request_body["organization"]
 
     @property
-    def ph_number(self):
-        return self.request_body["ph_number"]
+    def phNumber(self):
+        return self.request_body["phNumber"]
 
     @property
     def purpose(self):
@@ -24,15 +26,15 @@ class Visit:
 
     @property
     def visit_type(self):
-        return self.request_body["visit_type"]
+        return self.request_body["visitType"]
 
     @property
-    def to_meet(self):
-        return self.request_body["to_meet"]
+    def toMeet(self):
+        return self.request_body["toMeet"]
 
     @property
     def card_id(self):
-        return self.request_body["card_id"]
+        return self.request_body["cardId"]
 
     @property
     def comments(self):
@@ -44,12 +46,12 @@ class Visit:
             "SK": f"visit#{self.visitor_id}#{self.current_time}",
             "name": self.name.lower(),
             "organization": self.organization.lower(),
-            "ph_number": self.ph_number,
+            "phNumber": self.phNumber,
             "purpose": self.purpose,
-            "checked_in_by": self.checked_in_by.lower(),
-            "visit_type": self.visit_type,
-            "check_in_time": str(self.current_time),
-            "to_meet": self.to_meet.lower(),
-            "card_id": self.card_id,
+            "checkedInBy": self.checked_in_by.lower(),
+            "visitType": self.visit_type,
+            "checkInTime": str(self.current_time),
+            "toMeet": self.toMeet.lower(),
+            "cardId": self.card_id,
             "comments": self.comments.lower() if self.comments else None,
         }

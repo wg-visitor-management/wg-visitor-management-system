@@ -28,12 +28,12 @@ db_helper = DBHelper(os.getenv("DynamoDBTableName"))
 def lambda_handler(event, context):
     body = json.loads(event.get("body"))
 
-    visit_id = body.get("visit_id")
+    visit_id = body.get("visitId")
     dt = datetime.utcnow() + timedelta(hours=1)
     name = body.get("name")
     access_token = jwt.encode({"name": name, "exp": dt}, os.getenv("JWT_SECRET"))
     organization = body.get("organization")
-    ph_number = body.get("ph_number")
+    ph_number = body.get("phNumber")
     purpose = body.get("purpose")
     decoded_visit_id = base64_to_string(visit_id)
     visitor_id, timestamp = decoded_visit_id.split("#")
@@ -45,7 +45,7 @@ def lambda_handler(event, context):
     update_database_items(current_quarter, decoded_visit_id, visitor_id, timestamp)
 
     send_email(
-        "vms_email_template",
+        "vms_email_template-test",
         os.getenv("SENDER_EMAIL"),
         os.getenv("RECIPIENT_EMAIL"),
         "A visitor needs your approval for entry!",
@@ -70,7 +70,7 @@ def update_database_items(current_quarter, decoded_visit_id, visitor_id, timesta
     logger.info(f"Updating visit {decoded_visit_id} with approval status")
     db_helper.update_item(
         key={"PK": f"visit#{current_quarter}", "SK": f"visit#{decoded_visit_id}"},
-        update_expression="SET approval_status = :approved",
+        update_expression="SET approvalStatus = :approved",
         expression_attribute_values={":approved": "pending"},
     )
 
@@ -79,7 +79,7 @@ def update_database_items(current_quarter, decoded_visit_id, visitor_id, timesta
             "PK": f"history#{current_quarter}",
             "SK": f"history#{timestamp}#{visitor_id}",
         },
-        update_expression="SET approval_status = :approved",
+        update_expression="SET approvalStatus = :approved",
         expression_attribute_values={":approved": "pending"},
     )
 

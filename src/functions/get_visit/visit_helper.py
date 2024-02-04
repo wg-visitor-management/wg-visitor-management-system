@@ -46,8 +46,8 @@ class VisitHelper:
         for item in response:
             item.pop("PK")
             item.pop("SK")
-            item["date"] = epoch_to_date(int(item["check_in_time"])).split("T")[0]
-            item["check_in_time"] = epoch_to_date(int(item["check_in_time"])).split("T")[1]
+            item["date"] = epoch_to_date(int(item["checkInTime"])).split("T")[0]
+            item["checkInTime"] = epoch_to_date(int(item["checkInTime"])).split("T")[1]
         return response
 
     def query_items_with_filters(
@@ -70,7 +70,7 @@ class VisitHelper:
             filter_expression = "organization = :organization"
             expression_attribute_values[":organization"] = organization
         elif approver:
-            filter_expression = "approved_by = :approver"
+            filter_expression = "approvedBy = :approver"
             expression_attribute_values[":approver"] = approver
 
         return self.query_items(
@@ -104,8 +104,8 @@ class VisitHelper:
         for item in response:
             item.pop("PK")
             item.pop("SK")
-            item["date"] = epoch_to_date(int(item["check_in_time"])).split("T")[0]
-            item["check_in_time"] = epoch_to_date(int(item["check_in_time"])).split("T")[1]
+            item["date"] = epoch_to_date(int(item["checkInTime"])).split("T")[0]
+            item["checkInTime"] = epoch_to_date(int(item["checkInTime"])).split("T")[1]
             
         logger.debug(f"Response: {response}")
         return response

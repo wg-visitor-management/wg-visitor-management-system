@@ -15,7 +15,6 @@ logger = get_logger("GET /approval")
 db_helper = DBHelper(os.getenv("DynamoDBTableName"))
 
 
-
 def update_partition(
     db_helper,
     partition,
@@ -23,7 +22,7 @@ def update_partition(
     timestamp,
     visitor_id,
     status,
-    approved_by,
+    approvedBy,
     current_time,
 ):
     history_key = {
@@ -41,11 +40,11 @@ def update_partition(
         key = history_key
     response = db_helper.update_item(
         key=key,
-        update_expression="SET approval_status = :status, approved_by = :approved_by, approval_time = :approval_time",
+        update_expression="SET approvalStatus = :status, approvedBy = :approvedBy, approvalTime = :approvalTime",
         expression_attribute_values={
             ":status": status,
-            ":approved_by": approved_by,
-            ":approval_time": current_time,
+            ":approvedBy": approvedBy,
+            ":approvalTime": current_time,
         },
     )
     return response
@@ -65,7 +64,7 @@ def lambda_handler(event, context):
         epoch_to_date(int(timestamp)), epoch_to_date(int(timestamp))
     )[0]
     current_time = str(current_time_epoch())
-    approved_by = "admin"
+    approvedBy = "admin"
 
     if action in ("approved", "rejected"):
         update_partition(
@@ -75,7 +74,7 @@ def lambda_handler(event, context):
             timestamp,
             visitor_id,
             action,
-            approved_by,
+            approvedBy,
             current_time,
         )
         update_partition(
@@ -85,7 +84,7 @@ def lambda_handler(event, context):
             timestamp,
             visitor_id,
             action,
-            approved_by,
+            approvedBy,
             current_time,
         )
-    return ParseResponse({"name": name, "visit_id": visit_id}, 200).return_response()
+    return ParseResponse({"name": name, "visitId": visit_id}, 200).return_response()

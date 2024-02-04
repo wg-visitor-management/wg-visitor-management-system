@@ -21,7 +21,7 @@ def lambda_handler(event, context):
     logger.debug(event)
 
     request_body = json.loads(event["body"])
-    card_id = request_body.get('card_id')
+    card_id = request_body.get("cardId")
 
     check_if_card_exists(card_id)
 
@@ -32,8 +32,8 @@ def lambda_handler(event, context):
     db_helper.create_item(body)
 
     resposne_body = {
-        "card_id" : request_body.get("card_id"),
-        "status" : CARD_STATUS.get("AVAILABLE")
+        "cardId": request_body.get("cardId"),
+        "status": CARD_STATUS.get("AVAILABLE"),
     }
     return ParseResponse(resposne_body, 201).return_response()
 

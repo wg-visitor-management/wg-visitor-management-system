@@ -20,6 +20,7 @@ from vms_layer.config.schemas.approval_schema import patch_approval_schema
 logger = get_logger("PATCH /approval/:id")
 db_helper = DBHelper(os.getenv("DynamoDBTableName"))
 
+
 def update_partition(
     db_helper,
     partition,
@@ -27,7 +28,7 @@ def update_partition(
     timestamp,
     visitor_id,
     status,
-    approved_by,
+    approvedBy,
     current_time,
 ):
     history_key = {
@@ -45,11 +46,11 @@ def update_partition(
         key = history_key
     response = db_helper.update_item(
         key=key,
-        update_expression="SET approval_status = :status, approved_by = :approved_by, approval_time = :approval_time",
+        update_expression="SET approvalStatus = :status, approvedBy = :approvedBy, approvalTime = :approvalTime",
         expression_attribute_values={
             ":status": status,
-            ":approved_by": approved_by,
-            ":approval_time": current_time,
+            ":approvedBy": approvedBy,
+            ":approvalTime": current_time,
         },
     )
     return response
@@ -69,13 +70,11 @@ def lambda_handler(event, context):
     quarter = extract_quarters_from_date_range(
         epoch_to_date(int(timestamp)), epoch_to_date(int(timestamp))
     )[0]
-    approved_by = (
-        event.get("requestContext").get("authorizer").get("claims").get("name")
-    )
+    approvedBy = event.get("requestContext").get("authorizer").get("claims").get("name")
     current_time = str(current_time_epoch())
-    
+
     logger.info(
-        f"Updating approval status for visit {visit_id} with status {status} and approved by {approved_by}"
+        f"Updating approval status for visit {visit_id} with status {status} and approved by {approvedBy}"
     )
     if status in ("approved", "rejected"):
         update_partition(
@@ -85,7 +84,7 @@ def lambda_handler(event, context):
             timestamp,
             visitor_id,
             status,
-            approved_by,
+            approvedBy,
             current_time,
         )
         update_partition(
@@ -95,7 +94,7 @@ def lambda_handler(event, context):
             timestamp,
             visitor_id,
             status,
-            approved_by,
+            approvedBy,
             current_time,
         )
         logger.info(f"Approval status updated successfully")
@@ -103,8 +102,8 @@ def lambda_handler(event, context):
     return ParseResponse(
         {
             "message": "Approval status updated successfully",
-            "visit_id": visit_id,
-            "approved_by": approved_by,
+            "visitId": visit_id,
+            "approvedBy": approvedBy,
             "status": status,
         },
         200,
