@@ -16,8 +16,10 @@ logger = get_logger("POST_/card")
 def lambda_handler(event, context):
     data = db_helper.query_items(
         key_condition_expression="PK = :pk AND begins_with(SK, :sk)",
-        expression_attribute_values={":pk": "card", ":sk": "card#"}
+        expression_attribute_values={":pk": "card", ":sk": "card#"},
+        page_size= 1000
     ).get("Items")
+    print(data)
     if data:
         cards = parse_cards_data(data)
         return ParseResponse(cards, 200).return_response()

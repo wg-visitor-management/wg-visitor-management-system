@@ -17,7 +17,7 @@ class DBHelper:
  
     def get_item(self, key):
         """Get an item from the table"""
-        response = self.table.get_item(Key=key)
+        response = self.table.get_item(Key=key, ConsistentRead=True)
         return response.get("Item")
  
     def update_item(self, key, update_expression, expression_attribute_values):
