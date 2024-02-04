@@ -4,6 +4,7 @@ from jsonschema import validate, ValidationError
 
 
 def validate_schema(schema):
+    """Validates the schema of the request body."""
     def decorator(func):
         @wraps(func)
         def wrapper(event, context):

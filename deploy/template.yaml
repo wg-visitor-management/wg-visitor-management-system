@@ -52,6 +52,18 @@ Parameters:
         Type: String
         Description: ARN of the Cognito Pool
 
+    SenderMail:
+        Type: String
+        Description: Email of the sender
+
+    ReceiverMail:
+        Type: String
+        Description: Email of the receiver
+
+    JWTSecret:
+        Type: String
+        Description: JWT Secret
+
 Resources:
     ApiGatewayRole:
         Type: AWS::IAM::Role
@@ -89,11 +101,10 @@ Resources:
                                     !GetAtt VMSCardPOST.Arn,
                                     !GetAtt VMSCardIdGET.Arn,
                                     !GetAtt VMSCardIdPUT.Arn,
-                                    !GetAtt VMSCardIdDELETE.Arn,
-                                    !GetAtt VMSApprovalGET.Arn,
                                     !GetAtt VMSApprovalPOST.Arn,
-                                    !GetAtt VMSApprovalIdGET.Arn,
                                     !GetAtt VMSApprovalIdPATCH.Arn,
+                                    !GetAtt VMSApprovalIdGET.Arn,
+                                    !GetAtt VMSForgotPasswordPOST.Arn,
                                 ]
 
     VMSApiGateway:
@@ -177,9 +188,6 @@ Resources:
             Runtime: python3.11
             Layers:
                 - !Ref VMSLayer
-
-            Role: !Ref LambdaIAMRoleArn
-
             Events:
                 VMSForgotPasswordPOST:
                     Type: Api
@@ -356,7 +364,6 @@ Resources:
             Runtime: python3.11
             Layers:
                 - !Ref VMSLayer
-            Role: !Ref LambdaIAMRoleArn
             Events:
                 VMSVisitVisitIdGET:
                     Type: Api
@@ -558,6 +565,11 @@ Resources:
             CodeUri: ../src/functions/post_approval
             Handler: app.lambda_handler
             Runtime: python3.11
+            Environment:
+                Variables:
+                    SENDER_EMAIL: !Ref SenderMail
+                    RECIPIENT_EMAIL: !Ref ReceiverMail
+                    JWT_SECRET: !Ref JWTSecret
             Layers:
                 - !Ref VMSLayer
             Events:
@@ -576,6 +588,7 @@ Resources:
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref DynamoDBTable
+            Role: !Ref LambdaIAMRoleArn
     VMSApprovalIdGET:
         Type: AWS::Serverless::Function
         Properties:
@@ -583,6 +596,9 @@ Resources:
             CodeUri: ../src/functions/get_approval_id
             Handler: app.lambda_handler
             Runtime: python3.11
+            Environment:
+                Variables:
+                    JWT_SECRET: !Ref JWTSecret
             Layers:
                 - !Ref VMSLayer
             Events:

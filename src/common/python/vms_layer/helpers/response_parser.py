@@ -22,6 +22,7 @@ class ParseResponse:
         return response
 
     def parse_body(self):
+        """Parses the body of the response based on the status of the response."""
         if self.status == "success":
             return {
                 "status": self.status,
@@ -34,6 +35,7 @@ class ParseResponse:
             }
 
     def evaluate_status(self):
+        """Evaluates the status of the response based on the status code."""
         if self.status_code >= 200 and self.status_code <= 399:
             status = "success"
         else:
