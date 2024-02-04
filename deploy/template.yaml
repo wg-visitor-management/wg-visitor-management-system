@@ -187,6 +187,13 @@ Resources:
                         RestApiId: !Ref VMSApiGateway
                         Path: /forgot_password/{proxy+}
                         Method: post
+
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /forgot_password/{proxy+}
+                        Method: options
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref DynamoDBTable
@@ -207,6 +214,12 @@ Resources:
                         RestApiId: !Ref VMSApiGateway
                         Path: /visitor/{proxy+}
                         Method: get
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /visitor/{proxy+}
+                        Method: options
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref DynamoDBTable
@@ -254,6 +267,12 @@ Resources:
                         RestApiId: !Ref VMSApiGateway
                         Path: /visitor/{id}/{proxy+}
                         Method: get
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /visitor/{id}/{proxy+}
+                        Method: options
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref DynamoDBTable
@@ -294,6 +313,12 @@ Resources:
                         RestApiId: !Ref VMSApiGateway
                         Path: /visit/{proxy+}
                         Method: get
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /visit/{proxy+}
+                        Method: options
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref DynamoDBTable
@@ -313,6 +338,12 @@ Resources:
                         RestApiId: !Ref VMSApiGateway
                         Path: /visit/{proxy+}
                         Method: post
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /visit/{proxy+}
+                        Method: options
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref DynamoDBTable
@@ -333,6 +364,12 @@ Resources:
                         RestApiId: !Ref VMSApiGateway
                         Path: /visit/{id}/{proxy+}
                         Method: get
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /visit/{id}/{proxy+}
+                        Method: options
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref DynamoDBTable
@@ -352,6 +389,12 @@ Resources:
                         RestApiId: !Ref VMSApiGateway
                         Path: /visit/{id}/{proxy+}
                         Method: patch
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /visit/{id}/{proxy+}
+                        Method: options
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref DynamoDBTable
@@ -363,6 +406,7 @@ Resources:
             CodeUri: ../src/functions/get_card
             Handler: app.lambda_handler
             Runtime: python3.11
+            Role: !Ref LambdaIAMRoleArn
             Layers:
                 - !Ref VMSLayer
             Events:
@@ -372,6 +416,12 @@ Resources:
                         RestApiId: !Ref VMSApiGateway
                         Path: /card/{proxy+}
                         Method: get
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /card/{proxy+}
+                        Method: options
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref DynamoDBTable
@@ -391,6 +441,12 @@ Resources:
                         RestApiId: !Ref VMSApiGateway
                         Path: /card/{proxy+}
                         Method: post
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /card/{proxy+}
+                        Method: options
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref DynamoDBTable
@@ -410,6 +466,12 @@ Resources:
                         RestApiId: !Ref VMSApiGateway
                         Path: /card/{id}/{proxy+}
                         Method: get
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /card/{id}/{proxy+}
+                        Method: options
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref DynamoDBTable
@@ -429,6 +491,12 @@ Resources:
                         RestApiId: !Ref VMSApiGateway
                         Path: /card/{id}/{proxy+}
                         Method: put
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /card/{id}/{proxy+}
+                        Method: options
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref DynamoDBTable
@@ -448,6 +516,12 @@ Resources:
                         RestApiId: !Ref VMSApiGateway
                         Path: /card/{id}/{proxy+}
                         Method: delete
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /card/{id}/{proxy+}
+                        Method: options
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref DynamoDBTable
@@ -468,6 +542,12 @@ Resources:
                         RestApiId: !Ref VMSApiGateway
                         Path: /approval/{proxy+}
                         Method: get
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /approval/{proxy+}
+                        Method: options
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref DynamoDBTable
@@ -487,6 +567,12 @@ Resources:
                         RestApiId: !Ref VMSApiGateway
                         Path: /approval/{proxy+}
                         Method: post
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /approval/{proxy+}
+                        Method: options
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref DynamoDBTable
@@ -506,6 +592,12 @@ Resources:
                         RestApiId: !Ref VMSApiGateway
                         Path: /approval/{id}/{proxy+}
                         Method: get
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /approval/{id}/{proxy+}
+                        Method: options
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref DynamoDBTable
@@ -525,6 +617,12 @@ Resources:
                         RestApiId: !Ref VMSApiGateway
                         Path: /approval/{id}/{proxy+}
                         Method: patch
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref VMSApiGateway
+                        Path: /approval/{id}/{proxy+}
+                        Method: options
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref DynamoDBTable

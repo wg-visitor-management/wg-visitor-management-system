@@ -19,7 +19,7 @@ def lambda_handler(event, context):
     data = db_helper.get_item({"PK": "card", "SK": f"card#{card_id}"})
     if data:
         data.pop("PK")
-        data['card_id'] = data.get('SK')
+        data['card_id'] = data.get('SK').split("#")[-1]
         data.pop("SK")
         return ParseResponse(data, 200).return_response()
     

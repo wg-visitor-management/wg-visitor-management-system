@@ -1,5 +1,5 @@
 card_schema = {
-    "type": "object",
+    "type": "array",
     "properties": {
         "card_id": {
             "type": "string",

@@ -21,13 +21,14 @@ def lambda_handler(event, context):
     if data:
         cards = parse_cards_data(data)
         return ParseResponse(cards, 200).return_response()
+    return ParseResponse([], 200).return_response()
     
 def parse_cards_data(cards):
     cards_data = []
     for card in cards:
         if card.get("status") != CARD_STATUS.get("DISCARDED"):
             card.pop("PK")
-            card['card_id'] = card.get('SK')
+            card['card_id'] = card.get('SK').split("#")[-1]
             card.pop("SK")
             cards_data.append(card)
     return cards_data

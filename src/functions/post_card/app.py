@@ -20,22 +20,24 @@ logger = get_logger("POST_/card")
 def lambda_handler(event, context):
     logger.debug(event)
 
-    request_body = json.loads(event["body"])
-    card_id = request_body.get('card_id')
+    cards = json.loads(event["body"])
 
-    check_if_card_exists(card_id)
+    for card_id in cards:
 
-    body = {}
-    body["PK"] = "card"
-    body["SK"] = f"card#{card_id}"
-    body["status"] = CARD_STATUS.get("AVAILABLE")
-    db_helper.create_item(body)
+        body = {}
+        body["PK"] = "card"
+        body["SK"] = f"card#{card_id}"
+        body["status"] = CARD_STATUS.get("AVAILABLE")
+        db_helper.create_item(body)
 
-    resposne_body = {
-        "card_id" : request_body.get("card_id"),
-        "status" : CARD_STATUS.get("AVAILABLE")
-    }
-    return ParseResponse(resposne_body, 201).return_response()
+    response = []
+
+    for card_id in cards:
+        response.append({
+            "card_id": card_id,
+            "status": CARD_STATUS.get("AVAILABLE")
+        })
+    return ParseResponse(response, 201).return_response()
 
 
 def check_if_card_exists(card_id):
