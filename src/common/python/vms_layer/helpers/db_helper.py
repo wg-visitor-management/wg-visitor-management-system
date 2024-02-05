@@ -1,6 +1,7 @@
 import boto3
 from botocore.exceptions import ClientError
 
+
 class DBHelper:
     """Helper class for DynamoDB operations"""
 
@@ -21,7 +22,7 @@ class DBHelper:
     def get_item(self, key):
         """Get an item from the table"""
         try:
-            response = self.table.get_item(Key=key)
+            response = self.table.get_item(Key=key, ConsistentRead=True)
             return response.get("Item")
         except ClientError as e:
             print(f"Error getting item: {e}")

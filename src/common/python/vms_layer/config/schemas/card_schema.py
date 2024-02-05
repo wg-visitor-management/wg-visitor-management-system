@@ -1,22 +1,19 @@
 card_schema = {
-    "type": "object",
+    "type": "array",
     "properties": {
-        "cardId": {
+        "card_id": {
             "type": "string",
             "pattern": "^[a-zA-Z0-9]*$",
-            },
+        },
     },
-    "required": ["cardId"],
+    "required": ["card_id"],
 }
 
 card_update_schema = {
     "type": "object",
     "properties": {
         "visitId": {"type": "string"},
-        "status": {
-            "type": "string",
-            "enum": ["available", "occupied", "discarded"]
-        }
+        "status": {"type": "string", "enum": ["available", "occupied", "discarded"]},
     },
-    "required": ["visitId", "status"]
+    "required": ["status"],
 }
