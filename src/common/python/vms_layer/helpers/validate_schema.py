@@ -7,6 +7,7 @@ from vms_layer.helpers.response_parser import ParseResponse
 
 def validate_schema(schema):
     """Validates the schema of the request body."""
+
     def decorator(func):
         @wraps(func)
         def wrapper(event, context):

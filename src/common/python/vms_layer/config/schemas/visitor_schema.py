@@ -9,7 +9,7 @@ visitor_schema = {
         "address": {"type": "string"},
         "idProofNumber": {"type": "string"},
         "idPhotoBlob": {"type": "string"},
-        "vistorPhotoBlob": {"type": "string"}
+        "vistorPhotoBlob": {"type": "string"},
     },
     "required": ["firstName", "lastName", "phoneNumber", "email", "organization", "address", "idProofNumber"],
 }

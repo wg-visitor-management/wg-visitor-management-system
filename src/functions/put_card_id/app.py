@@ -20,24 +20,22 @@ def lambda_handler(event, context):
     logger.debug(f"Received event: {event}")
     card_id = event.get("pathParameters").get("id")
     visit_id = body.get("visitId")
-    card_status = body.get("status")
+    cardStatus = body.get("status")
 
     logger.info(
-        f"Updating card {card_id} with visit_id {visit_id} and status {card_status}"
+        f"Updating card {card_id} with visit_id {visit_id} and status {cardStatus}"
     )
     response = db_helper.update_item(
-        key={"PK": f"card", "SK": f"card#{card_id}"},
-        update_expression="SET visit_id = :visit_id, card_status = :status",
+        key={"PK": "card", "SK": f"card#{card_id}"},
+        update_expression="SET visit_id = :visit_id, cardStatus = :cardStatus",
         expression_attribute_values={
             ":visit_id": visit_id,
-            ":status": card_status,
+            ":cardStatus": cardStatus,
         },
     )
     logger.debug(f"Response from db: {response}")
-    logger.info(f"Card updated successfully")
+    logger.info("Card updated successfully")
     return ParseResponse(
-        {
-            "message": "Card updated successfully",
-        },
+        {"message": "Card updated successfully", "response": response},
         200,
     ).return_response()

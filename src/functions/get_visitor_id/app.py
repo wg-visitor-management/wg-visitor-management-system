@@ -14,6 +14,7 @@ logger = get_logger("GET /visitor/:id")
 db_helper = DBHelper(os.getenv("DynamoDBTableName"))
 bucket_name = os.getenv("BucketName")
 
+
 @handle_errors
 @rbac
 def lambda_handler(event, context):

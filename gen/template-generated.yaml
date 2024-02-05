@@ -1,732 +1,733 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
-Description: 'AWS SAM Template for making API Gateway with APIGatewayRole for invoking
-  lambda functions. Generate lambda functions according to docs\Visitor Management
-  System Swagger 1.yaml
+Description:
+    'AWS SAM Template for making API Gateway with APIGatewayRole for invoking
+    lambda functions. Generate lambda functions according to docs\Visitor Management
+    System Swagger 1.yaml
 
-  '
+    '
 Globals:
-  Function:
-    Timeout: 3
-    Runtime: python3.11
-    Environment:
-      Variables:
+    Function:
+        Timeout: 3
+        Runtime: python3.11
         Environment:
-          Ref: Environment
-        BucketName:
-          Ref: BucketName
-        DynamoDBTableName:
-          Ref: DynamoDBTable
-  Api:
-    Cors:
-      AllowMethods: '''DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'''
-      AllowHeaders: '''Content-Type,X-Amz-Date,X-Amz-Security-Token,Authorization,X-Api-Key,X-Requested-With,Accept,Access-Control-Allow-Methods,Access-Control-Allow-Origin,Access-Control-Allow-Headers'''
-      AllowOrigin: '''*'''
+            Variables:
+                Environment:
+                    Ref: Environment
+                BucketName:
+                    Ref: BucketName
+                DynamoDBTableName:
+                    Ref: DynamoDBTable
+    Api:
+        Cors:
+            AllowMethods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+            AllowHeaders: "'Content-Type,X-Amz-Date,X-Amz-Security-Token,Authorization,X-Api-Key,X-Requested-With,Accept,Access-Control-Allow-Methods,Access-Control-Allow-Origin,Access-Control-Allow-Headers'"
+            AllowOrigin: "'*'"
 Parameters:
-  Environment:
-    Type: String
-    Default: dev
-    AllowedValues:
-    - dev
-    - prod
-    Description: Environment name
-  BucketName:
-    Type: String
-    Description: Name of the S3 bucket
-  DynamoDBTable:
-    Type: String
-    Description: Name of the DynamoDB table
-  UserPoolClientId:
-    Type: String
-    Description: User Pool Client ID
-  UserPoolId:
-    Type: String
-    Description: User Pool ID
-  LambdaIAMRoleArn:
-    Type: String
-    Description: ARN of the Lambda IAM Role
-  CognitoPoolArn:
-    Type: String
-    Description: ARN of the Cognito Pool
-  SenderMail:
-    Type: String
-    Description: Email of the sender
-  ReceiverMail:
-    Type: String
-    Description: Email of the receiver
-  JWTSecret:
-    Type: String
-    Description: JWT Secret
+    Environment:
+        Type: String
+        Default: dev
+        AllowedValues:
+            - dev
+            - prod
+        Description: Environment name
+    BucketName:
+        Type: String
+        Description: Name of the S3 bucket
+    DynamoDBTable:
+        Type: String
+        Description: Name of the DynamoDB table
+    UserPoolClientId:
+        Type: String
+        Description: User Pool Client ID
+    UserPoolId:
+        Type: String
+        Description: User Pool ID
+    LambdaIAMRoleArn:
+        Type: String
+        Description: ARN of the Lambda IAM Role
+    CognitoPoolArn:
+        Type: String
+        Description: ARN of the Cognito Pool
+    SenderMail:
+        Type: String
+        Description: Email of the sender
+    ReceiverMail:
+        Type: String
+        Description: Email of the receiver
+    JWTSecret:
+        Type: String
+        Description: JWT Secret
 Resources:
-  ApiGatewayRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName:
-        Fn::Sub: ${Environment}--ApiGatewayRole
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-        - Effect: Allow
-          Principal:
-            Service:
-            - apigateway.amazonaws.com
-          Action:
-          - sts:AssumeRole
-      Policies:
-      - PolicyName:
-          Fn::Sub: ${Environment}--ApiGatewayRolePolicy
-        PolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-          - Effect: Allow
-            Action:
-            - lambda:InvokeFunction
-            Resource:
-            - Fn::GetAtt:
-              - VMSLoginGET
-              - Arn
-            - Fn::GetAtt:
-              - VMSVisitorGET
-              - Arn
-            - Fn::GetAtt:
-              - VMSVisitorPOST
-              - Arn
-            - Fn::GetAtt:
-              - VMSVisitorIdGET
-              - Arn
-            - Fn::GetAtt:
-              - VMSVisitorIdPUT
-              - Arn
-            - Fn::GetAtt:
-              - VMSVisitGET
-              - Arn
-            - Fn::GetAtt:
-              - VMSVisitPOST
-              - Arn
-            - Fn::GetAtt:
-              - VMSVisitIdGET
-              - Arn
-            - Fn::GetAtt:
-              - VMSVisitIdPATCH
-              - Arn
-            - Fn::GetAtt:
-              - VMSCardGET
-              - Arn
-            - Fn::GetAtt:
-              - VMSCardPOST
-              - Arn
-            - Fn::GetAtt:
-              - VMSCardIdGET
-              - Arn
-            - Fn::GetAtt:
-              - VMSCardIdPUT
-              - Arn
-            - Fn::GetAtt:
-              - VMSApprovalPOST
-              - Arn
-            - Fn::GetAtt:
-              - VMSApprovalIdPATCH
-              - Arn
-            - Fn::GetAtt:
-              - VMSApprovalIdGET
-              - Arn
-            - Fn::GetAtt:
-              - VMSForgotPasswordPOST
-              - Arn
-    Metadata:
-      SamResourceId: ApiGatewayRole
-  VMSApiGateway:
-    Type: AWS::Serverless::Api
-    Properties:
-      StageName:
-        Ref: Environment
-      DefinitionBody:
-        Fn::Transform:
-          Name: AWS::Include
-          Parameters:
-            Location: s3://abhi-code-sam/7df1ea27db0029da34dcd2311fc8cdaf
-      GatewayResponses:
-        DEFAULT_4XX:
-          ResponseParameters:
-            Headers:
-              Access-Control-Allow-Origin: '''*'''
-              Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'''
-              Access-Control-Allow-Methods: '''GET,OPTIONS,POST,PUT,DELETE'''
-        DEFAULT_5XX:
-          ResponseParameters:
-            Headers:
-              Access-Control-Allow-Origin: '''*'''
-              Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'''
-              Access-Control-Allow-Methods: '''GET,OPTIONS,POST,PUT,DELETE'''
-    Metadata:
-      SamResourceId: VMSApiGateway
-  VMSLayer:
-    Type: AWS::Serverless::LayerVersion
-    Properties:
-      LayerName:
-        Fn::Sub: ${Environment}-VMS-Layer
-      Description: VMS Lambda Layer
-      ContentUri: s3://abhi-code-sam/7e535a0f108d1ce9640cc93250ecc082
-      CompatibleRuntimes:
-      - python3.11
-    Metadata:
-      SamResourceId: VMSLayer
-  VMSLoginGET:
-    Type: AWS::Serverless::Function
-    Properties:
-      Environment:
-        Variables:
-          UserPoolClientId:
-            Ref: UserPoolClientId
-          UserPoolId:
-            Ref: UserPoolId
-      FunctionName:
-        Fn::Sub: ${Environment}-VMS-login-GET
-      CodeUri: s3://abhi-code-sam/4d71ccfcb562d4c720a24a9b2d4644f4
-      Handler: app.lambda_handler
-      Runtime: python3.11
-      Layers:
-      - Ref: VMSLayer
-      Events:
-        VMSLoginGET:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /login/{proxy+}
-            Method: post
-        Options:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /login/{proxy+}
-            Method: options
-      Policies:
-      - DynamoDBCrudPolicy:
-          TableName:
-            Ref: DynamoDBTable
-    Metadata:
-      SamResourceId: VMSLoginGET
-  VMSForgotPasswordPOST:
-    Type: AWS::Serverless::Function
-    Properties:
-      Environment:
-        Variables:
-          UserPoolClientId:
-            Ref: UserPoolClientId
-          UserPoolId:
-            Ref: UserPoolId
-      FunctionName:
-        Fn::Sub: ${Environment}-VMS-forgot-password-POST
-      CodeUri: s3://abhi-code-sam/2d6f24b986cf76a95a4e42190b7302ae
-      Handler: app.lambda_handler
-      Runtime: python3.11
-      Layers:
-      - Ref: VMSLayer
-      Events:
-        VMSForgotPasswordPOST:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /forgot_password/{proxy+}
-            Method: post
-        Options:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /forgot_password/{proxy+}
-            Method: options
-      Policies:
-      - DynamoDBCrudPolicy:
-          TableName:
-            Ref: DynamoDBTable
-    Metadata:
-      SamResourceId: VMSForgotPasswordPOST
-  VMSVisitorGET:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName:
-        Fn::Sub: ${Environment}-VMS-visitor-GET
-      CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
-      Handler: app.lambda_handler
-      Runtime: python3.11
-      Layers:
-      - Ref: VMSLayer
-      Events:
-        VMSVisitorGET:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /visitor/{proxy+}
-            Method: get
-        Options:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /visitor/{proxy+}
-            Method: options
-      Policies:
-      - DynamoDBCrudPolicy:
-          TableName:
-            Ref: DynamoDBTable
-    Metadata:
-      SamResourceId: VMSVisitorGET
-  VMSVisitorPOST:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName:
-        Fn::Sub: ${Environment}-VMS-visitor-POST
-      CodeUri: s3://abhi-code-sam/60cc57212b5a1884e064c247b4f331c9
-      Handler: app.lambda_handler
-      Runtime: python3.11
-      Layers:
-      - Ref: VMSLayer
-      Role:
-        Ref: LambdaIAMRoleArn
-      Events:
-        VMSVisitorPOST:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /visitor/{proxy+}
-            Method: post
-        Options:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /visitor/{proxy+}
-            Method: options
-      Policies:
-      - DynamoDBCrudPolicy:
-          TableName:
-            Ref: DynamoDBTable
-    Metadata:
-      SamResourceId: VMSVisitorPOST
-  VMSVisitorIdGET:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName:
-        Fn::Sub: ${Environment}-VMS-visitor-id-GET
-      CodeUri: s3://abhi-code-sam/8d4491e18860e51a20232f3f20932383
-      Handler: app.lambda_handler
-      Runtime: python3.11
-      Role:
-        Ref: LambdaIAMRoleArn
-      Layers:
-      - Ref: VMSLayer
-      Events:
-        VMSVisitorVisitorIdGET:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /visitor/{id}/{proxy+}
-            Method: get
-        Options:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /visitor/{id}/{proxy+}
-            Method: options
-      Policies:
-      - DynamoDBCrudPolicy:
-          TableName:
-            Ref: DynamoDBTable
-    Metadata:
-      SamResourceId: VMSVisitorIdGET
-  VMSVisitorIdPUT:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName:
-        Fn::Sub: ${Environment}-VMS-visitor-id-PUT
-      CodeUri: s3://abhi-code-sam/6530c12c17095c14a661734b24b81ea0
-      Handler: app.lambda_handler
-      Runtime: python3.11
-      Role:
-        Ref: LambdaIAMRoleArn
-      Layers:
-      - Ref: VMSLayer
-      Events:
-        VMSVisitorVisitorIdPUT:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /visitor/{id}/{proxy+}
-            Method: put
-      Policies:
-      - DynamoDBCrudPolicy:
-          TableName:
-            Ref: DynamoDBTable
-    Metadata:
-      SamResourceId: VMSVisitorIdPUT
-  VMSVisitGET:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName:
-        Fn::Sub: ${Environment}-VMS-visit-GET
-      CodeUri: s3://abhi-code-sam/c769e48c942c8e6a82defde4bcbaa7d0
-      Handler: app.lambda_handler
-      Runtime: python3.11
-      Layers:
-      - Ref: VMSLayer
-      Events:
-        VMSVisitGET:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /visit/{proxy+}
-            Method: get
-        Options:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /visit/{proxy+}
-            Method: options
-      Policies:
-      - DynamoDBCrudPolicy:
-          TableName:
-            Ref: DynamoDBTable
-    Metadata:
-      SamResourceId: VMSVisitGET
-  VMSVisitPOST:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName:
-        Fn::Sub: ${Environment}-VMS-visit-POST
-      CodeUri: s3://abhi-code-sam/f7e016b71a871e4eaa487c8b7e08e26b
-      Handler: app.lambda_handler
-      Runtime: python3.11
-      Layers:
-      - Ref: VMSLayer
-      Events:
-        VMSVisitPOST:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /visit/{proxy+}
-            Method: post
-        Options:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /visit/{proxy+}
-            Method: options
-      Policies:
-      - DynamoDBCrudPolicy:
-          TableName:
-            Ref: DynamoDBTable
-    Metadata:
-      SamResourceId: VMSVisitPOST
-  VMSVisitIdGET:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName:
-        Fn::Sub: ${Environment}-VMS-visit-id-GET
-      CodeUri: s3://abhi-code-sam/4aa8780c578d025a0bdd1215c13db3c6
-      Handler: app.lambda_handler
-      Runtime: python3.11
-      Layers:
-      - Ref: VMSLayer
-      Events:
-        VMSVisitVisitIdGET:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /visit/{id}/{proxy+}
-            Method: get
-        Options:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /visit/{id}/{proxy+}
-            Method: options
-      Policies:
-      - DynamoDBCrudPolicy:
-          TableName:
-            Ref: DynamoDBTable
-    Metadata:
-      SamResourceId: VMSVisitIdGET
-  VMSVisitIdPATCH:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName:
-        Fn::Sub: ${Environment}-VMS-visit-id-PATCH
-      CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
-      Handler: app.lambda_handler
-      Runtime: python3.11
-      Layers:
-      - Ref: VMSLayer
-      Events:
-        VMSVisitVisitIdPATCH:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /visit/{id}/{proxy+}
-            Method: patch
-        Options:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /visit/{id}/{proxy+}
-            Method: options
-      Policies:
-      - DynamoDBCrudPolicy:
-          TableName:
-            Ref: DynamoDBTable
-    Metadata:
-      SamResourceId: VMSVisitIdPATCH
-  VMSCardGET:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName:
-        Fn::Sub: ${Environment}-VMS-card-GET
-      CodeUri: s3://abhi-code-sam/15e6554912fb4e65ae52948a2832e61c
-      Handler: app.lambda_handler
-      Runtime: python3.11
-      Role:
-        Ref: LambdaIAMRoleArn
-      Layers:
-      - Ref: VMSLayer
-      Events:
-        VMSCardGET:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /card/{proxy+}
-            Method: get
-        Options:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /card/{proxy+}
-            Method: options
-      Policies:
-      - DynamoDBCrudPolicy:
-          TableName:
-            Ref: DynamoDBTable
-    Metadata:
-      SamResourceId: VMSCardGET
-  VMSCardPOST:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName:
-        Fn::Sub: ${Environment}-VMS-card-POST
-      CodeUri: s3://abhi-code-sam/a0a301eaa3be908526b43217529d4d55
-      Handler: app.lambda_handler
-      Runtime: python3.11
-      Layers:
-      - Ref: VMSLayer
-      Events:
-        VMSCardPOST:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /card/{proxy+}
-            Method: post
-        Options:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /card/{proxy+}
-            Method: options
-      Policies:
-      - DynamoDBCrudPolicy:
-          TableName:
-            Ref: DynamoDBTable
-    Metadata:
-      SamResourceId: VMSCardPOST
-  VMSCardIdGET:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName:
-        Fn::Sub: ${Environment}-VMS-card-id-GET
-      CodeUri: s3://abhi-code-sam/921e9af1277829967e1578495b7f5156
-      Handler: app.lambda_handler
-      Runtime: python3.11
-      Layers:
-      - Ref: VMSLayer
-      Events:
-        VMSCardCardIdGET:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /card/{id}/{proxy+}
-            Method: get
-        Options:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /card/{id}/{proxy+}
-            Method: options
-      Policies:
-      - DynamoDBCrudPolicy:
-          TableName:
-            Ref: DynamoDBTable
-    Metadata:
-      SamResourceId: VMSCardIdGET
-  VMSCardIdPUT:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName:
-        Fn::Sub: ${Environment}-VMS-card-id-PUT
-      CodeUri: s3://abhi-code-sam/bbc0a2b6f0ce0dba380e19b9f91e559b
-      Handler: app.lambda_handler
-      Runtime: python3.11
-      Layers:
-      - Ref: VMSLayer
-      Events:
-        VMSCardCardIdPUT:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /card/{id}/{proxy+}
-            Method: put
-        Options:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /card/{id}/{proxy+}
-            Method: options
-      Policies:
-      - DynamoDBCrudPolicy:
-          TableName:
-            Ref: DynamoDBTable
-    Metadata:
-      SamResourceId: VMSCardIdPUT
-  VMSApprovalPOST:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName:
-        Fn::Sub: ${Environment}-VMS-approval-POST
-      CodeUri: s3://abhi-code-sam/f41840fda26f116f162dec3b9dbbe45e
-      Handler: app.lambda_handler
-      Runtime: python3.11
-      Environment:
-        Variables:
-          SENDER_EMAIL:
-            Ref: SenderMail
-          RECIPIENT_EMAIL:
-            Ref: ReceiverMail
-          JWT_SECRET:
-            Ref: JWTSecret
-      Layers:
-      - Ref: VMSLayer
-      Events:
-        VMSApprovalPOST:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /approval/{proxy+}
-            Method: post
-        Options:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /approval/{proxy+}
-            Method: options
-      Policies:
-      - DynamoDBCrudPolicy:
-          TableName:
-            Ref: DynamoDBTable
-      Role:
-        Ref: LambdaIAMRoleArn
-    Metadata:
-      SamResourceId: VMSApprovalPOST
-  VMSApprovalIdGET:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName:
-        Fn::Sub: ${Environment}-VMS-approval-id-GET
-      CodeUri: s3://abhi-code-sam/68e84f799d8583ef98a5ec26756c54ca
-      Handler: app.lambda_handler
-      Runtime: python3.11
-      Environment:
-        Variables:
-          JWT_SECRET:
-            Ref: JWTSecret
-      Layers:
-      - Ref: VMSLayer
-      Events:
-        VMSApprovalApprovalIdGET:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /approval/{id}/{proxy+}
-            Method: get
-        Options:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /approval/{id}/{proxy+}
-            Method: options
-      Policies:
-      - DynamoDBCrudPolicy:
-          TableName:
-            Ref: DynamoDBTable
-    Metadata:
-      SamResourceId: VMSApprovalIdGET
-  VMSApprovalIdPATCH:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName:
-        Fn::Sub: ${Environment}-VMS-approval-id-PATCH
-      CodeUri: s3://abhi-code-sam/8ae93106508285cedcb8492cf425e168
-      Handler: app.lambda_handler
-      Runtime: python3.11
-      Layers:
-      - Ref: VMSLayer
-      Events:
-        VMSApprovalApprovalIdPATCH:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /approval/{id}/{proxy+}
-            Method: patch
-        Options:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: VMSApiGateway
-            Path: /approval/{id}/{proxy+}
-            Method: options
-      Policies:
-      - DynamoDBCrudPolicy:
-          TableName:
-            Ref: DynamoDBTable
-    Metadata:
-      SamResourceId: VMSApprovalIdPATCH
+    ApiGatewayRole:
+        Type: AWS::IAM::Role
+        Properties:
+            RoleName:
+                Fn::Sub: ${Environment}--ApiGatewayRole
+            AssumeRolePolicyDocument:
+                Version: "2012-10-17"
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service:
+                              - apigateway.amazonaws.com
+                      Action:
+                          - sts:AssumeRole
+            Policies:
+                - PolicyName:
+                      Fn::Sub: ${Environment}--ApiGatewayRolePolicy
+                  PolicyDocument:
+                      Version: "2012-10-17"
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                                - lambda:InvokeFunction
+                            Resource:
+                                - Fn::GetAtt:
+                                      - VMSLoginGET
+                                      - Arn
+                                - Fn::GetAtt:
+                                      - VMSVisitorGET
+                                      - Arn
+                                - Fn::GetAtt:
+                                      - VMSVisitorPOST
+                                      - Arn
+                                - Fn::GetAtt:
+                                      - VMSVisitorIdGET
+                                      - Arn
+                                - Fn::GetAtt:
+                                      - VMSVisitorIdPUT
+                                      - Arn
+                                - Fn::GetAtt:
+                                      - VMSVisitGET
+                                      - Arn
+                                - Fn::GetAtt:
+                                      - VMSVisitPOST
+                                      - Arn
+                                - Fn::GetAtt:
+                                      - VMSVisitIdGET
+                                      - Arn
+                                - Fn::GetAtt:
+                                      - VMSVisitIdPATCH
+                                      - Arn
+                                - Fn::GetAtt:
+                                      - VMSCardGET
+                                      - Arn
+                                - Fn::GetAtt:
+                                      - VMSCardPOST
+                                      - Arn
+                                - Fn::GetAtt:
+                                      - VMSCardIdGET
+                                      - Arn
+                                - Fn::GetAtt:
+                                      - VMSCardIdPUT
+                                      - Arn
+                                - Fn::GetAtt:
+                                      - VMSApprovalPOST
+                                      - Arn
+                                - Fn::GetAtt:
+                                      - VMSApprovalIdPATCH
+                                      - Arn
+                                - Fn::GetAtt:
+                                      - VMSApprovalIdGET
+                                      - Arn
+                                - Fn::GetAtt:
+                                      - VMSForgotPasswordPOST
+                                      - Arn
+        Metadata:
+            SamResourceId: ApiGatewayRole
+    VMSApiGateway:
+        Type: AWS::Serverless::Api
+        Properties:
+            StageName:
+                Ref: Environment
+            DefinitionBody:
+                Fn::Transform:
+                    Name: AWS::Include
+                    Parameters:
+                        Location: s3://abhi-code-sam/7df1ea27db0029da34dcd2311fc8cdaf
+            GatewayResponses:
+                DEFAULT_4XX:
+                    ResponseParameters:
+                        Headers:
+                            Access-Control-Allow-Origin: "'*'"
+                            Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                            Access-Control-Allow-Methods: "'GET,OPTIONS,POST,PUT,DELETE'"
+                DEFAULT_5XX:
+                    ResponseParameters:
+                        Headers:
+                            Access-Control-Allow-Origin: "'*'"
+                            Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                            Access-Control-Allow-Methods: "'GET,OPTIONS,POST,PUT,DELETE'"
+        Metadata:
+            SamResourceId: VMSApiGateway
+    VMSLayer:
+        Type: AWS::Serverless::LayerVersion
+        Properties:
+            LayerName:
+                Fn::Sub: ${Environment}-VMS-Layer
+            Description: VMS Lambda Layer
+            ContentUri: s3://abhi-code-sam/7e535a0f108d1ce9640cc93250ecc082
+            CompatibleRuntimes:
+                - python3.11
+        Metadata:
+            SamResourceId: VMSLayer
+    VMSLoginGET:
+        Type: AWS::Serverless::Function
+        Properties:
+            Environment:
+                Variables:
+                    UserPoolClientId:
+                        Ref: UserPoolClientId
+                    UserPoolId:
+                        Ref: UserPoolId
+            FunctionName:
+                Fn::Sub: ${Environment}-VMS-login-GET
+            CodeUri: s3://abhi-code-sam/4d71ccfcb562d4c720a24a9b2d4644f4
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Layers:
+                - Ref: VMSLayer
+            Events:
+                VMSLoginGET:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /login/{proxy+}
+                        Method: post
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /login/{proxy+}
+                        Method: options
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName:
+                          Ref: DynamoDBTable
+        Metadata:
+            SamResourceId: VMSLoginGET
+    VMSForgotPasswordPOST:
+        Type: AWS::Serverless::Function
+        Properties:
+            Environment:
+                Variables:
+                    UserPoolClientId:
+                        Ref: UserPoolClientId
+                    UserPoolId:
+                        Ref: UserPoolId
+            FunctionName:
+                Fn::Sub: ${Environment}-VMS-forgot-password-POST
+            CodeUri: s3://abhi-code-sam/2d6f24b986cf76a95a4e42190b7302ae
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Layers:
+                - Ref: VMSLayer
+            Events:
+                VMSForgotPasswordPOST:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /forgot_password/{proxy+}
+                        Method: post
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /forgot_password/{proxy+}
+                        Method: options
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName:
+                          Ref: DynamoDBTable
+        Metadata:
+            SamResourceId: VMSForgotPasswordPOST
+    VMSVisitorGET:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName:
+                Fn::Sub: ${Environment}-VMS-visitor-GET
+            CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Layers:
+                - Ref: VMSLayer
+            Events:
+                VMSVisitorGET:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /visitor/{proxy+}
+                        Method: get
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /visitor/{proxy+}
+                        Method: options
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName:
+                          Ref: DynamoDBTable
+        Metadata:
+            SamResourceId: VMSVisitorGET
+    VMSVisitorPOST:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName:
+                Fn::Sub: ${Environment}-VMS-visitor-POST
+            CodeUri: s3://abhi-code-sam/60cc57212b5a1884e064c247b4f331c9
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Layers:
+                - Ref: VMSLayer
+            Role:
+                Ref: LambdaIAMRoleArn
+            Events:
+                VMSVisitorPOST:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /visitor/{proxy+}
+                        Method: post
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /visitor/{proxy+}
+                        Method: options
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName:
+                          Ref: DynamoDBTable
+        Metadata:
+            SamResourceId: VMSVisitorPOST
+    VMSVisitorIdGET:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName:
+                Fn::Sub: ${Environment}-VMS-visitor-id-GET
+            CodeUri: s3://abhi-code-sam/8d4491e18860e51a20232f3f20932383
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Role:
+                Ref: LambdaIAMRoleArn
+            Layers:
+                - Ref: VMSLayer
+            Events:
+                VMSVisitorVisitorIdGET:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /visitor/{id}/{proxy+}
+                        Method: get
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /visitor/{id}/{proxy+}
+                        Method: options
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName:
+                          Ref: DynamoDBTable
+        Metadata:
+            SamResourceId: VMSVisitorIdGET
+    VMSVisitorIdPUT:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName:
+                Fn::Sub: ${Environment}-VMS-visitor-id-PUT
+            CodeUri: s3://abhi-code-sam/6530c12c17095c14a661734b24b81ea0
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Role:
+                Ref: LambdaIAMRoleArn
+            Layers:
+                - Ref: VMSLayer
+            Events:
+                VMSVisitorVisitorIdPUT:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /visitor/{id}/{proxy+}
+                        Method: put
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName:
+                          Ref: DynamoDBTable
+        Metadata:
+            SamResourceId: VMSVisitorIdPUT
+    VMSVisitGET:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName:
+                Fn::Sub: ${Environment}-VMS-visit-GET
+            CodeUri: s3://abhi-code-sam/c769e48c942c8e6a82defde4bcbaa7d0
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Layers:
+                - Ref: VMSLayer
+            Events:
+                VMSVisitGET:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /visit/{proxy+}
+                        Method: get
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /visit/{proxy+}
+                        Method: options
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName:
+                          Ref: DynamoDBTable
+        Metadata:
+            SamResourceId: VMSVisitGET
+    VMSVisitPOST:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName:
+                Fn::Sub: ${Environment}-VMS-visit-POST
+            CodeUri: s3://abhi-code-sam/f7e016b71a871e4eaa487c8b7e08e26b
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Layers:
+                - Ref: VMSLayer
+            Events:
+                VMSVisitPOST:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /visit/{proxy+}
+                        Method: post
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /visit/{proxy+}
+                        Method: options
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName:
+                          Ref: DynamoDBTable
+        Metadata:
+            SamResourceId: VMSVisitPOST
+    VMSVisitIdGET:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName:
+                Fn::Sub: ${Environment}-VMS-visit-id-GET
+            CodeUri: s3://abhi-code-sam/4aa8780c578d025a0bdd1215c13db3c6
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Layers:
+                - Ref: VMSLayer
+            Events:
+                VMSVisitVisitIdGET:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /visit/{id}/{proxy+}
+                        Method: get
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /visit/{id}/{proxy+}
+                        Method: options
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName:
+                          Ref: DynamoDBTable
+        Metadata:
+            SamResourceId: VMSVisitIdGET
+    VMSVisitIdPATCH:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName:
+                Fn::Sub: ${Environment}-VMS-visit-id-PATCH
+            CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Layers:
+                - Ref: VMSLayer
+            Events:
+                VMSVisitVisitIdPATCH:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /visit/{id}/{proxy+}
+                        Method: patch
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /visit/{id}/{proxy+}
+                        Method: options
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName:
+                          Ref: DynamoDBTable
+        Metadata:
+            SamResourceId: VMSVisitIdPATCH
+    VMSCardGET:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName:
+                Fn::Sub: ${Environment}-VMS-card-GET
+            CodeUri: s3://abhi-code-sam/15e6554912fb4e65ae52948a2832e61c
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Role:
+                Ref: LambdaIAMRoleArn
+            Layers:
+                - Ref: VMSLayer
+            Events:
+                VMSCardGET:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /card/{proxy+}
+                        Method: get
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /card/{proxy+}
+                        Method: options
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName:
+                          Ref: DynamoDBTable
+        Metadata:
+            SamResourceId: VMSCardGET
+    VMSCardPOST:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName:
+                Fn::Sub: ${Environment}-VMS-card-POST
+            CodeUri: s3://abhi-code-sam/a0a301eaa3be908526b43217529d4d55
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Layers:
+                - Ref: VMSLayer
+            Events:
+                VMSCardPOST:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /card/{proxy+}
+                        Method: post
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /card/{proxy+}
+                        Method: options
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName:
+                          Ref: DynamoDBTable
+        Metadata:
+            SamResourceId: VMSCardPOST
+    VMSCardIdGET:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName:
+                Fn::Sub: ${Environment}-VMS-card-id-GET
+            CodeUri: s3://abhi-code-sam/921e9af1277829967e1578495b7f5156
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Layers:
+                - Ref: VMSLayer
+            Events:
+                VMSCardCardIdGET:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /card/{id}/{proxy+}
+                        Method: get
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /card/{id}/{proxy+}
+                        Method: options
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName:
+                          Ref: DynamoDBTable
+        Metadata:
+            SamResourceId: VMSCardIdGET
+    VMSCardIdPUT:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName:
+                Fn::Sub: ${Environment}-VMS-card-id-PUT
+            CodeUri: s3://abhi-code-sam/bbc0a2b6f0ce0dba380e19b9f91e559b
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Layers:
+                - Ref: VMSLayer
+            Events:
+                VMSCardCardIdPUT:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /card/{id}/{proxy+}
+                        Method: put
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /card/{id}/{proxy+}
+                        Method: options
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName:
+                          Ref: DynamoDBTable
+        Metadata:
+            SamResourceId: VMSCardIdPUT
+    VMSApprovalPOST:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName:
+                Fn::Sub: ${Environment}-VMS-approval-POST
+            CodeUri: s3://abhi-code-sam/f41840fda26f116f162dec3b9dbbe45e
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Environment:
+                Variables:
+                    SENDER_EMAIL:
+                        Ref: SenderMail
+                    RECIPIENT_EMAIL:
+                        Ref: ReceiverMail
+                    JWT_SECRET:
+                        Ref: JWTSecret
+            Layers:
+                - Ref: VMSLayer
+            Events:
+                VMSApprovalPOST:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /approval/{proxy+}
+                        Method: post
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /approval/{proxy+}
+                        Method: options
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName:
+                          Ref: DynamoDBTable
+            Role:
+                Ref: LambdaIAMRoleArn
+        Metadata:
+            SamResourceId: VMSApprovalPOST
+    VMSApprovalIdGET:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName:
+                Fn::Sub: ${Environment}-VMS-approval-id-GET
+            CodeUri: s3://abhi-code-sam/68e84f799d8583ef98a5ec26756c54ca
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Environment:
+                Variables:
+                    JWT_SECRET:
+                        Ref: JWTSecret
+            Layers:
+                - Ref: VMSLayer
+            Events:
+                VMSApprovalApprovalIdGET:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /approval/{id}/{proxy+}
+                        Method: get
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /approval/{id}/{proxy+}
+                        Method: options
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName:
+                          Ref: DynamoDBTable
+        Metadata:
+            SamResourceId: VMSApprovalIdGET
+    VMSApprovalIdPATCH:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName:
+                Fn::Sub: ${Environment}-VMS-approval-id-PATCH
+            CodeUri: s3://abhi-code-sam/8ae93106508285cedcb8492cf425e168
+            Handler: app.lambda_handler
+            Runtime: python3.11
+            Layers:
+                - Ref: VMSLayer
+            Events:
+                VMSApprovalApprovalIdPATCH:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /approval/{id}/{proxy+}
+                        Method: patch
+                Options:
+                    Type: Api
+                    Properties:
+                        RestApiId:
+                            Ref: VMSApiGateway
+                        Path: /approval/{id}/{proxy+}
+                        Method: options
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName:
+                          Ref: DynamoDBTable
+        Metadata:
+            SamResourceId: VMSApprovalIdPATCH
 Outputs:
-  VMSApiEndpoint:
-    Description: VMS API Gateway endpoint URL
-    Value:
-      Fn::Sub: https://${VMSApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${Environment}
+    VMSApiEndpoint:
+        Description: VMS API Gateway endpoint URL
+        Value:
+            Fn::Sub: https://${VMSApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${Environment}

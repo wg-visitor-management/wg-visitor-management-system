@@ -24,4 +24,3 @@ def lambda_handler(event, context):
         return ParseResponse(data, 200).return_response()
     
     raise InvalidCardIdError("Invalid Card Id Provided")
-

@@ -27,7 +27,7 @@ def lambda_handler(event, context):
         body = {}
         body["PK"] = "card"
         body["SK"] = f"card#{card_id}"
-        body["status"] = CARD_STATUS.get("AVAILABLE")
+        body["cardStatus"] = CARD_STATUS.get("AVAILABLE")
         db_helper.create_item(body)
 
     response = []
@@ -35,7 +35,7 @@ def lambda_handler(event, context):
     for card_id in cards:
         response.append({
             "card_id": card_id,
-            "status": CARD_STATUS.get("AVAILABLE")
+            "cardStatus": CARD_STATUS.get("AVAILABLE")
         })
     return ParseResponse(response, 201).return_response()
 

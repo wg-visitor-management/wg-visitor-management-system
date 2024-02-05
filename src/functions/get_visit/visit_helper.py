@@ -1,4 +1,5 @@
 import os
+
 from vms_layer.utils.base64_parser import base64_to_string
 from vms_layer.utils.date_time_parser import current_time_epoch
 from vms_layer.utils.loggers import get_logger
@@ -8,6 +9,7 @@ from vms_layer.utils.date_time_parser import (
     date_to_epoch,
     epoch_to_date,
 )
+from vms_layer.utils.base64_parser import convert_to_base64
 
 logger = get_logger("GET /visit")
 
@@ -26,7 +28,9 @@ class VisitHelper:
         quarters = extract_quarters_from_date_range(start_date, end_date)
         start_date_formatted = date_to_epoch(start_date)
         end_date_formatted = date_to_epoch(end_date)
-        logger.debug(f"Quarters: {quarters}, start_date: {start_date}, end_date: {end_date}")
+        logger.debug(
+            f"Quarters: {quarters}, start_date: {start_date}, end_date: {end_date}"
+        )
 
         response = []
         db_helper = DBHelper(os.environ["DynamoDBTableName"])
@@ -45,9 +49,16 @@ class VisitHelper:
 
         for item in response:
             item.pop("PK")
+            visitor_id = item["SK"].split("#")[2]
+            timestamp = item["SK"].split("#")[1]
+            item["visitId"] = convert_to_base64(f"{visitor_id}#{timestamp}") + "=="
             item.pop("SK")
             item["date"] = epoch_to_date(int(item["checkInTime"])).split("T")[0]
             item["checkInTime"] = epoch_to_date(int(item["checkInTime"])).split("T")[1]
+            if item.get("checkOutTime"):
+                item["checkOutTime"] = epoch_to_date(int(item["checkOutTime"]))
+            if item.get("approvalTime"):
+                item["approvalTime"] = epoch_to_date(int(item["approvalTime"]))
         return response
 
     def query_items_with_filters(
@@ -88,7 +99,9 @@ class VisitHelper:
         formatted_timestamp = epoch_to_date(int(timestamp))
         time_now = current_time_epoch()
         time_now_formatted = epoch_to_date(time_now)
-        quarters = extract_quarters_from_date_range(formatted_timestamp, time_now_formatted)
+        quarters = extract_quarters_from_date_range(
+            formatted_timestamp, time_now_formatted
+        )
         response = []
         for quarter in quarters:
             items = self.query_items(
@@ -103,10 +116,17 @@ class VisitHelper:
 
         for item in response:
             item.pop("PK")
+            visitor_id = item["SK"].split("#")[1]
+            timestamp = item["SK"].split("#")[2]
+            item["visitId"] = convert_to_base64(f"{visitor_id}#{timestamp}") + "=="
             item.pop("SK")
             item["date"] = epoch_to_date(int(item["checkInTime"])).split("T")[0]
             item["checkInTime"] = epoch_to_date(int(item["checkInTime"])).split("T")[1]
-            
+            if item.get("checkOutTime"):
+                item["checkOutTime"] = epoch_to_date(int(item["checkOutTime"]))
+            if item.get("approvalTime"):
+                item["approvalTime"] = epoch_to_date(int(item["approvalTime"]))
+
         logger.debug(f"Response: {response}")
         return response
 
