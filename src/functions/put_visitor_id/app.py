@@ -15,7 +15,7 @@ from vms_layer.utils.date_time_parser import current_time_epoch
 from vms_layer.utils.s3_signed_url_generator import generate_presigned_url
 from vms_layer.utils.custom_errors import VisitorNotFoundException
 
-logger = get_logger("GET /visitor/:id")
+logger = get_logger("PUT /visitor/:id")
 db_helper = DBHelper(os.getenv("DynamoDBTableName"))
 bucket_name = os.getenv("BucketName")
 
@@ -63,7 +63,7 @@ def update_visitor_data(visitor_data, visitor_id, raw_visitor_id):
     
     return db_helper.update_item(
         {"PK": "visitor", "SK": updated_visitor_id},
-        "SET firstName = :firstName, lastName = :lastName, phoneNumber = :phoneNumber, email = :email, organisation = :organisation, address = :address, idProofNumber = :idProofNumber",
+        "SET firstName = :firstName, lastName = :lastName, phoneNumber = :phoneNumber, email = :email, organisation = :organisation, address = :address, idProofNumber = :idProofNumber, profilePictureUrl = :profilePictureUrl, idProofPictureUrl = :idProofPictureUrl",
         {
             ":firstName": visitor_data["firstName"],
             ":lastName": visitor_data["lastName"],
@@ -72,6 +72,8 @@ def update_visitor_data(visitor_data, visitor_id, raw_visitor_id):
             ":organisation": visitor_data["organisation"],
             ":address": visitor_data["address"],
             ":idProofNumber": visitor_data["idProofNumber"],
+            ":profilePictureUrl": visitor_data["profilePictureUrl"],
+            ":idProofPictureUrl": visitor_data["idProofPictureUrl"]
         }
     )
 

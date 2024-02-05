@@ -144,7 +144,7 @@ Resources:
         Fn::Transform:
           Name: AWS::Include
           Parameters:
-            Location: s3://udbhav-code-sam/7df1ea27db0029da34dcd2311fc8cdaf
+            Location: s3://abhi-code-sam/7df1ea27db0029da34dcd2311fc8cdaf
       GatewayResponses:
         DEFAULT_4XX:
           ResponseParameters:
@@ -166,7 +166,7 @@ Resources:
       LayerName:
         Fn::Sub: ${Environment}-VMS-Layer
       Description: VMS Lambda Layer
-      ContentUri: s3://udbhav-code-sam/fb5559be6573484681c7632eb22af8a5
+      ContentUri: s3://abhi-code-sam/7e535a0f108d1ce9640cc93250ecc082
       CompatibleRuntimes:
       - python3.11
     Metadata:
@@ -182,7 +182,7 @@ Resources:
             Ref: UserPoolId
       FunctionName:
         Fn::Sub: ${Environment}-VMS-login-GET
-      CodeUri: s3://udbhav-code-sam/4d71ccfcb562d4c720a24a9b2d4644f4
+      CodeUri: s3://abhi-code-sam/4d71ccfcb562d4c720a24a9b2d4644f4
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -219,7 +219,7 @@ Resources:
             Ref: UserPoolId
       FunctionName:
         Fn::Sub: ${Environment}-VMS-forgot-password-POST
-      CodeUri: s3://udbhav-code-sam/2d6f24b986cf76a95a4e42190b7302ae
+      CodeUri: s3://abhi-code-sam/2d6f24b986cf76a95a4e42190b7302ae
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -232,6 +232,13 @@ Resources:
               Ref: VMSApiGateway
             Path: /forgot_password/{proxy+}
             Method: post
+        Options:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /forgot_password/{proxy+}
+            Method: options
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
@@ -243,7 +250,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: ${Environment}-VMS-visitor-GET
-      CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
+      CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -256,6 +263,13 @@ Resources:
               Ref: VMSApiGateway
             Path: /visitor/{proxy+}
             Method: get
+        Options:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /visitor/{proxy+}
+            Method: options
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
@@ -267,7 +281,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: ${Environment}-VMS-visitor-POST
-      CodeUri: s3://udbhav-code-sam/60cc57212b5a1884e064c247b4f331c9
+      CodeUri: s3://abhi-code-sam/60cc57212b5a1884e064c247b4f331c9
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -300,9 +314,11 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: ${Environment}-VMS-visitor-id-GET
-      CodeUri: s3://udbhav-code-sam/5861a0a1ec8f730fc0a565e6a393fab0
+      CodeUri: s3://abhi-code-sam/8d4491e18860e51a20232f3f20932383
       Handler: app.lambda_handler
       Runtime: python3.11
+      Role:
+        Ref: LambdaIAMRoleArn
       Layers:
       - Ref: VMSLayer
       Events:
@@ -313,6 +329,13 @@ Resources:
               Ref: VMSApiGateway
             Path: /visitor/{id}/{proxy+}
             Method: get
+        Options:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /visitor/{id}/{proxy+}
+            Method: options
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
@@ -324,9 +347,11 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: ${Environment}-VMS-visitor-id-PUT
-      CodeUri: s3://udbhav-code-sam/ae2df3e19d574265c837abb57e15d7b9
+      CodeUri: s3://abhi-code-sam/6530c12c17095c14a661734b24b81ea0
       Handler: app.lambda_handler
       Runtime: python3.11
+      Role:
+        Ref: LambdaIAMRoleArn
       Layers:
       - Ref: VMSLayer
       Events:
@@ -348,7 +373,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: ${Environment}-VMS-visit-GET
-      CodeUri: s3://udbhav-code-sam/c769e48c942c8e6a82defde4bcbaa7d0
+      CodeUri: s3://abhi-code-sam/c769e48c942c8e6a82defde4bcbaa7d0
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -361,6 +386,13 @@ Resources:
               Ref: VMSApiGateway
             Path: /visit/{proxy+}
             Method: get
+        Options:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /visit/{proxy+}
+            Method: options
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
@@ -372,7 +404,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: ${Environment}-VMS-visit-POST
-      CodeUri: s3://udbhav-code-sam/f7e016b71a871e4eaa487c8b7e08e26b
+      CodeUri: s3://abhi-code-sam/f7e016b71a871e4eaa487c8b7e08e26b
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -385,6 +417,13 @@ Resources:
               Ref: VMSApiGateway
             Path: /visit/{proxy+}
             Method: post
+        Options:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /visit/{proxy+}
+            Method: options
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
@@ -396,7 +435,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: ${Environment}-VMS-visit-id-GET
-      CodeUri: s3://udbhav-code-sam/4aa8780c578d025a0bdd1215c13db3c6
+      CodeUri: s3://abhi-code-sam/4aa8780c578d025a0bdd1215c13db3c6
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -409,6 +448,13 @@ Resources:
               Ref: VMSApiGateway
             Path: /visit/{id}/{proxy+}
             Method: get
+        Options:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /visit/{id}/{proxy+}
+            Method: options
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
@@ -420,7 +466,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: ${Environment}-VMS-visit-id-PATCH
-      CodeUri: s3://udbhav-code-sam/7a4deecd340a215a5800d60c122f14e5
+      CodeUri: s3://abhi-code-sam/7a4deecd340a215a5800d60c122f14e5
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -433,6 +479,13 @@ Resources:
               Ref: VMSApiGateway
             Path: /visit/{id}/{proxy+}
             Method: patch
+        Options:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /visit/{id}/{proxy+}
+            Method: options
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
@@ -444,9 +497,11 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: ${Environment}-VMS-card-GET
-      CodeUri: s3://udbhav-code-sam/d653de2d9474875bd8750a3eb092fdeb
+      CodeUri: s3://abhi-code-sam/15e6554912fb4e65ae52948a2832e61c
       Handler: app.lambda_handler
       Runtime: python3.11
+      Role:
+        Ref: LambdaIAMRoleArn
       Layers:
       - Ref: VMSLayer
       Events:
@@ -457,6 +512,13 @@ Resources:
               Ref: VMSApiGateway
             Path: /card/{proxy+}
             Method: get
+        Options:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /card/{proxy+}
+            Method: options
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
@@ -468,7 +530,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: ${Environment}-VMS-card-POST
-      CodeUri: s3://udbhav-code-sam/c73eb3ad1da85d405ee33746b73303e5
+      CodeUri: s3://abhi-code-sam/a0a301eaa3be908526b43217529d4d55
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -481,6 +543,13 @@ Resources:
               Ref: VMSApiGateway
             Path: /card/{proxy+}
             Method: post
+        Options:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /card/{proxy+}
+            Method: options
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
@@ -492,7 +561,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: ${Environment}-VMS-card-id-GET
-      CodeUri: s3://udbhav-code-sam/c86dc9bc0e995e9ba4d1b87ecf736108
+      CodeUri: s3://abhi-code-sam/921e9af1277829967e1578495b7f5156
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -505,6 +574,13 @@ Resources:
               Ref: VMSApiGateway
             Path: /card/{id}/{proxy+}
             Method: get
+        Options:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /card/{id}/{proxy+}
+            Method: options
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
@@ -516,7 +592,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: ${Environment}-VMS-card-id-PUT
-      CodeUri: s3://udbhav-code-sam/bbc0a2b6f0ce0dba380e19b9f91e559b
+      CodeUri: s3://abhi-code-sam/bbc0a2b6f0ce0dba380e19b9f91e559b
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -529,6 +605,13 @@ Resources:
               Ref: VMSApiGateway
             Path: /card/{id}/{proxy+}
             Method: put
+        Options:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /card/{id}/{proxy+}
+            Method: options
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
@@ -540,7 +623,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: ${Environment}-VMS-approval-POST
-      CodeUri: s3://udbhav-code-sam/f41840fda26f116f162dec3b9dbbe45e
+      CodeUri: s3://abhi-code-sam/f41840fda26f116f162dec3b9dbbe45e
       Handler: app.lambda_handler
       Runtime: python3.11
       Environment:
@@ -561,6 +644,13 @@ Resources:
               Ref: VMSApiGateway
             Path: /approval/{proxy+}
             Method: post
+        Options:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /approval/{proxy+}
+            Method: options
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
@@ -574,7 +664,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: ${Environment}-VMS-approval-id-GET
-      CodeUri: s3://udbhav-code-sam/68e84f799d8583ef98a5ec26756c54ca
+      CodeUri: s3://abhi-code-sam/68e84f799d8583ef98a5ec26756c54ca
       Handler: app.lambda_handler
       Runtime: python3.11
       Environment:
@@ -591,6 +681,13 @@ Resources:
               Ref: VMSApiGateway
             Path: /approval/{id}/{proxy+}
             Method: get
+        Options:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /approval/{id}/{proxy+}
+            Method: options
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
@@ -602,7 +699,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: ${Environment}-VMS-approval-id-PATCH
-      CodeUri: s3://udbhav-code-sam/8ae93106508285cedcb8492cf425e168
+      CodeUri: s3://abhi-code-sam/8ae93106508285cedcb8492cf425e168
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -615,6 +712,13 @@ Resources:
               Ref: VMSApiGateway
             Path: /approval/{id}/{proxy+}
             Method: patch
+        Options:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: VMSApiGateway
+            Path: /approval/{id}/{proxy+}
+            Method: options
       Policies:
       - DynamoDBCrudPolicy:
           TableName:

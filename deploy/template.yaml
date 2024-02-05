@@ -507,57 +507,7 @@ Resources:
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref DynamoDBTable
-    VMSCardIdDELETE:
-        Type: AWS::Serverless::Function
-        Properties:
-            FunctionName: !Sub ${Environment}-VMS-card-id-DELETE
-            CodeUri: ../src/functions/delete_card_id
-            Handler: app.lambda_handler
-            Runtime: python3.11
-            Layers:
-                - !Ref VMSLayer
-            Events:
-                VMSCardCardIdDELETE:
-                    Type: Api
-                    Properties:
-                        RestApiId: !Ref VMSApiGateway
-                        Path: /card/{id}/{proxy+}
-                        Method: delete
-                Options:
-                    Type: Api
-                    Properties:
-                        RestApiId: !Ref VMSApiGateway
-                        Path: /card/{id}/{proxy+}
-                        Method: options
-            Policies:
-                - DynamoDBCrudPolicy:
-                      TableName: !Ref DynamoDBTable
 
-    VMSApprovalGET:
-        Type: AWS::Serverless::Function
-        Properties:
-            FunctionName: !Sub ${Environment}-VMS-approval-GET
-            CodeUri: ../src/functions/get_approval
-            Handler: app.lambda_handler
-            Runtime: python3.11
-            Layers:
-                - !Ref VMSLayer
-            Events:
-                VMSApprovalGET:
-                    Type: Api
-                    Properties:
-                        RestApiId: !Ref VMSApiGateway
-                        Path: /approval/{proxy+}
-                        Method: get
-                Options:
-                    Type: Api
-                    Properties:
-                        RestApiId: !Ref VMSApiGateway
-                        Path: /approval/{proxy+}
-                        Method: options
-            Policies:
-                - DynamoDBCrudPolicy:
-                      TableName: !Ref DynamoDBTable
     VMSApprovalPOST:
         Type: AWS::Serverless::Function
         Properties:

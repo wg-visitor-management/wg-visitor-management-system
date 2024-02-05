@@ -5,11 +5,11 @@ visitor_schema = {
         "lastName": {"type": "string"},
         "phoneNumber": {"type": "string"},
         "email": {"type": "string"},
-        "organisation": {"type": "string"},
+        "organization": {"type": "string"},
         "address": {"type": "string"},
         "idProofNumber": {"type": "string"},
         "idPhotoBlob": {"type": "string"},
         "vistorPhotoBlob": {"type": "string"}
     },
-    "required": ["firstName", "lastName", "phoneNumber", "email", "organisation", "address", "idProofNumber"],
+    "required": ["firstName", "lastName", "phoneNumber", "email", "organization", "address", "idProofNumber"],
 }
