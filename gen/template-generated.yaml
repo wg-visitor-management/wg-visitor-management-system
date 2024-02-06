@@ -144,7 +144,7 @@ Resources:
         Fn::Transform:
           Name: AWS::Include
           Parameters:
-            Location: s3://udbhav-code-sam/7df1ea27db0029da34dcd2311fc8cdaf
+            Location: s3://udbhav-code-sam/3194a440ec302cd5b5faecadcbf9e9d1
       GatewayResponses:
         DEFAULT_4XX:
           ResponseParameters:
@@ -305,6 +305,8 @@ Resources:
       Runtime: python3.11
       Layers:
       - Ref: VMSLayer
+      Role:
+        Ref: LambdaIAMRoleArn
       Events:
         VMSVisitorVisitorIdGET:
           Type: Api
@@ -324,7 +326,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: ${Environment}-VMS-visitor-id-PUT
-      CodeUri: s3://udbhav-code-sam/320f28a93bc29f9771a7cddfa7932614
+      CodeUri: s3://udbhav-code-sam/286b02d47970294c970debf8d08db02d
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -348,7 +350,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: ${Environment}-VMS-visit-GET
-      CodeUri: s3://udbhav-code-sam/6de89e1b8b165834f01809824bec2651
+      CodeUri: s3://udbhav-code-sam/7f9c7f15140c77638855c614bfbe7f72
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -468,7 +470,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: ${Environment}-VMS-card-POST
-      CodeUri: s3://udbhav-code-sam/f7ac238def76eb8fc1f4c48e38ecec1c
+      CodeUri: s3://udbhav-code-sam/1402bd374b4e8dada1dc42f2ef66e88d
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:

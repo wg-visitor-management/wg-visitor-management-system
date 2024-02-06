@@ -285,7 +285,7 @@ paths:
                                     type: number
                                 email:
                                     type: string
-                                organisation:
+                                organization:
                                     type: string
                                 address:
                                     type: string
@@ -445,7 +445,7 @@ paths:
                                     type: number
                                 email:
                                     type: string
-                                organisation:
+                                organization:
                                     type: string
                                 address:
                                     type: string
@@ -1469,7 +1469,7 @@ components:
                 email:
                     type: string
                     example: "rahul.sharma@example.com"
-                organisation:
+                organization:
                     type: string
                     example: "Tech Solutions India"
                 address:
@@ -1503,7 +1503,7 @@ components:
                 email:
                     type: string
                     example: "Arjun.patel@example.com"
-                organisation:
+                organization:
                     type: string
                     example: "Finance Solutions Mumbai"
                 address:
@@ -1578,7 +1578,7 @@ components:
                 email:
                     type: string
                     example: "Arjun.patel@example.com"
-                organisation:
+                organization:
                     type: string
                     example: "Finance Solutions Mumbai"
                 address:

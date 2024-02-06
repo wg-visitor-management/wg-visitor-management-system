@@ -1,12 +1,10 @@
-
-
 def parse_request_body_to_object(request_body, picture_name_self, picture_name_id):
     body = {}
     body["firstName"] = request_body["firstName"]
     body["lastName"] = request_body["lastName"]
     body["phoneNumber"] = request_body["phoneNumber"]
     body["email"] = request_body["email"]
-    body["organisation"] = request_body["organisation"]
+    body["organization"] = request_body["organization"]
     body["address"] = request_body["address"]
     body["idProofNumber"] = request_body["idProofNumber"]
     body["profilePictureUrl"] = picture_name_self

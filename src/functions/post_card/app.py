@@ -9,39 +9,40 @@ from vms_layer.utils.loggers import get_logger
 from vms_layer.helpers.response_parser import ParseResponse
 from vms_layer.config.config import CARD_STATUS
 from vms_layer.utils.custom_errors import CardAlreadyExistsError
-
+ 
 db_helper = DBHelper(os.getenv("DynamoDBTableName"))
 logger = get_logger("POST_/card")
-
-
+ 
+ 
 @handle_errors
 @validate_schema(schema=card_schema)
 @rbac
 def lambda_handler(event, context):
     logger.debug(event)
-
+ 
     cards = json.loads(event["body"])
-
+ 
     for card_id in cards:
-
+        check_if_card_exists(card_id)
+ 
         body = {}
         body["PK"] = "card"
         body["SK"] = f"card#{card_id}"
         body["cardStatus"] = CARD_STATUS.get("AVAILABLE")
         db_helper.create_item(body)
-
+ 
     response = []
-
+ 
     for card_id in cards:
         response.append({
             "card_id": card_id,
             "cardStatus": CARD_STATUS.get("AVAILABLE")
         })
     return ParseResponse(response, 201).return_response()
-
-
+ 
+ 
 def check_if_card_exists(card_id):
     card = db_helper.get_item({"PK": "card", "SK": f"card#{card_id}"})
     if card:
-        raise CardAlreadyExistsError("Card With This Id Already Exists")
+        raise CardAlreadyExistsError(f"Card With {card_id} Id Already Exists")
     return False

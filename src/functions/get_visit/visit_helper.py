@@ -54,6 +54,7 @@ class VisitHelper:
             item["visitId"] = convert_to_base64(f"{visitor_id}#{timestamp}") + "=="
             item.pop("SK")
             item["date"] = epoch_to_date(int(item["checkInTime"])).split("T")[0]
+            print(item)
             item["checkInTime"] = epoch_to_date(int(item["checkInTime"])).split("T")[1]
             if item.get("checkOutTime"):
                 item["checkOutTime"] = epoch_to_date(int(item["checkOutTime"]))
@@ -118,9 +119,11 @@ class VisitHelper:
             item.pop("PK")
             visitor_id = item["SK"].split("#")[1]
             timestamp = item["SK"].split("#")[2]
-            item["visitId"] = convert_to_base64(f"{visitor_id}#{timestamp}") + "=="
             item.pop("SK")
+
+            item["visitId"] = convert_to_base64(f"{visitor_id}#{timestamp}") + "=="
             item["date"] = epoch_to_date(int(item["checkInTime"])).split("T")[0]
+            print(item)
             item["checkInTime"] = epoch_to_date(int(item["checkInTime"])).split("T")[1]
             if item.get("checkOutTime"):
                 item["checkOutTime"] = epoch_to_date(int(item["checkOutTime"]))
