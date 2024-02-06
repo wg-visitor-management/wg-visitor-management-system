@@ -17,8 +17,8 @@ class Body:
     def email(self):
         return self.request_body["email"]
     @property
-    def organisation(self):
-        return self.request_body["organisation"]
+    def organization(self):
+        return self.request_body["organization"]
     @property
     def address(self):
         return self.request_body["address"]
@@ -38,7 +38,7 @@ class Body:
             "lastName": self.lastname,
             "phoneNumber": self.phonenumber,
             "email": self.email,
-            "organisation": self.organisation,
+            "organization": self.organization,
             "address": self.address,
             "idProofNumber": self.idproofnumber,
             "profilePictureUrl": self.profilepictureurl,

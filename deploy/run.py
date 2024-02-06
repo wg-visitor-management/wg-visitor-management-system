@@ -18,8 +18,8 @@ configurations = {
     "USER_POOL_CLIENT_NAME": "vms-user-pool-client",
     "TABLE_NAME": "vms-database",
     "ROLE_NAME": "vms-lambda-role-common",
-    "SENDER_EMAIL": "udbhavmani20@gmail.com",
-    "RECIPIENT_EMAIL": "udbhavmani20@gmail.com",
+    "SENDER_EMAIL": "abhi22hada@gmail.com",
+    "RECIPIENT_EMAIL": "abhi22hada@gmail.com",
     "JWT_SECRET": "vms-secret-key-1234",
 }
 

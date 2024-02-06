@@ -23,6 +23,7 @@ def lambda_handler(event, context):
     cards = json.loads(event["body"])
 
     for card_id in cards:
+        check_if_card_exists(card_id)
 
         body = {}
         body["PK"] = "card"
@@ -43,5 +44,5 @@ def lambda_handler(event, context):
 def check_if_card_exists(card_id):
     card = db_helper.get_item({"PK": "card", "SK": f"card#{card_id}"})
     if card:
-        raise CardAlreadyExistsError("Card With This Id Already Exists")
+        raise CardAlreadyExistsError(f"Card With {card_id} Id Already Exists")
     return False
