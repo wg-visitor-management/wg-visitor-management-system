@@ -187,6 +187,9 @@ def apigateway_lambda_deploy_sam():
     logger.info("Deploying SAM application...")
     run_command(deploy_command)
 
+def install_requirements():
+    run_command("mkdir -p ../src/common/python/lib/python3.11/site-packages")
+    run_command("pip install -r ../requirements.txt --target ../src/common/python/lib/python3.11/site-packages")
 
 def main():
 
@@ -200,6 +203,7 @@ def main():
     user_credentials = configurations.get("USER_CREDENTIALS")
     create_user_add_to_group(user_credentials.get("name"), user_credentials.get("email"), user_credentials.get("password"), "users")
     deploy_stack(**get_iam_stack(outputs))
+    install_requirements()
     apigateway_lambda_deploy_sam()
 
 if __name__ == "__main__":

@@ -36,7 +36,7 @@ def get_visitor_by_name(search_key):
             item.pop("SK")
  
         return ParseResponse(data, 200).return_response()
-    return ParseResponse("No visitor found", 404).return_response()
+    return ParseResponse([], 200).return_response()
 
 def query_items(
     db_helper,
