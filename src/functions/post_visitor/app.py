@@ -48,12 +48,11 @@ def lambda_handler(event, context):
         request_body.get("idPhotoBlob"),
     )
 
-    body = Body(
-        request_body, picture_name_self, picture_name_id)
+    body = Body(request_body, picture_name_self, picture_name_id)
 
     visitor_body = body.to_object()
     history_body = visitor_body.copy()
-    
+
     visitor_body["PK"] = "visitor"
     visitor_body["SK"] = f"detail#{first_name}{last_name}#{raw_visitor_id}"
     db_helper.create_item(visitor_body)
@@ -64,4 +63,11 @@ def lambda_handler(event, context):
 
     profile_picture_url = generate_presigned_url(bucket_name, picture_name_self)
     id_proof_picture_url = generate_presigned_url(bucket_name, picture_name_id)
-    return ParseResponse({"visitorId": str(encoded_visitor_id), "profilePictureUrl": profile_picture_url, "idProofPictureUrl": id_proof_picture_url}, 201).return_response()
+    return ParseResponse(
+        {
+            "visitorId": str(encoded_visitor_id),
+            "profilePictureUrl": profile_picture_url,
+            "idProofPictureUrl": id_proof_picture_url,
+        },
+        201,
+    ).return_response()

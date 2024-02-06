@@ -267,7 +267,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: ${Environment}-VMS-visitor-POST
-      CodeUri: s3://udbhav-code-sam/60cc57212b5a1884e064c247b4f331c9
+      CodeUri: s3://udbhav-code-sam/abc751f7b93e2ce20cd6cffefa5dcb1e
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
@@ -348,7 +348,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: ${Environment}-VMS-visit-GET
-      CodeUri: s3://udbhav-code-sam/d015ddfa51b5f53ee34d68a4816e5d5b
+      CodeUri: s3://udbhav-code-sam/6de89e1b8b165834f01809824bec2651
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:
