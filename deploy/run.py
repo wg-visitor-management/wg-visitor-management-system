@@ -3,6 +3,8 @@ import subprocess
 import boto3
 import logging
 import dotenv
+from cognito_operations import create_user_add_to_group
+from ses_template import deploy_template, send_verification_mails, body_mail
 dotenv.load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -10,6 +12,9 @@ client_cf = boto3.client("cloudformation")
 
 outputs = {}
 configurations = {
+    "ADMIN_EMAIL" : os.getenv("ADMIN_EMAIL"),
+    "ADMIN_CREDENTIALS" : os.getenv("ADMIN_CREDENTIALS"),
+    "USER_CREDENTIALS" : os.getenv("USER_CREDENTIALS"),
     "ENVIRONMENT": os.getenv("ENVIRONMENT"),
     "S3_BUCKET_FOR_SAM": os.getenv("BUCKET_NAME"),
     "SAM_STACK_NAME": "api-gateway-lambda-sam",
@@ -184,12 +189,18 @@ def apigateway_lambda_deploy_sam():
 
 
 def main():
+
     deploy_stack(**static_content_bucket_stack)
     deploy_stack(**cognito_stack)
     deploy_stack(**dynamodb_stack)
+    deploy_template("vms_email_template-test", "A visitor needs your approval", body_mail, "A visitor needs your approval")
+    send_verification_mails(configurations.get("ADMIN_EMAIL"))
+    admin_credentials = configurations.get("ADMIN_CREDENTIALS")
+    create_user_add_to_group(admin_credentials.get("name"), admin_credentials.get("email"), admin_credentials.get("password"), "admin")
+    user_credentials = configurations.get("USER_CREDENTIALS")
+    create_user_add_to_group(user_credentials.get("name"), user_credentials.get("email"), user_credentials.get("password"), "users")
     deploy_stack(**get_iam_stack(outputs))
     apigateway_lambda_deploy_sam()
-
 
 if __name__ == "__main__":
     main()
