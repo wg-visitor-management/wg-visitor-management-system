@@ -398,4 +398,3 @@ def send_verification_mails(emails):
 
 if __name__ == "__main__":
     print(deploy_template("vms_email_template-test", "A visitor needs your approval", body_mail, "A visitor needs your approval"))
-    

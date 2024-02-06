@@ -121,16 +121,31 @@ def confirm_sign_up(username, code):
     print(response)
     return response
 
-
-
-
+def verify_email_address(username):
+    try:
+        response = client.admin_update_user_attributes(
+            UserPoolId=userpool_id,
+            Username=username,
+            UserAttributes=[
+                {
+                    'Name': 'email_verified',
+                    'Value': 'true'
+                }
+            ]
+        )
+    except client.exceptions.UserNotFoundException:
+        print("User not found")
+        return
+    print(response)
+    return response
 
 
 def create_user_add_to_group(name, username, password, group_name):
     create_user(username, password, name)
     admin_create_group(group_name, "Group for testing")
     admin_add_user_to_group(username, group_name)
+    verify_email_address(username)
     initiate_auth(username, password)
 
 if __name__ == "__main__":
-    create_user_add_to_group("Udbhav Mani", "ayushmani2020@gmail.com", "AWSpass123!", "admin",)
+    create_user_add_to_group("Kittu", "cod12321@gmail.com", "AWSpass123!", "admin")
