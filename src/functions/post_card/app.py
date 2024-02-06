@@ -24,7 +24,7 @@ def lambda_handler(event, context):
  
     for card_id in cards:
         check_if_card_exists(card_id)
- 
+
         body = {}
         body["PK"] = "card"
         body["SK"] = f"card#{card_id}"

@@ -1,17 +1,17 @@
 import os
 from vms_layer.utils.base64_parser import convert_to_base64
-
+ 
 from vms_layer.helpers.rbac import rbac
 from vms_layer.helpers.db_helper import DBHelper
 from vms_layer.utils.handle_errors import handle_errors
 from vms_layer.utils.loggers import get_logger
 from vms_layer.config.config import CARD_STATUS
 from vms_layer.helpers.response_parser import ParseResponse
-
+ 
 db_helper = DBHelper(os.getenv("DynamoDBTableName"))
 logger = get_logger("GET /visitor")
-
-
+ 
+ 
 @handle_errors
 @rbac
 def lambda_handler(event, context):
@@ -22,23 +22,21 @@ def lambda_handler(event, context):
         if search_key:
             search_key = search_key.lower()
     return get_visitor_by_name(search_key)
-
-
+ 
+ 
 def get_visitor_by_name(search_key):
-    data = query_items(
-        db_helper,
+    data = query_items(db_helper,
         key_condition_expression="PK = :pk AND begins_with(SK, :sk)",
-        expression_attribute_values={":pk": "visitor", ":sk": f"detail#{search_key}"},
+        expression_attribute_values={":pk": "visitor", ":sk": f"detail#{search_key}"}
     )
     if data:
         for item in data:
-            item["visitor_id"] = convert_to_base64(item.get("SK").split("#")[-1])
+            item['visitor_id'] = convert_to_base64(item.get('SK').split('#')[-1])
             item.pop("PK")
             item.pop("SK")
-
+ 
         return ParseResponse(data, 200).return_response()
     return ParseResponse("No visitor found", 404).return_response()
-
 
 def query_items(
     db_helper,

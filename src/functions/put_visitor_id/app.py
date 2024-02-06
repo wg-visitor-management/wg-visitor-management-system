@@ -15,6 +15,7 @@ from vms_layer.utils.date_time_parser import current_time_epoch
 from vms_layer.utils.s3_signed_url_generator import generate_presigned_url
 from vms_layer.utils.custom_errors import VisitorNotFoundException
 
+
 logger = get_logger("PUT /visitor/:id")
 db_helper = DBHelper(os.getenv("DynamoDBTableName"))
 bucket_name = os.getenv("BucketName")
@@ -42,6 +43,7 @@ def lambda_handler(event, context):
     visitor_history_id = f"detail#{raw_visitor_id}"
     picture_name_self = visitor_details.get("profilePictureUrl")
     picture_name_id = visitor_details.get("idProofPictureUrl")
+
 
     vistor_pk_body = parse_request_body_to_object(
         request_body, picture_name_self, picture_name_id

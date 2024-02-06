@@ -34,21 +34,9 @@ def lambda_handler(event, context):
     profilePictureUrl = None
     idProofPictureUrl = None
     if profilePictureIdentifier and idProofPictureIdentifier:
-        profilePictureUrl = generate_presigned_url(
-            bucket_name, profilePictureIdentifier
-        )
-        idProofPictureUrl = generate_presigned_url(
-            bucket_name, idProofPictureIdentifier
-        )
+        profilePictureUrl = generate_presigned_url(bucket_name, profilePictureIdentifier)
+        idProofPictureUrl = generate_presigned_url(bucket_name, idProofPictureIdentifier)
     visitor.pop("PK")
     visitor.pop("SK")
     visitor_id = convert_to_base64(visitor_id.split("#")[-1])
-    return ParseResponse(
-        {
-            **visitor,
-            "visitorId": visitor_id,
-            "profilePictureUrl": profilePictureUrl,
-            "idProofPictureUrl": idProofPictureUrl,
-        },
-        200,
-    ).return_response()
+    return ParseResponse({**visitor,"visitorId": visitor_id ,  "profilePictureUrl": profilePictureUrl, "idProofPictureUrl": idProofPictureUrl}, 200).return_response()

@@ -2,9 +2,8 @@ import os
 import subprocess
 import boto3
 import logging
-from dotenv import load_dotenv
-load_dotenv()
-
+import dotenv
+dotenv.load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 client_cf = boto3.client("cloudformation")
@@ -14,13 +13,13 @@ configurations = {
     "ENVIRONMENT": os.getenv("ENVIRONMENT"),
     "S3_BUCKET_FOR_SAM": os.getenv("BUCKET_NAME"),
     "SAM_STACK_NAME": "api-gateway-lambda-sam",
-    "BUCKET_NAME": "vms-static-content-test",
+    "BUCKET_NAME": "vms-static-content",
     "USER_POOL_NAME": "vms-user-pool",
     "USER_POOL_CLIENT_NAME": "vms-user-pool-client",
     "TABLE_NAME": "vms-database",
     "ROLE_NAME": "vms-lambda-role-common",
-    "SENDER_EMAIL": "udbhavmani20@gmail.com",
-    "RECIPIENT_EMAIL": "udbhavmani20@gmail.com",
+    "SENDER_EMAIL": "abhi22hada@gmail.com",
+    "RECIPIENT_EMAIL": "abhi22hada@gmail.com",
     "JWT_SECRET": "vms-secret-key-1234",
 }
 
