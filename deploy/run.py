@@ -5,16 +5,29 @@ import logging
 import dotenv
 from cognito_operations import create_user_add_to_group
 from ses_template import deploy_template, send_verification_mails, body_mail
+ 
 dotenv.load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 client_cf = boto3.client("cloudformation")
-
+ADMIN_EMAILS = [
+    "abhi22hada@gmail.com"
+]
+ADMIN_CREDENTIALS = {
+    "name": "Naugs",
+    "email": "naugaria.ar.6@gmail.com",
+    "password": "Password@123",
+}
+USER_CREDENTIALS = {
+    "name": "Abhishek Kumar",
+    "email": "user@gmail.com",
+    "password": "Password@123",
+}
 outputs = {}
 configurations = {
-    "ADMIN_EMAIL" : os.getenv("ADMIN_EMAIL"),
-    "ADMIN_CREDENTIALS" : os.getenv("ADMIN_CREDENTIALS"),
-    "USER_CREDENTIALS" : os.getenv("USER_CREDENTIALS"),
+    "ADMIN_EMAIL": ADMIN_EMAILS,
+    "ADMIN_CREDENTIALS": ADMIN_CREDENTIALS,
+    "USER_CREDENTIALS": USER_CREDENTIALS,
     "ENVIRONMENT": os.getenv("ENVIRONMENT"),
     "S3_BUCKET_FOR_SAM": os.getenv("BUCKET_NAME"),
     "SAM_STACK_NAME": "api-gateway-lambda-sam",
@@ -27,8 +40,8 @@ configurations = {
     "RECIPIENT_EMAIL": "abhi22hada@gmail.com",
     "JWT_SECRET": "vms-secret-key-1234",
 }
-
-
+ 
+ 
 def get_iam_stack(outputs, configurations=configurations):
     iam_stack = {
         "stack_name": "iam-stack",
@@ -51,8 +64,8 @@ def get_iam_stack(outputs, configurations=configurations):
         "capabilities": ["CAPABILITY_IAM", "CAPABILITY_NAMED_IAM"],
     }
     return iam_stack
-
-
+ 
+ 
 static_content_bucket_stack = {
     "stack_name": "static-content-bucket-stack",
     "template_body_url": "cfn/static_content_bucket.yaml",
@@ -98,13 +111,13 @@ dynamodb_stack = {
     ],
     "capabilities": ["CAPABILITY_IAM"],
 }
-
-
+ 
+ 
 def extract_outputs(response):
     for output in response["Stacks"][0]["Outputs"]:
         outputs[output["OutputKey"]] = output["OutputValue"]
-
-
+ 
+ 
 def get_stack_outputs(stack_name):
     try:
         response = client_cf.describe_stacks(StackName=stack_name)
@@ -116,13 +129,13 @@ def get_stack_outputs(stack_name):
     else:
         logger.info(f"Stack: {stack_name} exists!")
         return True
-
-
+ 
+ 
 def deploy_stack(stack_name, template_body_url, parameters, capabilities):
     logger.info("Deploying stack: {} wiht params : {}".format(stack_name, parameters))
     template_body = open(template_body_url).read()
     logger.info(f"Deploying stack: {stack_name}\n")
-
+ 
     try:
         if not get_stack_outputs(stack_name):
             response = client_cf.create_stack(
@@ -148,16 +161,16 @@ def deploy_stack(stack_name, template_body_url, parameters, capabilities):
         )
         logger.info(f"Stack: {stack_name} deployed successfully!")
         get_stack_outputs(stack_name)
-
-
+ 
+ 
 def run_command(command):
     try:
         subprocess.run(command, check=True, shell=True)
     except subprocess.CalledProcessError as e:
         logger.error(f"Error running command: {e}")
         exit(1)
-
-
+ 
+ 
 def apigateway_lambda_deploy_sam():
     package_command = (
         "sam package "
@@ -167,7 +180,7 @@ def apigateway_lambda_deploy_sam():
     )
     logger.info("Packaging SAM application...")
     run_command(package_command)
-
+ 
     deploy_command = (
         "sam deploy "
         "--template-file ../gen/template-generated.yaml "
@@ -186,25 +199,45 @@ def apigateway_lambda_deploy_sam():
     )
     logger.info("Deploying SAM application...")
     run_command(deploy_command)
-
+ 
+ 
 def install_requirements():
-    run_command("mkdir -p ../src/common/python/lib/python3.11/site-packages")
-    run_command("pip install -r ../requirements.txt --target ../src/common/python/lib/python3.11/site-packages")
-
+    # run_command("mkdir ../src/common/python/lib/python3.11/site-packages")
+    run_command(
+        "pip install -r ../requirements.txt --target ../src/common/python/lib/python3.11/site-packages"
+    )
+ 
+ 
 def main():
-
+ 
     deploy_stack(**static_content_bucket_stack)
     deploy_stack(**cognito_stack)
     deploy_stack(**dynamodb_stack)
-    deploy_template("vms_email_template-test", "A visitor needs your approval", body_mail, "A visitor needs your approval")
-    send_verification_mails(configurations.get("ADMIN_EMAIL"))
-    admin_credentials = configurations.get("ADMIN_CREDENTIALS")
-    create_user_add_to_group(admin_credentials.get("name"), admin_credentials.get("email"), admin_credentials.get("password"), "admin")
-    user_credentials = configurations.get("USER_CREDENTIALS")
-    create_user_add_to_group(user_credentials.get("name"), user_credentials.get("email"), user_credentials.get("password"), "users")
+    deploy_template(
+        "vms_email_template-test",
+        "A visitor needs your approval",
+        body_mail,
+        "A visitor needs your approval",
+    )
+    send_verification_mails(ADMIN_EMAILS)
+    admin_credentials = ADMIN_CREDENTIALS
+    create_user_add_to_group(
+        admin_credentials.get("name"),
+        admin_credentials.get("email"),
+        admin_credentials.get("password"),
+        "admin",
+    )
+    user_credentials = USER_CREDENTIALS
+    create_user_add_to_group(
+        user_credentials.get("name"),
+        user_credentials.get("email"),
+        user_credentials.get("password"),
+        "users",
+    )
     deploy_stack(**get_iam_stack(outputs))
     install_requirements()
     apigateway_lambda_deploy_sam()
-
+ 
+ 
 if __name__ == "__main__":
     main()

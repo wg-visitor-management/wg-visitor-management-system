@@ -276,7 +276,7 @@ body_mail ="""
                                                         "
                                                     >
                                                         <a
-                                                            href="https://ryfhm9zfki.execute-api.ap-south-1.amazonaws.com/dev/approval/{{visit_id}}?access_token={{access_token}}&action=approved"
+                                                            href="https://blmdrybz1c.execute-api.ap-south-1.amazonaws.com/dev/approval/{{visit_id}}?access_token={{access_token}}&action=approved"
                                                             class="approve"
                                                             style="
                                                                 display: inline-block;
