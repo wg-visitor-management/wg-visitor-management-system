@@ -14,18 +14,32 @@ logger = get_logger("POST /forgot-password")
 client_id = os.getenv("UserPoolClientId")
 
 def get_token(alias):
-    client.forgot_password(
-    ClientId=client_id,
-    Username=alias,
-    )
+    try: 
+        client.forgot_password(
+        ClientId=client_id,
+        Username=alias,
+        )
+    except client.exceptions.UserNotFoundException as error:
+        raise ValueError("User not found.")
+    except Exception as error:
+        raise ValueError("Cannot send token.")
 
 def change_password(alias, code, password):
-    client.confirm_forgot_password(
-    ClientId=client_id,
-    Username=alias,
-    ConfirmationCode=code,
-    Password=password,
-    )
+    try:
+        client.confirm_forgot_password(
+        ClientId=client_id,
+        Username=alias,
+        ConfirmationCode=code,
+        Password=password,
+        )
+    except client.exceptions.CodeMismatchException as error:
+        raise ValueError("Invalid OTP, Please Try Again.")
+    except client.exceptions.ExpiredCodeException as error:
+        raise ValueError("OTP expired. Please request a new one.")
+    except client.exceptions.UserNotFoundException as error:
+        raise ValueError("User not found.")
+    except Exception as error:
+        raise ValueError("Cannot change password.")
 
 @handle_errors
 @validate_schema(password_schema)
