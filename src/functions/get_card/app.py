@@ -7,7 +7,8 @@ from vms_layer.utils.loggers import get_logger
 from vms_layer.config.config import CARD_STATUS
 from vms_layer.helpers.response_parser import ParseResponse
 
-db_helper = DBHelper(os.getenv("DynamoDBTableName"))
+TABLE_NAME = os.getenv("DynamoDBTableName")
+db_helper = DBHelper(TABLE_NAME)
 logger = get_logger("POST_/card")
 
 

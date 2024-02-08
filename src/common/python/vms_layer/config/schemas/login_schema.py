@@ -9,10 +9,12 @@ login_schema = {
                         }},
         "password": {
             "type": "string",
-            "minLength": 6, 
+            "minLength": 8,
+            "pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",
             "message": {
                 "required": "Password is a required property.",
-                "minLength": "Password should be atleast 6 characters long.", 
+                "minLength": "Password should be atleast 8 characters long.", 
+                "pattern": "Password should contain atleast one uppercase letter, one lowercase letter, one number and one special character."
                 }},
     },
     "required": ["username", "password"],
