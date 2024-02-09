@@ -1,20 +1,26 @@
+"""This module contains the code for the get_visitor lambda function."""
+
 import os
 from vms_layer.utils.base64_parser import convert_to_base64
- 
+
 from vms_layer.helpers.rbac import rbac
 from vms_layer.helpers.db_helper import DBHelper
 from vms_layer.utils.handle_errors import handle_errors
 from vms_layer.utils.loggers import get_logger
-from vms_layer.config.config import CARD_STATUS
 from vms_layer.helpers.response_parser import ParseResponse
- 
+
 db_helper = DBHelper(os.getenv("DynamoDBTableName"))
 logger = get_logger("GET /visitor")
- 
- 
+
+
 @handle_errors
 @rbac
 def lambda_handler(event, context):
+    """
+    This function is used to get all the visitors from the database.
+    """
+    logger.debug("Received event: %s", event)
+    logger.debug("Received context: %s", context)
     search_key = ""
     query_params = event.get("queryStringParameters")
     if query_params:
@@ -22,24 +28,27 @@ def lambda_handler(event, context):
         if search_key:
             search_key = search_key.lower()
     return get_visitor_by_name(search_key)
- 
- 
+
+
 def get_visitor_by_name(search_key):
-    data = query_items(db_helper,
+    """
+    This function is used to get the visitor by name from the database.
+    """
+    data = query_items(
         key_condition_expression="PK = :pk AND begins_with(SK, :sk)",
-        expression_attribute_values={":pk": "visitor", ":sk": f"detail#{search_key}"}
+        expression_attribute_values={":pk": "visitor", ":sk": f"detail#{search_key}"},
     )
     if data:
         for item in data:
-            item['visitor_id'] = convert_to_base64(item.get('SK').split('#')[-1])
+            item["visitor_id"] = convert_to_base64(item.get("SK").split("#")[-1])
             item.pop("PK")
             item.pop("SK")
- 
+        logger.debug("Visitor Data: %s", data)
         return ParseResponse(data, 200).return_response()
     return ParseResponse("No visitor found", 404).return_response()
 
+
 def query_items(
-    db_helper,
     key_condition_expression,
     filter_expression=None,
     expression_attribute_values=None,
@@ -53,7 +62,6 @@ def query_items(
         expression_attribute_values=expression_attribute_values,
     )
     items += response["Items"]
-    logger.debug(f"Items: {items}")
     while "LastEvaluatedKey" in response:
         response = db_helper.query_items(
             key_condition_expression=key_condition_expression,
@@ -63,6 +71,5 @@ def query_items(
             expression_attribute_values=expression_attribute_values,
         )
         items += response["Items"]
-
-    logger.debug(f"Items Q: {items}")
+    logger.debug("Items %s", items)
     return items

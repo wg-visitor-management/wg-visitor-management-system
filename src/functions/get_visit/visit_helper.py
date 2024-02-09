@@ -1,3 +1,8 @@
+"""
+This module contains the VisitHelper class 
+that is responsible for getting the visits from the database
+with some filters.
+"""
 import os
 
 from vms_layer.utils.base64_parser import base64_to_string
@@ -15,6 +20,9 @@ logger = get_logger("GET /visit")
 
 
 class VisitHelper:
+    """
+    This class is used to get the visits from the database with some filters.
+    """
     def __init__(self):
         pass
 
@@ -25,11 +33,15 @@ class VisitHelper:
         organization=None,
         approver=None,
     ):
+        """Get the visits from the database with some filters like start and end date"""
         quarters = extract_quarters_from_date_range(start_date, end_date)
         start_date_formatted = date_to_epoch(start_date)
         end_date_formatted = date_to_epoch(end_date)
         logger.debug(
-            f"Quarters: {quarters}, start_date: {start_date}, end_date: {end_date}"
+            "Quarters: %s, Start Date: %s, End Date: %s",
+            quarters,
+            start_date_formatted,
+            end_date_formatted,
         )
 
         response = []
@@ -45,8 +57,7 @@ class VisitHelper:
                 approver,
             )
             response += items
-        logger.debug(f"Response: {response}")
-
+        logger.debug({"Response %s": response})
         for item in response:
             item.pop("PK")
             visitor_id = item["SK"].split("#")[2]
@@ -54,7 +65,6 @@ class VisitHelper:
             item["visitId"] = convert_to_base64(f"{visitor_id}#{timestamp}") + "=="
             item.pop("SK")
             item["date"] = epoch_to_date(int(item["checkInTime"])).split("T")[0]
-            print(item)
             item["checkInTime"] = epoch_to_date(int(item["checkInTime"])).split("T")[1]
             if item.get("checkOutTime"):
                 item["checkOutTime"] = epoch_to_date(int(item["checkOutTime"]))
@@ -92,7 +102,7 @@ class VisitHelper:
             expression_attribute_values=expression_attribute_values,
         )
 
-    def get_visits_by_visitor_id(self, visitor_id, pageSize=50, nextPageToken=None):
+    def get_visits_by_visitor_id(self, visitor_id):
         """Get the visits of a visitor by visitor id"""
         db_helper = DBHelper(os.environ["DynamoDBTableName"])
         decoded_id = base64_to_string(visitor_id)
@@ -123,14 +133,13 @@ class VisitHelper:
 
             item["visitId"] = convert_to_base64(f"{visitor_id}#{timestamp}") + "=="
             item["date"] = epoch_to_date(int(item["checkInTime"])).split("T")[0]
-            print(item)
             item["checkInTime"] = epoch_to_date(int(item["checkInTime"])).split("T")[1]
             if item.get("checkOutTime"):
                 item["checkOutTime"] = epoch_to_date(int(item["checkOutTime"]))
             if item.get("approvalTime"):
                 item["approvalTime"] = epoch_to_date(int(item["approvalTime"]))
 
-        logger.debug(f"Response: {response}")
+        logger.debug("Response: %s", response)
         return response
 
     def query_items(
@@ -149,7 +158,7 @@ class VisitHelper:
             expression_attribute_values=expression_attribute_values,
         )
         items += response["Items"]
-        logger.debug(f"Items: {items}")
+        logger.debug("Items: %s", items)
         while "LastEvaluatedKey" in response:
             response = db_helper.query_items(
                 key_condition_expression=key_condition_expression,
@@ -160,5 +169,5 @@ class VisitHelper:
             )
             items += response["Items"]
 
-        logger.debug(f"Items Q: {items}")
+        logger.debug("Items %s", items)
         return items

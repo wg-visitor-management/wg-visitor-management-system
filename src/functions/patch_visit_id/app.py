@@ -1,4 +1,3 @@
-import json
 import os
 import base64
 from vms_layer.helpers.response_parser import ParseResponse

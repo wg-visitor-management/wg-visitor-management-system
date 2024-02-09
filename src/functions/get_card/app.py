@@ -1,3 +1,7 @@
+"""
+This module is used to get all the cards from the database.
+"""
+
 import os
 
 from vms_layer.helpers.rbac import rbac
@@ -8,12 +12,17 @@ from vms_layer.config.config import CARD_STATUS
 from vms_layer.helpers.response_parser import ParseResponse
 
 db_helper = DBHelper(os.getenv("DynamoDBTableName"))
-logger = get_logger("POST_/card")
+logger = get_logger("GET /card")
 
 
 @handle_errors
 @rbac
 def lambda_handler(event, context):
+    """
+    This function is used to get all the cards from the database.
+    """
+    logger.debug("Received event: %s", event)
+    logger.debug("Received context: %s", context)
     data = db_helper.query_items(
         key_condition_expression="PK = :pk AND begins_with(SK, :sk)",
         expression_attribute_values={":pk": "card", ":sk": "card#"},
@@ -23,8 +32,9 @@ def lambda_handler(event, context):
         cards = parse_cards_data(data)
         return ParseResponse(cards, 200).return_response()
     return ParseResponse([], 200).return_response()
-    
 def parse_cards_data(cards):
+    """
+    This function is used to parse the cards data."""
     cards_data = []
     for card in cards:
         if card.get("cardStatus") != CARD_STATUS.get("DISCARDED"):

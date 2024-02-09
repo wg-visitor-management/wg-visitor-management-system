@@ -11,3 +11,5 @@ deploy/sam_config.py
 ses_template.py
 gen/template-generated.yaml
 run.py
+.pylintrc
+out

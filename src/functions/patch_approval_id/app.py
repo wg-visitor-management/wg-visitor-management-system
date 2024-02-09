@@ -1,7 +1,5 @@
 import json
 import os
-import time
-import base64
 from vms_layer.utils.handle_errors import handle_errors
 from vms_layer.helpers.validate_schema import validate_schema
 from vms_layer.utils.loggers import get_logger
