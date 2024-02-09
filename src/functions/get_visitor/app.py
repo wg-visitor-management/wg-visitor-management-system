@@ -1,8 +1,6 @@
-import json
 """This module contains the code for the get_visitor lambda function."""
 
-import os
-
+import json
 from vms_layer.utils.base64_parser import convert_to_base64, base64_to_string
 from vms_layer.helpers.rbac import rbac
 from vms_layer.helpers.db_helper import DBHelper
@@ -13,38 +11,68 @@ from vms_layer.helpers.response_parser import ParseResponse
 db_helper = DBHelper()
 logger = get_logger("GET /visitor")
 
+
+@handle_errors
+@rbac
 def lambda_handler(event, context):
+    """
+    This function is used as a handler for the get_visitor lambda function
+    """
     logger.debug("Received event: %s", event)
+    logger.debug("Received context: %s", context)
     query_params = event.get("queryStringParameters")
     search_key = query_params.get("name", "").lower()
     last_evaluated_key = query_params.get("nextPageToken")
     organization = query_params.get("organization")
     page_size = int(query_params.get("maxItems", 10))
+    filter_expression = "contains(organization, :organization)" if organization else ""
+    expression_attribute_values = (
+        {":organization": organization} if organization else {}
+    )
 
-    filter_expression = generate_filter_expression(organization)
-    expression_attribute_values = generate_expression_attribute_values(organization)
-    
-    return get_visitor_by_name(search_key, filter_expression, expression_attribute_values, last_evaluated_key, page_size)
+    response = get_visitor_by_name(
+        search_key,
+        filter_expression,
+        expression_attribute_values,
+        last_evaluated_key,
+        page_size,
+    )
+    logger.info("Returning response: %s", response)
+    return response
 
-def get_visitor_by_name(search_key, filter_expression, expression_attribute_values, last_evaluated_key, page_size):
+
+def get_visitor_by_name(
+    search_key,
+    filter_expression,
+    expression_attribute_values,
+    last_evaluated_key,
+    page_size,
+):
+    """
+    This function is used to get the visitor by name
+    """
     logger.debug("Getting visitor by name: %s", search_key)
     if last_evaluated_key:
         last_evaluated_key = json.loads(base64_to_string(last_evaluated_key))
-    
+
     expression_attributes = {":pk": "visitor", ":sk": f"detail#{search_key}"}
     if expression_attribute_values:
         expression_attributes.update(expression_attribute_values)
-    
+
     data, next_page_token = query_items(
         key_condition_expression="PK = :pk AND begins_with(SK, :sk)",
-        expression_attribute_values= expression_attributes,
+        expression_attribute_values=expression_attributes,
         filter_expression=filter_expression,
         starting_token=last_evaluated_key,
-        page_size=page_size
+        page_size=page_size,
     )
     return format_response(data, next_page_token)
 
+
 def format_response(data, next_page_token):
+    """
+    This function is used to format the response
+    """
     logger.debug("Formatting response")
     if data:
         for item in data:
@@ -64,8 +92,11 @@ def query_items(
     starting_token,
     page_size,
     filter_expression=None,
-    expression_attribute_values=None
+    expression_attribute_values=None,
 ):
+    """
+    This function is used to query items from the table
+    """
     logger.debug("Querying items")
     if not expression_attribute_values:
         expression_attribute_values = {}
@@ -86,14 +117,6 @@ def query_items(
         last_evaluated_key = response.get("LastEvaluatedKey")
         last_evaluated_key = json.dumps(last_evaluated_key)
         last_evaluated_key = convert_to_base64(last_evaluated_key)
-    
-    logger.debug(f"Items Q: {items}")
+
+    logger.debug("Items :%s", items)
     return items, last_evaluated_key
-
-def generate_filter_expression(organization):
-    logger.debug("Generating filter expression for organization: %s", organization)
-    return f"contains(organization, :organization)" if organization else ""
-
-def generate_expression_attribute_values(organization):
-    logger.debug("Generating expression attribute values for organization: %s", organization)
-    return {":organization": organization} if organization else {}
