@@ -1,7 +1,5 @@
 import json
 import os
-import time
-import base64
 from vms_layer.utils.handle_errors import handle_errors
 from vms_layer.helpers.validate_schema import validate_schema
 from vms_layer.utils.loggers import get_logger
@@ -18,7 +16,7 @@ from vms_layer.utils.date_time_parser import (
 from vms_layer.config.schemas.approval_schema import patch_approval_schema
 
 logger = get_logger("PATCH /approval/:id")
-db_helper = DBHelper(os.getenv("DynamoDBTableName"))
+db_helper = DBHelper()
 
 
 def update_partition(

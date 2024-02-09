@@ -17,7 +17,7 @@ from vms_layer.utils.base64_parser import convert_to_base64
 from vms_layer.utils.loggers import get_logger
 
 logger = get_logger("POST /visitor")
-db_helper = DBHelper(os.getenv("DynamoDBTableName"))
+db_helper = DBHelper()
 bucket_name = os.getenv("BucketName")
 
 def process_visitor_photo(request_body, raw_visitor_id):

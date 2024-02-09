@@ -1,14 +1,15 @@
+import os
 import boto3
 from botocore.exceptions import ClientError
 
-
+TABLE_NAME = os.getenv("DynamoDBTableName")
 class DBHelper:
     """Helper class for DynamoDB operations"""
 
-    def __init__(self, table_name):
-        self.table_name = table_name
+    def __init__(self):
+        self.table_name = TABLE_NAME
         self.dynamodb = boto3.resource("dynamodb")
-        self.table = self.dynamodb.Table(table_name)
+        self.table = self.dynamodb.Table(TABLE_NAME)
 
     def create_item(self, item):
         """Create an item in the table"""

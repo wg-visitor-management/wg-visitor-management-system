@@ -19,13 +19,13 @@ configurations = {
     "ENVIRONMENT": os.getenv("ENVIRONMENT"),
     "S3_BUCKET_FOR_SAM": os.getenv("BUCKET_NAME"),
     "SAM_STACK_NAME": "api-gateway-lambda-sam",
-    "BUCKET_NAME": "vms-static-content",
+    "BUCKET_NAME": "vms-static-content-test",
     "USER_POOL_NAME": "vms-user-pool",
     "USER_POOL_CLIENT_NAME": "vms-user-pool-client",
     "TABLE_NAME": "vms-database",
     "ROLE_NAME": "vms-lambda-role-common",
-    "SENDER_EMAIL": "abhi22hada@gmail.com",
-    "RECIPIENT_EMAIL": "abhi22hada@gmail.com",
+    "SENDER_EMAIL": "udbhavmani20@gmail.com",
+    "RECIPIENT_EMAIL": "udbhavmani20@gmail.com",
     "JWT_SECRET": "vms-secret-key-1234",
 }
  
@@ -164,14 +164,14 @@ def apigateway_lambda_deploy_sam():
         "sam package "
         f"--s3-bucket {configurations.get('S3_BUCKET_FOR_SAM')} "
         "--template-file template.yaml "
-        "--output-template-file ../gen/template-generated.yaml"
+        "--output-template-file template-generated.yaml"
     )
     logger.info("Packaging SAM application...")
     run_command(package_command)
  
     deploy_command = (
         "sam deploy "
-        "--template-file ../gen/template-generated.yaml "
+        "--template-file template-generated.yaml "
         f"--stack-name {configurations.get('SAM_STACK_NAME')} "
         "--capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM "
         f"--parameter-overrides Environment={configurations.get('ENVIRONMENT')} "

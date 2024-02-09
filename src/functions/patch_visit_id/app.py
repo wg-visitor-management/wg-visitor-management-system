@@ -1,4 +1,3 @@
-import json
 import os
 import base64
 from vms_layer.helpers.response_parser import ParseResponse
@@ -16,7 +15,7 @@ from vms_layer.helpers.db_helper import DBHelper
 def lambda_handler(event, context):
     visit_id = event.get("pathParameters").get("id")
 
-    db_helper = DBHelper(os.environ.get("DynamoDBTableName"))
+    db_helper = DBHelper()
 
     decoded_visit_id = base64.b64decode(visit_id).decode("utf-8")
 
