@@ -31,7 +31,7 @@ def lambda_handler(event, context):
     if not response:
         logger.error(f"Card {card_id} not found")
         return ParseResponse({"message": "Card not found"}, 404).return_response()
-    if response.get("cardStatus") == "occupied" and cardStatus == "discarded":
+    if response.get("cardStatus") == "occupied" and response.get("cardStatus") == "discarded":
         logger.error(f"Card {card_id} is already occupied")
         return ParseResponse({"message": "Card is already occupied. Cannot be discarded."}, 400).return_response()
     response = db_helper.update_item(

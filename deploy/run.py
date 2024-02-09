@@ -3,12 +3,15 @@ import subprocess
 import boto3
 import logging
 import dotenv
+
 from cognito_operations import create_user_add_to_group
+from run_helper import create_recursive_folders
 from ses_template import deploy_template, send_verification_mails, body_mail
  
 dotenv.load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 client_cf = boto3.client("cloudformation")
 ADMIN_EMAILS = [
     "abhi22hada@gmail.com"
@@ -203,7 +206,9 @@ def apigateway_lambda_deploy_sam():
  
  
 def install_requirements():
-    # run_command("mkdir ../src/common/python/lib/python3.11/site-packages")
+
+    create_recursive_folders("../src", "common/python/lib/python3.11/site-packages")
+    
     run_command(
         "pip install -r ../requirements.txt --target ../src/common/python/lib/python3.11/site-packages"
     )

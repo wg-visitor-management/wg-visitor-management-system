@@ -11,11 +11,9 @@ from vms_layer.helpers.response_parser import ParseResponse
  
 db_helper = DBHelper(os.getenv("DynamoDBTableName"))
 logger = get_logger("GET /visitor")
- 
 
-@handle_errors
-@rbac
 def lambda_handler(event, context):
+    logger.debug("Received event: %s", event)
     query_params = event.get("queryStringParameters")
     search_key = query_params.get("name", "").lower()
     last_evaluated_key = query_params.get("nextPageToken")
@@ -27,8 +25,8 @@ def lambda_handler(event, context):
     
     return get_visitor_by_name(search_key, filter_expression, expression_attribute_values, last_evaluated_key, page_size)
 
-
 def get_visitor_by_name(search_key, filter_expression, expression_attribute_values, last_evaluated_key, page_size):
+    logger.debug("Getting visitor by name: %s", search_key)
     if last_evaluated_key:
         last_evaluated_key = json.loads(base64_to_string(last_evaluated_key))
     
@@ -36,13 +34,17 @@ def get_visitor_by_name(search_key, filter_expression, expression_attribute_valu
     if expression_attribute_values:
         expression_attributes.update(expression_attribute_values)
     
-    data, next_page_token = query_items(db_helper,
+    data, next_page_token = query_items(
         key_condition_expression="PK = :pk AND begins_with(SK, :sk)",
         expression_attribute_values= expression_attributes,
         filter_expression=filter_expression,
         starting_token=last_evaluated_key,
         page_size=page_size
     )
+    return format_response(data, next_page_token)
+
+def format_response(data, next_page_token):
+    logger.debug("Formatting response")
     if data:
         for item in data:
             item['visitor_id'] = convert_to_base64(item.get('SK').split('#')[-1])
@@ -55,14 +57,14 @@ def get_visitor_by_name(search_key, filter_expression, expression_attribute_valu
         return ParseResponse(response, 200).return_response()
     return ParseResponse([], 200).return_response()
 
-def query_items(db_helper,
+def query_items(
     key_condition_expression,
     starting_token,
     page_size,
     filter_expression=None,
     expression_attribute_values=None
 ):
-    """Query items from the table"""
+    logger.debug("Querying items")
     if not expression_attribute_values:
         expression_attribute_values = {}
     if not filter_expression:
@@ -87,7 +89,9 @@ def query_items(db_helper,
     return items, last_evaluated_key
 
 def generate_filter_expression(organization):
+    logger.debug("Generating filter expression for organization: %s", organization)
     return f"contains(organization, :organization)" if organization else ""
 
 def generate_expression_attribute_values(organization):
+    logger.debug("Generating expression attribute values for organization: %s", organization)
     return {":organization": organization} if organization else {}

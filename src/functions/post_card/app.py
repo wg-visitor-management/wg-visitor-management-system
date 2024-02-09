@@ -44,5 +44,8 @@ def lambda_handler(event, context):
 def check_if_card_exists(card_id):
     card = db_helper.get_item({"PK": "card", "SK": f"card#{card_id}"})
     if card:
+        if card.get("cardStatus") == "discarded":
+            logger.error(f"Card {card_id} is already discarded")
+            raise CardAlreadyExistsError(f"Card with ID {card_id} is revoked. Use some other ID.")
         raise CardAlreadyExistsError(f"Card With {card_id} Id Already Exists")
     return False
