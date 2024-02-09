@@ -17,7 +17,7 @@ from vms_layer.utils.custom_errors import VisitorNotFoundException
 
 
 logger = get_logger("PUT /visitor/:id")
-db_helper = DBHelper(os.getenv("DynamoDBTableName"))
+db_helper = DBHelper()
 bucket_name = os.getenv("BucketName")
 
 

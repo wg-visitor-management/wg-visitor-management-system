@@ -14,7 +14,7 @@ from vms_layer.utils.date_time_parser import (
 from vms_layer.utils.handle_errors import handle_errors
 
 logger = get_logger("GET /visit/:id")
-db_helper = DBHelper(os.getenv("DynamoDBTableName"))
+db_helper = DBHelper()
 
 
 @handle_errors

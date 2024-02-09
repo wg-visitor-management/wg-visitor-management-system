@@ -10,7 +10,7 @@ from vms_layer.utils.handle_errors import handle_errors
 from vms_layer.utils.loggers import get_logger
 from vms_layer.helpers.response_parser import ParseResponse
 
-db_helper = DBHelper(os.getenv("DynamoDBTableName"))
+db_helper = DBHelper()
 logger = get_logger("GET /visitor")
 
 def lambda_handler(event, context):

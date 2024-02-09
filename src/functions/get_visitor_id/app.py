@@ -14,7 +14,7 @@ from vms_layer.utils.base64_parser import base64_to_string, convert_to_base64
 
 
 logger = get_logger("GET /visitor/:id")
-db_helper = DBHelper(os.getenv("DynamoDBTableName"))
+db_helper = DBHelper()
 bucket_name = os.getenv("BucketName")
 
 

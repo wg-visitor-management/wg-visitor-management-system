@@ -9,7 +9,7 @@ from vms_layer.helpers.db_helper import DBHelper
 from vms_layer.config.schemas.card_schema import card_update_schema
 
 logger = get_logger("POST /card/:id")
-db_helper = DBHelper(os.getenv("DynamoDBTableName"))
+db_helper = DBHelper()
 
 
 @handle_errors

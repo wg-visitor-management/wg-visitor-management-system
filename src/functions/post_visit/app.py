@@ -16,7 +16,7 @@ from vms_layer.utils.date_time_parser import (
 )
 from vms_layer.config.schemas.visit_schema import post_visit_schema
 
-db_helper = DBHelper(os.getenv("DynamoDBTableName"))
+db_helper = DBHelper()
 logger = get_logger("POST /visit")
 
 

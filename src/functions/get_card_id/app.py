@@ -10,7 +10,7 @@ from vms_layer.utils.loggers import get_logger
 from vms_layer.helpers.response_parser import ParseResponse
 from vms_layer.utils.custom_errors import InvalidCardIdError
 
-db_helper = DBHelper(os.getenv("DynamoDBTableName"))
+db_helper = DBHelper()
 logger = get_logger("POST_/card")
 
 
