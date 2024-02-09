@@ -4,7 +4,6 @@ import boto3
 import logging
 import dotenv
 
-from cognito_operations import create_user_add_to_group
 from run_helper import create_recursive_folders
 from ses_template import deploy_template, send_verification_mails, body_mail
  
@@ -13,25 +12,10 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 client_cf = boto3.client("cloudformation")
-ADMIN_EMAILS = [
-    "abhi22hada@gmail.com"
-]
-ADMIN_CREDENTIALS = {
-    "name": "Naugs",
-    "email": "naugaria.ar.6@gmail.com",
-    "password": "Password@123",
-}
-USER_CREDENTIALS = {
-    "name": "Abhishek Kumar",
-    "email": "user@gmail.com",
-    "password": "Password@123",
-}
+
 outputs = {}
 configurations = {
-    
-    "ADMIN_EMAIL": ADMIN_EMAILS,
-    "ADMIN_CREDENTIALS": ADMIN_CREDENTIALS,
-    "USER_CREDENTIALS": USER_CREDENTIALS,
+
     "ENVIRONMENT": os.getenv("ENVIRONMENT"),
     "S3_BUCKET_FOR_SAM": os.getenv("BUCKET_NAME"),
     "SAM_STACK_NAME": "api-gateway-lambda-sam",
@@ -224,21 +208,6 @@ def main():
         "A visitor needs your approval",
         body_mail,
         "A visitor needs your approval",
-    )
-    send_verification_mails(ADMIN_EMAILS)
-    admin_credentials = ADMIN_CREDENTIALS
-    create_user_add_to_group(
-        admin_credentials.get("name"),
-        admin_credentials.get("email"),
-        admin_credentials.get("password"),
-        "admin",
-    )
-    user_credentials = USER_CREDENTIALS
-    create_user_add_to_group(
-        user_credentials.get("name"),
-        user_credentials.get("email"),
-        user_credentials.get("password"),
-        "users",
     )
     deploy_stack(**get_iam_stack(outputs))
     install_requirements()
