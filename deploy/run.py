@@ -3,13 +3,19 @@ import subprocess
 import boto3
 import logging
 import dotenv
+
+from run_helper import create_recursive_folders
+from ses_template import deploy_template, send_verification_mails, body_mail
+ 
 dotenv.load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 client_cf = boto3.client("cloudformation")
 
 outputs = {}
 configurations = {
+
     "ENVIRONMENT": os.getenv("ENVIRONMENT"),
     "S3_BUCKET_FOR_SAM": os.getenv("BUCKET_NAME"),
     "SAM_STACK_NAME": "api-gateway-lambda-sam",
@@ -22,8 +28,8 @@ configurations = {
     "RECIPIENT_EMAIL": "abhi22hada@gmail.com",
     "JWT_SECRET": "vms-secret-key-1234",
 }
-
-
+ 
+ 
 def get_iam_stack(outputs, configurations=configurations):
     iam_stack = {
         "stack_name": "iam-stack",
@@ -46,8 +52,8 @@ def get_iam_stack(outputs, configurations=configurations):
         "capabilities": ["CAPABILITY_IAM", "CAPABILITY_NAMED_IAM"],
     }
     return iam_stack
-
-
+ 
+ 
 static_content_bucket_stack = {
     "stack_name": "static-content-bucket-stack",
     "template_body_url": "cfn/static_content_bucket.yaml",
@@ -93,13 +99,13 @@ dynamodb_stack = {
     ],
     "capabilities": ["CAPABILITY_IAM"],
 }
-
-
+ 
+ 
 def extract_outputs(response):
     for output in response["Stacks"][0]["Outputs"]:
         outputs[output["OutputKey"]] = output["OutputValue"]
-
-
+ 
+ 
 def get_stack_outputs(stack_name):
     try:
         response = client_cf.describe_stacks(StackName=stack_name)
@@ -111,13 +117,13 @@ def get_stack_outputs(stack_name):
     else:
         logger.info(f"Stack: {stack_name} exists!")
         return True
-
-
+ 
+ 
 def deploy_stack(stack_name, template_body_url, parameters, capabilities):
     logger.info("Deploying stack: {} wiht params : {}".format(stack_name, parameters))
     template_body = open(template_body_url).read()
     logger.info(f"Deploying stack: {stack_name}\n")
-
+ 
     try:
         if not get_stack_outputs(stack_name):
             response = client_cf.create_stack(
@@ -143,16 +149,16 @@ def deploy_stack(stack_name, template_body_url, parameters, capabilities):
         )
         logger.info(f"Stack: {stack_name} deployed successfully!")
         get_stack_outputs(stack_name)
-
-
+ 
+ 
 def run_command(command):
     try:
         subprocess.run(command, check=True, shell=True)
     except subprocess.CalledProcessError as e:
         logger.error(f"Error running command: {e}")
         exit(1)
-
-
+ 
+ 
 def apigateway_lambda_deploy_sam():
     package_command = (
         "sam package "
@@ -162,7 +168,7 @@ def apigateway_lambda_deploy_sam():
     )
     logger.info("Packaging SAM application...")
     run_command(package_command)
-
+ 
     deploy_command = (
         "sam deploy "
         "--template-file ../gen/template-generated.yaml "
@@ -181,15 +187,32 @@ def apigateway_lambda_deploy_sam():
     )
     logger.info("Deploying SAM application...")
     run_command(deploy_command)
+ 
+ 
+def install_requirements():
 
-
+    create_recursive_folders("../src", "common/python/lib/python3.11/site-packages")
+    
+    run_command(
+        "pip install -r ../requirements.txt --target ../src/common/python/lib/python3.11/site-packages"
+    )
+ 
+ 
 def main():
+ 
     deploy_stack(**static_content_bucket_stack)
     deploy_stack(**cognito_stack)
     deploy_stack(**dynamodb_stack)
+    deploy_template(
+        "vms_email_template-test",
+        "A visitor needs your approval",
+        body_mail,
+        "A visitor needs your approval",
+    )
     deploy_stack(**get_iam_stack(outputs))
+    install_requirements()
     apigateway_lambda_deploy_sam()
-
-
+ 
+ 
 if __name__ == "__main__":
     main()

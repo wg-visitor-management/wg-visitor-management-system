@@ -144,7 +144,7 @@ Resources:
         Fn::Transform:
           Name: AWS::Include
           Parameters:
-            Location: s3://udbhav-code-sam/3194a440ec302cd5b5faecadcbf9e9d1
+            Location: s3://abhi-code-sam/3194a440ec302cd5b5faecadcbf9e9d1
       GatewayResponses:
         DEFAULT_4XX:
           ResponseParameters:
@@ -281,7 +281,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: ${Environment}-VMS-visitor-POST
-      CodeUri: s3://udbhav-code-sam/abc751f7b93e2ce20cd6cffefa5dcb1e
+      CodeUri: s3://abhi-code-sam/12f6371615b5538cfc46648f80f15b95
       Handler: app.lambda_handler
       Runtime: python3.11
       Layers:

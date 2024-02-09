@@ -17,7 +17,7 @@ visitor_schema = {
             }},
         "phoneNumber": {
             "type": "string",
-            "pattern": "^[0-9]+$",
+            "pattern": "^[0-9]{10,12}$",
             "minLength": 10,
             "message": {
                 "required": "Phone number is a required property.",
@@ -40,7 +40,7 @@ visitor_schema = {
             }},
         "address": {
             "type": "string",
-            "pattern": "^[A-Za-z0-9 ]+$",
+            "pattern": "^[#.0-9a-zA-Z\s,-]+$",
             "message": {
                 "required": "Address is a required property.",
                 "pattern": "Address should contain only alphabets, numbers and spaces.",

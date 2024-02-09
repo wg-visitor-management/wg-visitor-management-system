@@ -57,7 +57,7 @@ post_visit_schema = {
             }},
         "comments": {
             "type": "string", 
-            "pattern": "^[A-Za-z0-9 ]+$",
+            "pattern": "^[A-Za-z0-9 ]*$",
             "message": {
                 "required": "Comments is a required property.",
                 "pattern": "Comments should contain only alphabets, numbers and spaces.",
