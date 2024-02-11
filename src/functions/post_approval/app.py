@@ -38,7 +38,7 @@ def lambda_handler(event, context):
     This function is used to send an email to the approver
     and update the visit and history table with the approval status
     """
-    body = event.get("body")
+    body = json.loads(event.get("body"))
     visit_id = body.get("visitId")
     logger.debug("Event - %s, Context - %s", event, context)
     update_visit(visit_id)
@@ -85,7 +85,6 @@ def send_email(body):
     """
     logger.debug("Sending email to the approver with body %s", body)
     exp_time = datetime.utcnow() + timedelta(hours=1)
-    body = json.loads(body)
     name = body.get("name")
     visit_id = body.get("visitId")
     organization = body.get("organization")

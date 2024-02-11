@@ -33,7 +33,9 @@ def lambda_handler(event, context):
         return ParseResponse({"message": "Card not found"}, 404).return_response()
     if response.get("cardStatus") == "occupied" and response.get("cardStatus") == "discarded":
         logger.error(f"Card {card_id} is already occupied")
-        return ParseResponse({"message": "Card is already occupied. Cannot be discarded."}, 400).return_response()
+        return ParseResponse(
+            {"message": "Card is already occupied. Cannot be discarded."},
+            400).return_response()
     response = db_helper.update_item(
         key={"PK": "card", "SK": f"card#{card_id}"},
         update_expression="SET visit_id = :visit_id, cardStatus = :cardStatus",
