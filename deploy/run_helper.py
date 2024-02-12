@@ -16,6 +16,3 @@ def create_recursive_folders(folder_path, create_path):
             print(f"Folder already exists: {_sub_path}")
     os.chdir(current_path)
     return
-    
-if __name__ == "__main__":
-    create_recursive_folders("../src", "common/python/lib/python3.11/site-packages/hii")

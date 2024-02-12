@@ -1,11 +1,11 @@
 """
-This module contains the VisitHelper class 
+This module contains the VisitHelper class
 that is responsible for getting the visits from the database
 with some filters.
 """
-
+ 
 from body_parser import BodyParser
-
+ 
 from vms_layer.utils.base64_parser import base64_to_string
 from vms_layer.utils.date_time_parser import current_time_epoch
 from vms_layer.utils.loggers import get_logger
@@ -15,19 +15,19 @@ from vms_layer.utils.date_time_parser import (
     date_to_epoch,
     epoch_to_date,
 )
-
+ 
 logger = get_logger("GET /visit")
 db_helper = DBHelper()
-
-
+ 
+ 
 class VisitHelper:
     """
     This class is used to get the visits from the database with some filters.
     """
-
+ 
     def __init__(self):
         pass
-
+ 
     def get_filtered_visits_date_range(
         self,
         start_date,
@@ -39,7 +39,7 @@ class VisitHelper:
         quarters = extract_quarters_from_date_range(start_date, end_date)
         start_date_formatted = date_to_epoch(start_date)
         end_date_formatted = date_to_epoch(end_date)
-
+ 
         response = []
         for quarter in quarters:
             items = self.query_items_with_filters(
@@ -54,7 +54,7 @@ class VisitHelper:
         response_body = BodyParser(response).parse_response()
         logger.info({"Response %s": response_body})
         return response_body
-
+ 
     def query_items_with_filters(
         self,
         quarter,
@@ -76,7 +76,7 @@ class VisitHelper:
         elif approver:
             filter_expression = "approvedBy = :approver"
             expression_attribute_values[":approver"] = approver
-
+ 
         response = self.query_items(
             key_condition_expression="PK = :PK AND SK BETWEEN :start_date AND :end_date",
             filter_expression=filter_expression,
@@ -84,7 +84,7 @@ class VisitHelper:
         )
         logger.info({"Response %s": response})
         return response
-
+ 
     def get_visits_by_visitor_id(self, visitor_id):
         """Get the visits of a visitor by visitor id"""
         decoded_id = base64_to_string(visitor_id)
@@ -107,7 +107,7 @@ class VisitHelper:
             response += items
         response_body = BodyParser(response).parse_response()
         return response_body
-
+ 
     def query_items(
         self,
         key_condition_expression,
@@ -132,6 +132,6 @@ class VisitHelper:
                 expression_attribute_values=expression_attribute_values,
             )
             items += response["Items"]
-
+ 
         logger.debug("Items %s", items)
         return items
