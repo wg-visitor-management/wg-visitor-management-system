@@ -31,6 +31,10 @@ def lambda_handler(event, context):
 
     if visitor_id:
         response = visit_helper.get_visits_by_visitor_id(visitor_id)
+    elif not (start_date and end_date):
+        return ParseResponse(
+            {"message": "Please provide start and end date"}, 400
+        ).return_response()
     else:
         response = visit_helper.get_filtered_visits_date_range(
             start_date, end_date, organization, approver

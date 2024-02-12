@@ -39,9 +39,9 @@ def lambda_handler(event, context):
             response.get("AuthenticationResult"), 200
         ).return_response()
 
-    except client.exceptions.NotAuthorizedException:
+    except client.exceptions.NotAuthorizedException as exc:
         logger.error("Incorrect username or password")
-        raise NotAuthorizedException("Incorrect username or password")
-    except client.exceptions.UserNotFoundException:
+        raise NotAuthorizedException("Incorrect username or password") from exc
+    except client.exceptions.UserNotFoundException as exc:
         logger.error("User does not exist")
-        raise UserNotFoundException("User does not exist")
+        raise UserNotFoundException("User does not exist") from exc
