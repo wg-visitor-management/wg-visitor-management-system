@@ -5,12 +5,9 @@ vms_layer.zip
 testing.py
 template-generated.yaml
 gen/template-generated.yaml
-# cognito_operations.py
 deploy/sam_config.py
 .env
-# ses_template.py
 gen/template-generated.yaml
-# run.py
 .pylintrc
 out
 cognito_operations.py

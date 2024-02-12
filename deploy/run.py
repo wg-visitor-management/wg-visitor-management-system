@@ -4,7 +4,7 @@ import boto3
 import logging
 import dotenv
 
-from run_helper import create_recursive_folders
+from run_helper import create_recursive_folders, get_stack_qualifier
 from ses_template import deploy_template, send_verification_mails, body_mail
  
 dotenv.load_dotenv()
@@ -12,31 +12,28 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 client_cf = boto3.client("cloudformation")
-ADMIN_EMAILS = [
-    "abhi22hada@gmail.com"
-]
-
 outputs = {}
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
 configurations = {
-
-    "ADMIN_EMAIL": ADMIN_EMAILS,
+    
+    "ADMIN_EMAIL": [ADMIN_EMAIL],
     "ENVIRONMENT": os.getenv("ENVIRONMENT"),
     "S3_BUCKET_FOR_SAM": os.getenv("BUCKET_NAME"),
-    "SAM_STACK_NAME": "api-gateway-lambda-sam",
-    "BUCKET_NAME": "vms-static-content",
-    "USER_POOL_NAME": "vms-user-pool",
-    "USER_POOL_CLIENT_NAME": "vms-user-pool-client",
-    "TABLE_NAME": "vms-database",
-    "ROLE_NAME": "vms-lambda-role-common",
-    "SENDER_EMAIL": "abhi22hada@gmail.com",
-    "RECIPIENT_EMAIL": "abhi22hada@gmail.com",
-    "JWT_SECRET": "vms-secret-key-1234",
+    "SAM_STACK_NAME": f"{get_stack_qualifier("api-gateway")}",
+    "BUCKET_NAME": f"{get_stack_qualifier("static-content")}",
+    "USER_POOL_NAME": f"{get_stack_qualifier("user-pool")}",
+    "USER_POOL_CLIENT_NAME": f"{get_stack_qualifier("user-pool-client")}",
+    "TABLE_NAME": f"{get_stack_qualifier("database")}",
+    "ROLE_NAME": f"{get_stack_qualifier("lambda-role-common")}",
+    "SENDER_EMAIL": ADMIN_EMAIL,
+    "RECIPIENT_EMAIL": ADMIN_EMAIL,
+    "JWT_SECRET": "secret-key-1234",
 }
  
  
 def get_iam_stack(outputs, configurations=configurations):
     iam_stack = {
-        "stack_name": "iam-stack",
+        "stack_name": "iam-policy",
         "template_body_url": "cfn/iam_policy.yaml",
         "parameters": [
             {
@@ -59,7 +56,7 @@ def get_iam_stack(outputs, configurations=configurations):
  
  
 static_content_bucket_stack = {
-    "stack_name": "static-content-bucket-stack",
+    "stack_name": "static-content",
     "template_body_url": "cfn/static_content_bucket.yaml",
     "parameters": [
         {
@@ -70,7 +67,7 @@ static_content_bucket_stack = {
     "capabilities": ["CAPABILITY_IAM"],
 }
 cognito_stack = {
-    "stack_name": "cognito-stack",
+    "stack_name": "cognito",
     "template_body_url": "cfn/cognito.yaml",
     "parameters": [
         {
@@ -89,7 +86,7 @@ cognito_stack = {
     "capabilities": ["CAPABILITY_IAM"],
 }
 dynamodb_stack = {
-    "stack_name": "dynamodb-stack",
+    "stack_name": "dynamodb",
     "template_body_url": "cfn/dynamodb.yaml",
     "parameters": [
         {
@@ -127,6 +124,7 @@ def deploy_stack(stack_name, template_body_url, parameters, capabilities):
     logger.info("Deploying stack: {} wiht params : {}".format(stack_name, parameters))
     template_body = open(template_body_url).read()
     logger.info(f"Deploying stack: {stack_name}\n")
+    stack_name = get_stack_qualifier(stack_name)
  
     try:
         if not get_stack_outputs(stack_name):
@@ -213,7 +211,7 @@ def main():
         body_mail,
         "A visitor needs your approval",
     )
-    send_verification_mails(ADMIN_EMAILS)
+    send_verification_mails(configurations.get("ADMIN_EMAIL"))
     deploy_stack(**get_iam_stack(outputs))
     install_requirements()
     apigateway_lambda_deploy_sam()
