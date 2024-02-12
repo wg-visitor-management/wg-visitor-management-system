@@ -16,3 +16,12 @@ def create_recursive_folders(folder_path, create_path):
             print(f"Folder already exists: {_sub_path}")
     os.chdir(current_path)
     return
+
+def get_stack_qualifier(stack_name):
+
+    branch = os.popen('git rev-parse --abbrev-ref HEAD').read().strip()
+    if branch == "master":
+        stack_qualifier = "prod"
+    else:
+        stack_qualifier = branch
+    return f"{stack_qualifier}-vms-{stack_name}"
