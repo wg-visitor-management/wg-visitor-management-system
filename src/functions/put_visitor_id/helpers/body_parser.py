@@ -1,13 +1,28 @@
-def parse_request_body_to_object(request_body, picture_name_self, picture_name_id):
-    body = {}
-    body["firstName"] = request_body["firstName"]
-    body["lastName"] = request_body["lastName"]
-    body["phoneNumber"] = request_body["phoneNumber"]
-    body["email"] = request_body["email"]
-    body["organization"] = request_body["organization"]
-    body["address"] = request_body["address"]
-    body["idProofNumber"] = request_body["idProofNumber"]
-    body["profilePictureUrl"] = picture_name_self
-    body["idProofPictureUrl"] = picture_name_id
+"""
+Class to parse the request body for the post visitor function
+"""
 
-    return body
+class Body:
+    """
+    Class to parse the request body for the post visitor function
+    """
+    def __init__(self, request_body, picture_name_self, picture_name_id):
+        self.request_body = request_body
+        self.picture_name_self = picture_name_self
+        self.picture_name_id = picture_name_id
+
+    def to_object(self):
+        """
+        Return the visitor object
+        """
+        return {
+            "firstName": self.request_body["firstName"],
+            "lastName": self.request_body["lastName"],
+            "phoneNumber": self.request_body["phoneNumber"],
+            "email": self.request_body["email"],
+            "organization": self.request_body["organization"],
+            "address": self.request_body["address"],
+            "idProofNumber": self.request_body["idProofNumber"],
+            "profilePictureUrl": self.picture_name_self,
+            "idProofPictureUrl": self.picture_name_id
+        }

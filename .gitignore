@@ -11,3 +11,4 @@ gen/template-generated.yaml
 .pylintrc
 out
 cognito_operations.py
+gen/template-generated.yaml

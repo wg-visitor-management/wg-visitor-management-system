@@ -1,7 +1,6 @@
 """
 This module is the entry point for the lambda function for get_visit_id.
 """
-import os
 from vms_layer.utils.loggers import get_logger
 from vms_layer.helpers.db_helper import DBHelper
 from vms_layer.helpers.rbac import rbac

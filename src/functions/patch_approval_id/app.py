@@ -1,5 +1,9 @@
+"""
+PATCH /approval/:id
+This module contains the code for the patch_approval_id lambda function.
+"""
+
 import json
-import os
 from vms_layer.utils.handle_errors import handle_errors
 from vms_layer.helpers.validate_schema import validate_schema
 from vms_layer.utils.loggers import get_logger
@@ -19,16 +23,18 @@ logger = get_logger("PATCH /approval/:id")
 db_helper = DBHelper()
 
 
-def update_partition(
-    db_helper,
-    partition,
-    quarter,
-    timestamp,
-    visitor_id,
-    status,
-    approvedBy,
-    current_time,
-):
+def update_partition(update_partition_data):
+    """
+    Update the approval status for the visit and history partition
+    """
+    partition = update_partition_data.get("partition")
+    quarter = update_partition_data.get("quarter")
+    timestamp = update_partition_data.get("timestamp")
+    visitor_id = update_partition_data.get("visitor_id")
+    status = update_partition_data.get("status")
+    approved_by = update_partition_data.get("approved_by")
+    current_time = update_partition_data.get("current_time")
+
     history_key = {
         "PK": f"{partition}#{quarter}",
         "SK": f"{partition}#{timestamp}#{visitor_id}",
@@ -37,17 +43,20 @@ def update_partition(
         "PK": f"{partition}#{quarter}",
         "SK": f"{partition}#{visitor_id}#{timestamp}",
     }
-    logger.debug(f"Updating {partition} with key {history_key} and status {status}")
+    logger.debug(
+        "Updating %s with key %s and status %s", partition, history_key, status
+    )
     if partition == "visit":
         key = visit_key
     else:
         key = history_key
+    query = "SET approvalStatus = :status, approvedBy = :approvedBy, approvalTime = :approvalTime"
     response = db_helper.update_item(
         key=key,
-        update_expression="SET approvalStatus = :status, approvedBy = :approvedBy, approvalTime = :approvalTime",
+        update_expression=query,
         expression_attribute_values={
             ":status": status,
-            ":approvedBy": approvedBy,
+            ":approvedBy": approved_by,
             ":approvalTime": current_time,
         },
     )
@@ -58,9 +67,36 @@ def update_partition(
 @rbac
 @validate_schema(patch_approval_schema)
 def lambda_handler(event, context):
+    """
+    This function is the entry point for
+    the patch_approval_id lambda function.
+    """
     visit_id = event.get("pathParameters").get("id")
+    logger.debug("Received context: %s", context)
+    logger.debug("Received event: %s", event)
+    update_partition_data = get_update_partition_data(visit_id, event)
+    if update_partition_data.get("status") in ("approved", "rejected"):
+        update_partition(update_partition_data)
+        update_partition_data["partition"] = "history"
+        update_partition(update_partition_data)
+        logger.info("Approval status updated successfully")
+
+    return ParseResponse(
+        {
+            "message": "Approval status updated successfully",
+            "visitId": visit_id,
+            "approvedBy": update_partition_data.get("approved_by"),
+            "status": update_partition_data.get("status"),
+        },
+        200,
+    ).return_response()
+
+
+def get_update_partition_data(visit_id, event):
+    """
+    Get the data to update the partition
+    """
     body = json.loads(event.get("body"))
-    logger.debug(f"Received event: {event}")
     decoded_visit_id = base64_to_string(visit_id)
     status = body.get("status")
     visitor_id = decoded_visit_id.split("#")[0]
@@ -68,41 +104,19 @@ def lambda_handler(event, context):
     quarter = extract_quarters_from_date_range(
         epoch_to_date(int(timestamp)), epoch_to_date(int(timestamp))
     )[0]
-    approvedBy = event.get("requestContext").get("authorizer").get("claims").get("name")
+    authorizer = event.get("requestContext").get("authorizer")
+    approved_by = authorizer.get("claims").get("name")
     current_time = str(current_time_epoch())
-
     logger.info(
-        f"Updating approval status for visit {visit_id} with status {status} and approved by {approvedBy}"
+        "Updating approval status for visit %s with status %s", visit_id, status
     )
-    if status in ("approved", "rejected"):
-        update_partition(
-            db_helper,
-            "visit",
-            quarter,
-            timestamp,
-            visitor_id,
-            status,
-            approvedBy,
-            current_time,
-        )
-        update_partition(
-            db_helper,
-            "history",
-            quarter,
-            timestamp,
-            visitor_id,
-            status,
-            approvedBy,
-            current_time,
-        )
-        logger.info(f"Approval status updated successfully")
 
-    return ParseResponse(
-        {
-            "message": "Approval status updated successfully",
-            "visitId": visit_id,
-            "approvedBy": approvedBy,
-            "status": status,
-        },
-        200,
-    ).return_response()
+    return {
+        "partition": "visit",
+        "quarter": quarter,
+        "timestamp": timestamp,
+        "visitor_id": visitor_id,
+        "status": status,
+        "approved_by": approved_by,
+        "current_time": current_time,
+    }
