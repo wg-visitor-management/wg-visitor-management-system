@@ -1,5 +1,7 @@
+"""
+This module contains the code for the post_visit lambda function.
+"""
 import json
-import os
 from helpers.body_parser import Visit
 from vms_layer.helpers.validate_schema import validate_schema
 from vms_layer.utils.handle_errors import handle_errors
@@ -24,8 +26,13 @@ logger = get_logger("POST /visit")
 @rbac
 @validate_schema(post_visit_schema)
 def lambda_handler(event, context):
+    """
+    Create a new visit for the visitor
+    """
+    logger.debug("Received event: %s", event)
+    logger.debug("Received context: %s", context)
     body = json.loads(event.get("body"))
-    logger.debug(f"Received event: {event}")
+
     current_time = current_time_epoch()
     current_date = epoch_to_date(current_time)
     current_quarter = extract_quarters_from_date_range(current_date, current_date)[0]
@@ -37,9 +44,10 @@ def lambda_handler(event, context):
     visit = Visit(body, current_quarter, visitor_id, current_time, checked_in_by)
     item_data = visit.to_object()
 
-    logger.info(f"Creating visit for visitor {visitor_id} with data: {item_data}")
+    logger.info("Creating visit for visitor %s with data: %s", visitor_id, item_data)
+
     create_item_in_database(item_data, current_quarter, current_time, visitor_id)
-    logger.info(f"Visit created successfully")
+    logger.info("Visit created successfully")
 
     response_data = {
         "message": "Visit created successfully",
@@ -53,6 +61,9 @@ def lambda_handler(event, context):
 
 
 def create_item_in_database(item_data, current_quarter, current_time, visitor_id):
+    """
+    Create the visit and history items in the database
+    """
     db_helper.create_item(item_data)
     item_data.pop("PK")
     item_data.pop("SK")
@@ -62,5 +73,5 @@ def create_item_in_database(item_data, current_quarter, current_time, visitor_id
         "SK": f"history#{current_time}#{visitor_id}",
         **item_data,
     }
-    logger.debug(f"Creating history item with data: {history_item_data}")
+    logger.debug("Creating history item with data: %s", history_item_data)
     db_helper.create_item(history_item_data)

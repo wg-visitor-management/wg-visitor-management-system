@@ -75,7 +75,7 @@ def lambda_handler(event, context):
     logger.debug("Received context: %s", context)
     logger.debug("Received event: %s", event)
     update_partition_data = get_update_partition_data(visit_id, event)
-    if update_partition.get("status") in ("approved", "rejected"):
+    if update_partition_data.get("status") in ("approved", "rejected"):
         update_partition(update_partition_data)
         update_partition_data["partition"] = "history"
         update_partition(update_partition_data)

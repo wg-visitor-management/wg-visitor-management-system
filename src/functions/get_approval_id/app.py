@@ -69,8 +69,8 @@ def lambda_handler(event, context):
     action = event.get("queryStringParameters").get("action")
     token = jwt.decode(access_token, os.getenv("JWT_SECRET"), algorithms=["HS256"])
     name = token.get("name")
-    logger.debug("Received event: %s", {event})
-    logger.debug("Received context: %s", {context})
+    logger.debug("Received event: %s", event)
+    logger.debug("Received context: %s", context)
     decoded_visit_id = base64_to_string(visit_id)
     visitor_id = decoded_visit_id.split("#")[0]
     timestamp = decoded_visit_id.split("#")[1]

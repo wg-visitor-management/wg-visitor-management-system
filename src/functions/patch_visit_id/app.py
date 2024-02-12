@@ -1,3 +1,7 @@
+"""
+This module is responsible for updating the 
+check out time for the visit and history partition
+"""
 import base64
 
 from vms_layer.helpers.response_parser import ParseResponse

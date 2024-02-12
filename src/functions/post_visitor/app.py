@@ -1,6 +1,6 @@
+"""This module contains the lambda handler for the POST /visitor endpoint."""
 import os
 import json
-import logging
 from datetime import datetime
 
 from helpers.body_parser import Body
@@ -21,6 +21,9 @@ db_helper = DBHelper()
 bucket_name = os.getenv("BucketName")
 
 def process_visitor_photo(request_body, raw_visitor_id):
+    """
+    Process the visitor photo and upload it to S3
+    """
     logger.debug("Processing visitor photo with raw_visitor_id: %s", raw_visitor_id)
     picture_name_self = f"{raw_visitor_id}#photo_self"
     upload_mime_image_binary_to_s3(
@@ -31,6 +34,9 @@ def process_visitor_photo(request_body, raw_visitor_id):
     return picture_name_self
 
 def process_id_photo(request_body, raw_visitor_id):
+    """
+    Process the ID photo and upload it to S3
+    """
     logger.debug("Processing ID photo with raw_visitor_id: %s", raw_visitor_id)
     picture_name_id = f"{raw_visitor_id}#photo_id"
     upload_mime_image_binary_to_s3(
@@ -41,6 +47,9 @@ def process_id_photo(request_body, raw_visitor_id):
     return picture_name_id
 
 def create_visitor_and_history(visitor_body, history_body):
+    """
+    Create visitor and history records
+    """
     logger.info("Creating visitor and history records")
     db_helper.create_item(visitor_body)
     db_helper.create_item(history_body)
@@ -49,7 +58,11 @@ def create_visitor_and_history(visitor_body, history_body):
 @rbac
 @validate_schema(schema=visitor_schema)
 def lambda_handler(event, context):
+    """
+    The lambda handler for the POST /visitor endpoint.
+    """
     logger.debug("Received event: %s", event)
+    logger.debug("Received context: %s", context)
     current_year = datetime.now().year
     epoch_current = current_time_epoch()
     request_body = json.loads(event.get("body"))
