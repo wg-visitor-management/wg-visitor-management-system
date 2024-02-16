@@ -1,6 +1,12 @@
 """Helper Class for date conversions."""
 import time
 from math import ceil
+
+
+def current_time_epoch():
+    """Returns the current time in epoch format."""
+    return int(time.time())
+from math import ceil
  
  
 def current_time_epoch():

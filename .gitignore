@@ -5,4 +5,10 @@ vms_layer.zip
 testing.py
 template-generated.yaml
 gen/template-generated.yaml
+deploy/sam_config.py
+.env
+gen/template-generated.yaml
+.pylintrc
+out
 cognito_operations.py
+gen/template-generated.yaml
