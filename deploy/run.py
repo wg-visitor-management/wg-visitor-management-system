@@ -15,7 +15,6 @@ client_cf = boto3.client("cloudformation")
 outputs = {}
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
 configurations = {
-    
     "ADMIN_EMAIL": [ADMIN_EMAIL],
     "ENVIRONMENT": os.getenv("ENVIRONMENT"),
     "S3_BUCKET_FOR_SAM": os.getenv("BUCKET_NAME"),
@@ -29,8 +28,7 @@ configurations = {
     "RECIPIENT_EMAIL": ADMIN_EMAIL,
     "JWT_SECRET": os.getenv("JWT_SECRET"),
 }
- 
- 
+
 def get_iam_stack(outputs, configurations=configurations):
     iam_stack = {
         "stack_name": "iam-policy",
@@ -166,14 +164,14 @@ def apigateway_lambda_deploy_sam():
         "sam package "
         f"--s3-bucket {configurations.get('S3_BUCKET_FOR_SAM')} "
         "--template-file template.yaml "
-        "--output-template-file ../gen/template-generated.yaml"
+        "--output-template-file template-generated.yaml"
     )
     logger.info("Packaging SAM application...")
     run_command(package_command)
  
     deploy_command = (
         "sam deploy "
-        "--template-file ../gen/template-generated.yaml "
+        "--template-file template-generated.yaml "
         f"--stack-name {configurations.get('SAM_STACK_NAME')} "
         "--capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM "
         f"--parameter-overrides Environment={configurations.get('ENVIRONMENT')} "
