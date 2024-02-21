@@ -63,12 +63,22 @@ Parameters:
     JWTSecret:
         Type: String
         Description: JWT Secret
+    
+    ApplicationName:
+        Type: String
+        Description: The name of the application
+        Default: wg-visitor-mgmt-system
 
 Resources:
     ApiGatewayRole:
         Type: AWS::IAM::Role
         Properties:
             RoleName: !Sub ${Environment}--ApiGatewayRole
+            Tags:
+                - Key: "ApplicationName"
+                  Value: !Ref ApplicationName
+                - Key: "ResourceName"
+                  Value: !Sub ${Environment}--ApiGatewayRole
             AssumeRolePolicyDocument:
                 Version: "2012-10-17"
                 Statement:
@@ -111,7 +121,11 @@ Resources:
         Type: AWS::Serverless::Api
         Properties:
             StageName: !Ref Environment
-
+            Tags:
+                - Key: "ApplicationName"
+                  Value: !Ref ApplicationName
+                - Key: "ResourceName"
+                  Value: !Sub ${Environment}--ApiGateway
             DefinitionBody:
                 Fn::Transform:
                     Name: AWS::Include
@@ -149,6 +163,11 @@ Resources:
                 Variables:
                     UserPoolClientId: !Ref UserPoolClientId
                     UserPoolId: !Ref UserPoolId
+            Tags:
+                - Key: "ApplicationName"
+                  Value: !Ref ApplicationName
+                - Key: "ResourceName"
+                  Value: !Sub ${Environment}-VMS-login-GET
 
             FunctionName: !Sub ${Environment}-VMS-login-GET
             CodeUri: ../src/functions/login

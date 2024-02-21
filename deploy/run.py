@@ -32,6 +32,10 @@ def get_iam_stack(outputs, ):
                 "ParameterKey": "DynamoDBTableArn",
                 "ParameterValue": outputs["DynamoDBTableArn"],
             },
+            {
+                "ParameterKey": "ApplicationName",
+                "ParameterValue": config.APPLICATION_NAME,
+            }
         ],
         "capabilities": ["CAPABILITY_IAM", "CAPABILITY_NAMED_IAM"],
     }
@@ -46,6 +50,14 @@ static_content_bucket_stack = {
             "ParameterKey": "BucketName",
             "ParameterValue": config.BUCKET_NAME,
         },
+        {
+            "ParameterKey": "Environment",
+            "ParameterValue": config.ENVIRONMENT,
+        },
+        {
+            "ParameterKey": "ApplicationName",
+            "ParameterValue": config.APPLICATION_NAME,
+        }
     ],
     "capabilities": ["CAPABILITY_IAM"],
 }
@@ -65,6 +77,10 @@ cognito_stack = {
             "ParameterKey": "UserPoolClientName",
             "ParameterValue": config.USER_POOL_CLIENT_NAME,
         },
+        {
+            "ParameterKey": "AppName",
+            "ParameterValue": config.APPLICATION_NAME,
+        }
     ],
     "capabilities": ["CAPABILITY_IAM"],
 }
@@ -80,6 +96,10 @@ dynamodb_stack = {
             "ParameterKey": "TableName",
             "ParameterValue": config.TABLE_NAME,
         },
+        {
+            "ParameterKey": "ApplicationName",
+            "ParameterValue": config.APPLICATION_NAME,
+        }
     ],
     "capabilities": ["CAPABILITY_IAM"],
 }
@@ -167,7 +187,8 @@ def apigateway_lambda_deploy_sam():
         f"CognitoPoolArn={outputs.get('CognitoPoolArn')} "
         f"SenderMail={config.SENDER_EMAIL} "
         f"ReceiverMail={config.RECIPIENT_EMAIL} "
-        f"JWTSecret={config.JWT_SECRET}"
+        f"JWTSecret={config.JWT_SECRET} "
+        f"ApplicationName={config.APPLICATION_NAME}"
     )
     logger.info("Deploying SAM application...")
     run_command(deploy_command)

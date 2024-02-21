@@ -9,6 +9,17 @@ Parameters:
         MinLength: 1
         MaxLength: 80
         Default: "vms-static-content"
+    Environment:
+        Type: String
+        Description: "The name of the Environment"
+        Default: "dev"
+        AllowedValues:
+            - dev
+            - prod
+    ApplicationName:
+        Type: String
+        Description: "The name of the application"
+        Default: "wg-visitor-mgmt-system"
 
 Resources:
     VMSStaticContentBucket:
@@ -16,10 +27,10 @@ Resources:
         Properties:
             BucketName: !Ref BucketName
             Tags:
-                - Key: Requirement
-                  Value: Storing Static Content
-                - Key: Type
-                  Value: Images
+                - Key: "ApplicationName"
+                  Value: !Ref "ApplicationName"
+                - Key: "ResourceName"
+                  Value: !Ref BucketName
     VmsBucketPolicy:
         Type: AWS::S3::BucketPolicy
         Properties:

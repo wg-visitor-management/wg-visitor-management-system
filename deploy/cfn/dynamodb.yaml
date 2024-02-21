@@ -11,7 +11,10 @@ Parameters:
         AllowedValues:
             - dev
             - prod
-
+    ApplicationName:
+        Type: String
+        Description: The name of the application
+        Default: wg-visitor-mgmt-system
 Resources:
     DynamoDBTable:
         Type: AWS::DynamoDB::Table
@@ -30,6 +33,12 @@ Resources:
             ProvisionedThroughput:
                 ReadCapacityUnits: 5
                 WriteCapacityUnits: 5
+            Tags:
+                - Key: "AppName"
+                  Value: !Ref ApplicationName
+                - Key: "ResourceName"
+                  Value: !Ref TableName
+            
 
 Outputs:
     DynamoDBTableName:

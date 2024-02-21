@@ -16,6 +16,10 @@ Parameters:
         Type: String
         Description: Name of the Cognito User Pool Client
         Default: vms-user-pool-client
+    ApplicationName:
+        Type: String
+        Description: Name of the application
+        Default: wg-visitor-mgmt-system
 Resources:
     UserPool:
         Type: AWS::Cognito::UserPool
@@ -29,6 +33,9 @@ Resources:
                 PasswordPolicy:
                     MinimumLength: 8
                     RequireNumbers: true
+            UserPoolTags:
+                AppName: !Ref ApplicationName
+                ResourceName: !Ref UserPoolName
 
     UserPoolClient:
         Type: AWS::Cognito::UserPoolClient

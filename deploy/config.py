@@ -11,6 +11,7 @@ ENVIRONMENT = os.getenv("ENVIRONMENT")
 S3_BUCKET_FOR_SAM = os.getenv("BUCKET_NAME")
 JWT_SECRET = os.getenv("JWT_SECRET")
 
+APPLICATION_NAME = "wg-visitor-mgmt-system"
 SAM_STACK_NAME = f"{get_stack_qualifier('api-gateway')}"
 BUCKET_NAME = f"{get_stack_qualifier('static-content')}"
 USER_POOL_NAME = f"{get_stack_qualifier('user-pool')}"
@@ -19,19 +20,3 @@ TABLE_NAME = f"{get_stack_qualifier('database')}"
 ROLE_NAME = f"{get_stack_qualifier('lambda-role-common')}"
 SENDER_EMAIL = ADMIN_EMAIL
 RECIPIENT_EMAIL = ADMIN_EMAIL
-
-
-configurations = {
-    "ADMIN_EMAIL": [ADMIN_EMAIL],
-    "ENVIRONMENT": ENVIRONMENT,
-    "S3_BUCKET_FOR_SAM": BUCKET_NAME,
-    "JWT_SECRET": JWT_SECRET,
-    "SAM_STACK_NAME": f"{get_stack_qualifier('api-gateway')}",
-    "BUCKET_NAME": f"{get_stack_qualifier('static-content')}",
-    "USER_POOL_NAME": f"{get_stack_qualifier('user-pool')}",
-    "USER_POOL_CLIENT_NAME": f"{get_stack_qualifier('user-pool-client')}",
-    "TABLE_NAME": f"{get_stack_qualifier('database')}",
-    "ROLE_NAME": f"{get_stack_qualifier('lambda-role-common')}",
-    "SENDER_EMAIL": ADMIN_EMAIL,
-    "RECIPIENT_EMAIL": ADMIN_EMAIL,
-}

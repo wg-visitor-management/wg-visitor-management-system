@@ -25,6 +25,11 @@ Parameters:
         Description: "Name of the DynamoDB table"
         MinLength: 1
         MaxLength: 80
+    ApplicationName:
+        Type: String
+        Description: The name of the application
+        Default: wg-visitor-mgmt-system
+    
 Resources:
     LambdaIAMRole:
         Type: AWS::IAM::Role
@@ -39,6 +44,11 @@ Resources:
                       Action:
                           - sts:AssumeRole
             RoleName: !Sub "${Environment}-${RoleName}"
+            Tags:
+                - Key: "ApplicationName"
+                  Value: !Ref ApplicationName
+                - Key: "ResourceName"
+                  Value: !Ref RoleName
             Policies:
                 - PolicyName: SESPolicy
                   PolicyDocument:
