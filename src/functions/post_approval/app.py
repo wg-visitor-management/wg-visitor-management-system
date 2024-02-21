@@ -84,7 +84,7 @@ def send_email(body):
     This function is used to send an email to the approver
     """
     logger.debug("Sending email to the approver with body %s", body)
-    exp_time = datetime.utcnow() + timedelta(hours=1)
+    exp_time = datetime.utcnow() + timedelta(seconds=690)
     name = body.get("name")
     visit_id = body.get("visitId")
     organization = body.get("organization")

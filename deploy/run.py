@@ -3,14 +3,14 @@ import subprocess
 import boto3
 import logging
 import dotenv
-
+ 
 from run_helper import create_recursive_folders, get_stack_qualifier
 from ses_template import deploy_template, send_verification_mails, body_mail
  
 dotenv.load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
+ 
 client_cf = boto3.client("cloudformation")
 outputs = {}
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
@@ -28,7 +28,7 @@ configurations = {
     "RECIPIENT_EMAIL": ADMIN_EMAIL,
     "JWT_SECRET": os.getenv("JWT_SECRET"),
 }
-
+ 
 def get_iam_stack(outputs, configurations=configurations):
     iam_stack = {
         "stack_name": "iam-policy",
@@ -153,10 +153,9 @@ def deploy_stack(stack_name, template_body_url, parameters, capabilities):
  
 def run_command(command):
     try:
-        subprocess.run(command, check=True, shell=True)        
+        subprocess.run(command, check=True, shell=True)  
     except subprocess.CalledProcessError as e:
         logger.error(f"Error running command: {e}")
-        exit(1)
  
  
 def apigateway_lambda_deploy_sam():
@@ -190,9 +189,9 @@ def apigateway_lambda_deploy_sam():
  
  
 def install_requirements():
-
+ 
     create_recursive_folders("../src", "common/python/lib/python3.11/site-packages")
-    
+   
     run_command(
         "pip install -r ../requirements.txt --target ../src/common/python/lib/python3.11/site-packages"
     )
@@ -203,17 +202,19 @@ def main():
     deploy_stack(**static_content_bucket_stack)
     deploy_stack(**cognito_stack)
     deploy_stack(**dynamodb_stack)
+    send_verification_mails(configurations.get("ADMIN_EMAIL"))
+    deploy_stack(**get_iam_stack(outputs))
+    install_requirements()
+    apigateway_lambda_deploy_sam()
+    get_stack_outputs(configurations.get("SAM_STACK_NAME"))
+    APIGatewayEndpoint = outputs.get("VMSApiEndpoint")
     deploy_template(
         "vms_email_template-test",
         "A visitor needs your approval",
         body_mail,
         "A visitor needs your approval",
+        APIGatewayEndpoint
     )
-    send_verification_mails(configurations.get("ADMIN_EMAIL"))
-    deploy_stack(**get_iam_stack(outputs))
-    install_requirements()
-    apigateway_lambda_deploy_sam()
- 
  
 if __name__ == "__main__":
     main()

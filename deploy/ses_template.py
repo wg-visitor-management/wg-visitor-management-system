@@ -1,10 +1,11 @@
 import boto3
-
+ 
 client = boto3.client("ses")
-
-
-def deploy_template(template_name, subject, html, text):
+ 
+ 
+def deploy_template(template_name, subject, html, text, api_gateway_url):
     try:
+        html = html.replace("{{api_gateway_url}}", api_gateway_url)
         response = client.get_template(TemplateName=template_name)
         if "Template" in response:
             client.update_template(
@@ -25,10 +26,10 @@ def deploy_template(template_name, subject, html, text):
                 "TextPart": text,
             }
         )
-    
+   
     return f"Template {template_name} created successfully"
-
-
+ 
+ 
 def send_email(template_name, sender, recipient, subject, body):
     client.send_templated_email(
         Source=sender,
@@ -37,8 +38,8 @@ def send_email(template_name, sender, recipient, subject, body):
         TemplateData=body,
     )
     return f"Email sent successfully"
-
-
+ 
+ 
 body_mail ="""
 <!DOCTYPE html>
 <html>
@@ -220,7 +221,7 @@ body_mail ="""
                                 </p>
                             </td>
                         </tr>
-
+ 
                         <tr>
                             <td
                                 align="left"
@@ -244,11 +245,11 @@ body_mail ="""
                                     {{purpose}}
                                 </p>
                                 <p style="margin: 0">
-                                    <strong>Phone number </strong> {{ph_number}} 
+                                    <strong>Phone number </strong> {{ph_number}}
                                 </p>
                             </td>
                         </tr>
-
+ 
                         <tr>
                             <td align="left" bgcolor="#ffffff">
                                 <table
@@ -276,7 +277,7 @@ body_mail ="""
                                                         "
                                                     >
                                                         <a
-                                                            href="https://blmdrybz1c.execute-api.ap-south-1.amazonaws.com/dev/approval/{{visit_id}}?access_token={{access_token}}&action=approved"
+                                                            href="{{api_gateway_url}}/approval/{{visit_id}}?access_token={{access_token}}&action=approved"
                                                             class="approve"
                                                             style="
                                                                 display: inline-block;
@@ -303,7 +304,7 @@ body_mail ="""
                                                         "
                                                     >
                                                         <a
-                                                            href="https://blmdrybz1c.execute-api.ap-south-1.amazonaws.com/dev/approval/{{visit_id}}?access_token={{access_token}}&action=rejected"
+                                                            href="{{api_gateway_url}}/approval/{{visit_id}}?access_token={{access_token}}&action=rejected"
                                                             class="reject"
                                                             style="
                                                                 display: inline-block;
@@ -330,7 +331,7 @@ body_mail ="""
                                 </table>
                             </td>
                         </tr>
-
+ 
                         <tr>
                             <td
                                 align="left"
@@ -391,7 +392,7 @@ body_mail ="""
     </body>
 </html>
 """
-
+ 
 def send_verification_mails(emails):
     for email in emails:
         client.verify_email_identity(EmailAddress=email)
