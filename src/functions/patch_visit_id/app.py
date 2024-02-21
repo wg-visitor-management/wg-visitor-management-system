@@ -2,6 +2,7 @@
 This module is responsible for updating the 
 check out time for the visit and history partition
 """
+import os
 import base64
 
 from vms_layer.helpers.response_parser import ParseResponse
@@ -13,7 +14,9 @@ from vms_layer.utils.handle_errors import handle_errors
 from vms_layer.helpers.db_helper import DBHelper
 from vms_layer.utils.loggers import get_logger
 
-logger = get_logger("PATCH /visit/:id")
+APP_NAME = os.getenv("ApplicationName")
+
+logger = get_logger(APP_NAME)
 
 
 

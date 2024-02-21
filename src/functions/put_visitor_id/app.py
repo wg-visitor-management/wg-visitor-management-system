@@ -19,9 +19,10 @@ from vms_layer.utils.date_time_parser import current_time_epoch
 from vms_layer.utils.s3_signed_url_generator import generate_presigned_url
 from vms_layer.utils.custom_errors import VisitorNotFoundException
 
+APP_NAME = os.getenv("ApplicationName")
 
-logger = get_logger("PUT /visitor/:id")
 db_helper = DBHelper()
+logger = get_logger(APP_NAME)
 BUCKET_NAME = os.getenv("BucketName")
 
 

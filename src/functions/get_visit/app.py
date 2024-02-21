@@ -2,13 +2,17 @@
 This module is the entry point for the lambda function
 that retrieves visits from the database.
 """
+import os
+
 from vms_layer.utils.handle_errors import handle_errors
 from vms_layer.utils.loggers import get_logger
 from vms_layer.helpers.response_parser import ParseResponse
 from vms_layer.helpers.rbac import rbac
 from visit_helper import VisitHelper
-logger = get_logger("GET /visit")
 
+APP_NAME = os.getenv("ApplicationName")
+
+logger = get_logger(APP_NAME)
 
 @handle_errors
 @rbac

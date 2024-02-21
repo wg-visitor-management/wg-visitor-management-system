@@ -34,7 +34,7 @@ Resources:
                     MinimumLength: 8
                     RequireNumbers: true
             UserPoolTags:
-                AppName: !Ref ApplicationName
+                ApplicationName: !Ref ApplicationName
                 ResourceName: !Ref UserPoolName
 
     UserPoolClient:

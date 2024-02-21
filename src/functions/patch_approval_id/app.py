@@ -3,7 +3,9 @@ PATCH /approval/:id
 This module contains the code for the patch_approval_id lambda function.
 """
 
+import os
 import json
+
 from vms_layer.utils.handle_errors import handle_errors
 from vms_layer.helpers.validate_schema import validate_schema
 from vms_layer.utils.loggers import get_logger
@@ -19,7 +21,9 @@ from vms_layer.utils.date_time_parser import (
 )
 from vms_layer.config.schemas.approval_schema import patch_approval_schema
 
-logger = get_logger("PATCH /approval/:id")
+APP_NAME = os.getenv("ApplicationName")
+
+logger = get_logger(APP_NAME)
 db_helper = DBHelper()
 
 

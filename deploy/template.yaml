@@ -13,6 +13,7 @@ Globals:
                 Environment: !Ref Environment
                 BucketName: !Ref BucketName
                 DynamoDBTableName: !Ref DynamoDBTable
+                ApplicationName: !Ref ApplicationName
     Api:
         Cors:
             AllowMethods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"

@@ -1,6 +1,8 @@
 """This module contains the code for the get_visitor lambda function."""
 
+import os
 import json
+
 from vms_layer.utils.base64_parser import convert_to_base64, base64_to_string
 from vms_layer.helpers.rbac import rbac
 from vms_layer.helpers.db_helper import DBHelper
@@ -8,9 +10,10 @@ from vms_layer.utils.handle_errors import handle_errors
 from vms_layer.utils.loggers import get_logger
 from vms_layer.helpers.response_parser import ParseResponse
 
-db_helper = DBHelper()
-logger = get_logger("GET /visitor")
+APP_NAME = os.getenv("ApplicationName")
 
+logger = get_logger(APP_NAME)
+db_helper = DBHelper()
 
 @handle_errors
 @rbac

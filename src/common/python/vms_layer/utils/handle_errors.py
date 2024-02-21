@@ -1,11 +1,13 @@
+import os
 import functools
 import traceback
+
 from vms_layer.utils.loggers import get_logger
 from vms_layer.helpers.response_parser import ParseResponse
 from vms_layer.config.config import error_map
+APP_NAME = os.getenv("ApplicationName")
 
-logger = get_logger(__name__)
-
+logger = get_logger(APP_NAME)
 
 def handle_errors(function):
     """Decorator to handle errors"""

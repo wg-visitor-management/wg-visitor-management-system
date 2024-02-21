@@ -1,5 +1,7 @@
 """This module updates a card with a visit_id and status."""
+import os
 import json
+
 from vms_layer.helpers.validate_schema import validate_schema
 from vms_layer.utils.handle_errors import handle_errors
 from vms_layer.utils.loggers import get_logger
@@ -8,9 +10,10 @@ from vms_layer.helpers.rbac import rbac
 from vms_layer.helpers.db_helper import DBHelper
 from vms_layer.config.schemas.card_schema import card_update_schema
 
-logger = get_logger("POST /card/:id")
-db_helper = DBHelper()
+APP_NAME = os.getenv("ApplicationName")
 
+logger = get_logger(APP_NAME)
+db_helper = DBHelper()
 
 @handle_errors
 @rbac

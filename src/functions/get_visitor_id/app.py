@@ -12,10 +12,11 @@ from vms_layer.utils.handle_errors import handle_errors
 from vms_layer.utils.loggers import get_logger
 from vms_layer.utils.base64_parser import base64_to_string, convert_to_base64
 
+APP_NAME = os.getenv("ApplicationName")
 
-logger = get_logger("GET /visitor/:id")
+logger = get_logger(APP_NAME)
 db_helper = DBHelper()
-bucket_name = os.getenv("BucketName")
+BUCKET_NAME = os.getenv("BucketName")
 
 
 @handle_errors
@@ -43,10 +44,10 @@ def lambda_handler(event, context):
     id_proof_picture_url = None
     if profile_picture_identifier and id_proof_picture_identifier:
         profile_picture_url = generate_presigned_url(
-            bucket_name, profile_picture_identifier
+            BUCKET_NAME, profile_picture_identifier
         )
         id_proof_picture_url = generate_presigned_url(
-            bucket_name, id_proof_picture_identifier
+            BUCKET_NAME, id_proof_picture_identifier
         )
     visitor.pop("PK")
     visitor.pop("SK")

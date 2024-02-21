@@ -1,10 +1,12 @@
 import base64
+import os
 import boto3
 
 from vms_layer.utils.loggers import get_logger
 from vms_layer.utils.custom_errors import FailedToUploadImageError
+APP_NAME = os.getenv("ApplicationName")
 
-logger = get_logger(__name__)
+logger = get_logger(APP_NAME)
 s3 = boto3.client("s3")
 
 

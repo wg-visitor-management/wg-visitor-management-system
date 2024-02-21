@@ -11,10 +11,12 @@ from vms_layer.helpers.validate_schema import validate_schema
 from vms_layer.utils.handle_errors import handle_errors
 from vms_layer.utils.custom_errors import NotAuthorizedException, UserNotFoundException
 from vms_layer.helpers.response_parser import ParseResponse
-client = boto3.client("cognito-idp")
-client_id = os.getenv("UserPoolClientId")
-logger = get_logger("POS /login")
 
+CLIENT_ID = os.getenv("UserPoolClientId")
+APP_NAME = os.getenv("ApplicationName")
+
+client = boto3.client("cognito-idp")
+logger = get_logger(APP_NAME)
 
 
 @handle_errors
@@ -33,7 +35,7 @@ def lambda_handler(event, context):
         response = client.initiate_auth(
             AuthFlow="USER_PASSWORD_AUTH",
             AuthParameters={"USERNAME": email, "PASSWORD": password},
-            ClientId=client_id,
+            ClientId=CLIENT_ID,
         )
         return ParseResponse(
             response.get("AuthenticationResult"), 200

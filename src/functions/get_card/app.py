@@ -10,9 +10,11 @@ from vms_layer.utils.handle_errors import handle_errors
 from vms_layer.utils.loggers import get_logger
 from vms_layer.config.config import CARD_STATUS
 from vms_layer.helpers.response_parser import ParseResponse
+APP_NAME = os.getenv("ApplicationName")
 
+logger = get_logger(APP_NAME)
 db_helper = DBHelper()
-logger = get_logger("POST_/card")
+
 
 
 @handle_errors

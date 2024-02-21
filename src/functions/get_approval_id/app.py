@@ -16,8 +16,9 @@ from vms_layer.utils.date_time_parser import (
     epoch_to_date,
     current_time_epoch,
 )
+APP_NAME = os.getenv("ApplicationName")
 
-logger = get_logger("GET /approval")
+logger = get_logger(APP_NAME)
 db_helper = DBHelper()
 
 

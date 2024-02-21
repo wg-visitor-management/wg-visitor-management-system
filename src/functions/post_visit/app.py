@@ -1,7 +1,9 @@
 """
 This module contains the code for the post_visit lambda function.
 """
+import os
 import json
+
 from helpers.body_parser import Visit
 from vms_layer.helpers.validate_schema import validate_schema
 from vms_layer.utils.handle_errors import handle_errors
@@ -18,9 +20,10 @@ from vms_layer.utils.date_time_parser import (
 )
 from vms_layer.config.schemas.visit_schema import post_visit_schema
 
-db_helper = DBHelper()
-logger = get_logger("POST /visit")
+APP_NAME = os.getenv("ApplicationName")
 
+logger = get_logger(APP_NAME)
+db_helper = DBHelper()
 
 @handle_errors
 @rbac

@@ -34,7 +34,7 @@ Resources:
                 ReadCapacityUnits: 5
                 WriteCapacityUnits: 5
             Tags:
-                - Key: "AppName"
+                - Key: "ApplicationName"
                   Value: !Ref ApplicationName
                 - Key: "ResourceName"
                   Value: !Ref TableName

@@ -21,8 +21,10 @@ from vms_layer.utils.date_time_parser import (
 )
 from vms_layer.config.schemas.approval_schema import post_approval_schema
 
+APP_NAME = os.getenv("ApplicationName")
+
+logger = get_logger(APP_NAME)
 client = boto3.client("ses")
-logger = get_logger("POST /approval")
 db_helper = DBHelper()
 SENDER_EMAIL = os.getenv("SENDER_EMAIL")
 RECEIVER_EMAIL = os.getenv("RECIPIENT_EMAIL")

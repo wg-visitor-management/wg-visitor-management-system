@@ -4,6 +4,7 @@ that is responsible for getting the visits from the database
 with some filters.
 """
 
+import os
 from body_parser import BodyParser
 
 from vms_layer.utils.base64_parser import base64_to_string
@@ -16,9 +17,10 @@ from vms_layer.utils.date_time_parser import (
     epoch_to_date,
 )
 
-logger = get_logger("GET /visit")
-db_helper = DBHelper()
+APP_NAME = os.getenv("ApplicationName")
 
+logger = get_logger(APP_NAME)
+db_helper = DBHelper()
 
 class VisitHelper:
     """

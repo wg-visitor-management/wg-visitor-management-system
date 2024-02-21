@@ -1,7 +1,12 @@
+import os
 import boto3
+
 from vms_layer.utils.loggers import get_logger
 
-logger = get_logger(__name__)
+APP_NAME = os.getenv("ApplicationName")
+
+logger = get_logger(APP_NAME)
+
 def generate_presigned_url(bucket_name, object_name, expiration=3600):
     """Generate a presigned URL to share an S3 object
     :param bucket_name: string

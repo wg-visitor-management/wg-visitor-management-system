@@ -1,7 +1,7 @@
 """This module is the entry point for the lambda function."""
 
-import json
 import os
+import json
 import boto3
 
 from vms_layer.helpers.response_parser import ParseResponse
@@ -10,17 +10,17 @@ from vms_layer.utils.handle_errors import handle_errors
 from vms_layer.utils.loggers import get_logger
 from vms_layer.config.schemas.password_schema import password_schema
 
+APP_NAME = os.getenv("ApplicationName")
+
+logger = get_logger(APP_NAME)
 client = boto3.client("cognito-idp")
-
-logger = get_logger("POST /forgot-password")
-client_id = os.getenv("UserPoolClientId")
-
+CLIENT_ID = os.getenv("UserPoolClientId")
 
 def get_token(alias):
     """Send a token to the user's email."""
     try:
         client.forgot_password(
-            ClientId=client_id,
+            ClientId=CLIENT_ID,
             Username=alias,
         )
     except client.exceptions.UserNotFoundException as exc:
@@ -33,7 +33,7 @@ def change_password(alias, code, password):
     """Change the user's password."""
     try:
         client.confirm_forgot_password(
-            ClientId=client_id,
+            ClientId=CLIENT_ID,
             Username=alias,
             ConfirmationCode=code,
             Password=password,

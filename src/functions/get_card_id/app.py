@@ -10,8 +10,10 @@ from vms_layer.utils.loggers import get_logger
 from vms_layer.helpers.response_parser import ParseResponse
 from vms_layer.utils.custom_errors import InvalidCardIdError
 
+APP_NAME = os.getenv("ApplicationName")
+
+logger = get_logger(APP_NAME)
 db_helper = DBHelper()
-logger = get_logger("POST_/card")
 
 
 @handle_errors
