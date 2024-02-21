@@ -153,7 +153,7 @@ def deploy_stack(stack_name, template_body_url, parameters, capabilities):
  
 def run_command(command):
     try:
-        subprocess.run(command, check=True, shell=True)
+        subprocess.run(command, check=True, shell=True)        
     except subprocess.CalledProcessError as e:
         logger.error(f"Error running command: {e}")
         exit(1)

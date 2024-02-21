@@ -73,6 +73,11 @@ def format_response(data, next_page_token):
     """
     This function is used to format the response
     """
+    response = {
+        "visitors": [],
+        "nextPageToken": None
+    }
+    
     logger.debug("Formatting response")
     if data:
         for item in data:
@@ -84,7 +89,7 @@ def format_response(data, next_page_token):
             "nextPageToken": next_page_token,
         }
         return ParseResponse(response, 200).return_response()
-    return ParseResponse([], 200).return_response()
+    return ParseResponse(response, 200).return_response()
 
 
 def query_items(

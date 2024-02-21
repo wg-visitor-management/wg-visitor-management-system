@@ -17,43 +17,43 @@ class Body:
         """
         Return the first name of the visitor
         """
-        return self.request_body["firstName"]
+        return self.request_body.get("firstName")
     @property
     def lastname(self):
         """
         Return the last name of the visitor
         """
-        return self.request_body["lastName"]
+        return self.request_body.get("lastName")
     @property
     def phonenumber(self):
         """
         Return the phone number of the visitor
         """
-        return self.request_body["phoneNumber"]
+        return self.request_body.get("phoneNumber")
     @property
     def email(self):
         """
         Return the email of the visitor
         """
-        return self.request_body["email"]
+        return self.request_body.get("email")
     @property
     def organization(self):
         """
         Return the organization of the visitor
         """
-        return self.request_body["organization"]
+        return self.request_body.get("organization")
     @property
     def address(self):
         """
         Return the address of the visitor
         """
-        return self.request_body["address"]
+        return self.request_body.get("address")
     @property
     def idproofnumber(self):
         """
         Return the id proof number of the visitor
         """
-        return self.request_body["idProofNumber"]
+        return self.request_body.get("idProofNumber")
     @property
     def profilepictureurl(self):
         """

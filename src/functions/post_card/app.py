@@ -50,8 +50,6 @@ def check_if_card_exists(card_id):
     if card:
         if card.get("cardStatus") == "discarded":
             logger.error("Card %s is already discarded",card_id)
-            raise CardAlreadyExistsError(
-                f"Card with ID {card_id} is revoked. Use some other ID."
-            )
+            return False
         raise CardAlreadyExistsError(f"Card With {card_id} Id Already Exists")
     return False

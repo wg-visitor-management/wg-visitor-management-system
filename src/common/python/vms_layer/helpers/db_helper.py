@@ -17,7 +17,6 @@ class DBHelper:
             response = self.table.put_item(Item=item)
             return response
         except ClientError as e:
-            print(f"Error creating item: {e}")
             return None
 
     def get_item(self, key):
@@ -26,7 +25,6 @@ class DBHelper:
             response = self.table.get_item(Key=key, ConsistentRead=True)
             return response.get("Item")
         except ClientError as e:
-            print(f"Error getting item: {e}")
             return None
 
     def update_item(self, key, update_expression, expression_attribute_values):
@@ -40,7 +38,6 @@ class DBHelper:
             )
             return response
         except ClientError as e:
-            print(f"Error updating item: {e}")
             return None
 
     def delete_item(self, key):
@@ -49,7 +46,6 @@ class DBHelper:
             response = self.table.delete_item(Key=key)
             return response
         except ClientError as e:
-            print(f"Error deleting item: {e}")
             return None
 
     def query_items(
@@ -81,7 +77,6 @@ class DBHelper:
             response = self.table.query(**query_params)
             return response
         except ClientError as e:
-            print(f"Error querying items: {e}")
             return None
 
     def batch_get_items(self, keys):
@@ -90,5 +85,4 @@ class DBHelper:
             response = self.table.batch_get_item(Keys=keys)
             return response
         except ClientError as e:
-            print(f"Error batch getting items: {e}")
             return None
