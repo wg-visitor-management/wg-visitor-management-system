@@ -78,7 +78,7 @@ cognito_stack = {
             "ParameterValue": config.USER_POOL_CLIENT_NAME,
         },
         {
-            "ParameterKey": "AppName",
+            "ParameterKey": "ApplicationName",
             "ParameterValue": config.APPLICATION_NAME,
         }
     ],

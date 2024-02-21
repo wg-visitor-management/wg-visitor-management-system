@@ -122,10 +122,8 @@ Resources:
         Properties:
             StageName: !Ref Environment
             Tags:
-                - Key: "ApplicationName"
-                  Value: !Ref ApplicationName
-                - Key: "ResourceName"
-                  Value: !Sub ${Environment}--ApiGateway
+                ApplicationName: !Ref ApplicationName
+                ResourceName: !Sub ${Environment}--ApiGateway
             DefinitionBody:
                 Fn::Transform:
                     Name: AWS::Include
@@ -164,10 +162,8 @@ Resources:
                     UserPoolClientId: !Ref UserPoolClientId
                     UserPoolId: !Ref UserPoolId
             Tags:
-                - Key: "ApplicationName"
-                  Value: !Ref ApplicationName
-                - Key: "ResourceName"
-                  Value: !Sub ${Environment}-VMS-login-GET
+                ApplicationName: !Ref ApplicationName
+                ResourceName: !Sub ${Environment}-VMS-login-GET
 
             FunctionName: !Sub ${Environment}-VMS-login-GET
             CodeUri: ../src/functions/login
@@ -200,11 +196,13 @@ Resources:
                 Variables:
                     UserPoolClientId: !Ref UserPoolClientId
                     UserPoolId: !Ref UserPoolId
-
             FunctionName: !Sub ${Environment}-VMS-forgot-password-POST
             CodeUri: ../src/functions/post_forgot_password
             Handler: app.lambda_handler
             Runtime: python3.11
+            Tags:
+                ApplicationName: !Ref ApplicationName
+                ResourceName: !Sub ${Environment}-VMS-forgot-password-POST
             Layers:
                 - !Ref VMSLayer
             Events:
@@ -224,7 +222,6 @@ Resources:
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref DynamoDBTable
-
     VMSVisitorGET:
         Type: AWS::Serverless::Function
         Properties:
@@ -232,6 +229,9 @@ Resources:
             CodeUri: ../src/functions/get_visitor
             Handler: app.lambda_handler
             Runtime: python3.11
+            Tags:
+                ApplicationName: !Ref ApplicationName
+                ResourceName: !Sub ${Environment}-VMS-visitor-GET
             Layers:
                 - !Ref VMSLayer
             Events:
@@ -257,6 +257,9 @@ Resources:
             CodeUri: ../src/functions/post_visitor
             Handler: app.lambda_handler
             Runtime: python3.11
+            Tags:
+                ApplicationName: !Ref ApplicationName
+                ResourceName: !Sub ${Environment}-VMS-visitor-POST
             Layers:
                 - !Ref VMSLayer
             Role: !Ref LambdaIAMRoleArn
@@ -284,6 +287,9 @@ Resources:
             CodeUri: ../src/functions/get_visitor_id
             Handler: app.lambda_handler
             Runtime: python3.11
+            Tags:
+                ApplicationName: !Ref ApplicationName
+                ResourceName: !Sub ${Environment}-VMS-visitor-id-GET
             Role: !Ref LambdaIAMRoleArn
             Layers:
                 - !Ref VMSLayer
@@ -310,6 +316,9 @@ Resources:
             CodeUri: ../src/functions/put_visitor_id
             Handler: app.lambda_handler
             Runtime: python3.11
+            Tags:
+                ApplicationName: !Ref ApplicationName
+                ResourceName: !Sub ${Environment}-VMS-visitor-id-PUT
             Role: !Ref LambdaIAMRoleArn
             Layers:
                 - !Ref VMSLayer
@@ -323,7 +332,6 @@ Resources:
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref DynamoDBTable
-
     VMSVisitGET:
         Type: AWS::Serverless::Function
         Properties:
@@ -331,6 +339,9 @@ Resources:
             CodeUri: ../src/functions/get_visit
             Handler: app.lambda_handler
             Runtime: python3.11
+            Tags:
+                ApplicationName: !Ref ApplicationName
+                ResourceName: !Sub ${Environment}-VMS-visit-GET
             Layers:
                 - !Ref VMSLayer
             Events:
@@ -356,6 +367,9 @@ Resources:
             CodeUri: ../src/functions/post_visit
             Handler: app.lambda_handler
             Runtime: python3.11
+            Tags:
+                ApplicationName: !Ref ApplicationName
+                ResourceName: !Sub ${Environment}-VMS-visit-POST
             Layers:
                 - !Ref VMSLayer
             Events:
@@ -381,6 +395,9 @@ Resources:
             CodeUri: ../src/functions/get_visit_id
             Handler: app.lambda_handler
             Runtime: python3.11
+            Tags:
+                ApplicationName: !Ref ApplicationName
+                ResourceName: !Sub ${Environment}-VMS-visit-id-GET
             Layers:
                 - !Ref VMSLayer
             Events:
@@ -406,6 +423,9 @@ Resources:
             CodeUri: ../src/functions/patch_visit_id
             Handler: app.lambda_handler
             Runtime: python3.11
+            Tags:
+                ApplicationName: !Ref ApplicationName
+                ResourceName: !Sub ${Environment}-VMS-visit-id-PATCH
             Layers:
                 - !Ref VMSLayer
             Events:
@@ -424,7 +444,6 @@ Resources:
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref DynamoDBTable
-
     VMSCardGET:
         Type: AWS::Serverless::Function
         Properties:
@@ -432,6 +451,9 @@ Resources:
             CodeUri: ../src/functions/get_card
             Handler: app.lambda_handler
             Runtime: python3.11
+            Tags:
+                ApplicationName: !Ref ApplicationName
+                ResourceName: !Sub ${Environment}-VMS-card-GET
             Role: !Ref LambdaIAMRoleArn
             Layers:
                 - !Ref VMSLayer
@@ -458,6 +480,9 @@ Resources:
             CodeUri: ../src/functions/post_card
             Handler: app.lambda_handler
             Runtime: python3.11
+            Tags:
+                ApplicationName: !Ref ApplicationName
+                ResourceName: !Sub ${Environment}-VMS-card-POST
             Layers:
                 - !Ref VMSLayer
             Events:
@@ -483,6 +508,9 @@ Resources:
             CodeUri: ../src/functions/get_card_id
             Handler: app.lambda_handler
             Runtime: python3.11
+            Tags:
+                ApplicationName: !Ref ApplicationName
+                ResourceName: !Sub ${Environment}-VMS-card-id-GET
             Layers:
                 - !Ref VMSLayer
             Events:
@@ -508,6 +536,9 @@ Resources:
             CodeUri: ../src/functions/put_card_id
             Handler: app.lambda_handler
             Runtime: python3.11
+            Tags:
+                ApplicationName: !Ref ApplicationName
+                ResourceName: !Sub ${Environment}-VMS-card-id-PUT
             Layers:
                 - !Ref VMSLayer
             Events:
@@ -526,7 +557,6 @@ Resources:
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref DynamoDBTable
-
     VMSApprovalPOST:
         Type: AWS::Serverless::Function
         Properties:
@@ -534,6 +564,9 @@ Resources:
             CodeUri: ../src/functions/post_approval
             Handler: app.lambda_handler
             Runtime: python3.11
+            Tags:
+                ApplicationName: !Ref ApplicationName
+                ResourceName: !Sub ${Environment}-VMS-approval-POST
             Environment:
                 Variables:
                     SENDER_EMAIL: !Ref SenderMail
@@ -565,6 +598,9 @@ Resources:
             CodeUri: ../src/functions/get_approval_id
             Handler: app.lambda_handler
             Runtime: python3.11
+            Tags:
+                ApplicationName: !Ref ApplicationName
+                ResourceName: !Sub ${Environment}-VMS-approval-id-GET
             Environment:
                 Variables:
                     JWT_SECRET: !Ref JWTSecret
@@ -593,6 +629,9 @@ Resources:
             CodeUri: ../src/functions/patch_approval_id
             Handler: app.lambda_handler
             Runtime: python3.11
+            Tags:
+                ApplicationName: !Ref ApplicationName
+                ResourceName: !Sub ${Environment}-VMS-approval-id-PATCH
             Layers:
                 - !Ref VMSLayer
             Events:

@@ -1,7 +1,7 @@
 import os
 import dotenv
 
-from deploy.run_helper import get_stack_qualifier
+from run_helper import get_stack_qualifier
 
 
 dotenv.load_dotenv()
