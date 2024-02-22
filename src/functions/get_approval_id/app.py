@@ -105,4 +105,45 @@ def lambda_handler(event, context):
         update_partition(update_partition_data.get("visit"))
         update_partition(update_partition_data.get("history"))
     logger.debug("Returning response")
-    return ParseResponse({"name": name, "visitId": visit_id}, 200).return_response()
+    # return ParseResponse({"name": name, "visitId": visit_id}, 200).return_response()
+    html_content = f"""
+    <html lang="en">
+    <head>
+    <meta charset="UTF-8">
+    <title>Visit Approved</title>
+    <style>
+        body {{
+        font-family: sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background-color: #f0f0f0;
+        }}
+
+        h1 {{
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #222;
+        }}
+
+        p {{
+        font-size: 1.8rem;
+        margin-bottom: 0;
+        }}
+    </style>
+    </head>
+    <body>
+    <h1>Visit {action}</h1>
+    <br>
+    <p>Visit has been {action} for {name}.</p>
+    </body>
+    </html>
+    """
+    return {
+        "statusCode": 200,
+        "body": html_content,
+        "headers": {
+            "Content-Type": "text/html"
+        }
+    }

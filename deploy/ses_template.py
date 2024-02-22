@@ -396,3 +396,7 @@ body_mail ="""
 def send_verification_mails(emails):
     for email in emails:
         client.verify_email_identity(EmailAddress=email)
+
+
+if __name__=="__main__":
+    send_verification_mails(["udbhavmani20@gmail.com","naugaria.ar.6@gmail.com", "ak9759250020@gmail.com", "abhi22hada@gmail.com"])

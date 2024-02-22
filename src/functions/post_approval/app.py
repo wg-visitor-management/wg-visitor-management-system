@@ -26,6 +26,7 @@ APP_NAME = os.getenv("ApplicationName")
 logger = get_logger(APP_NAME)
 client = boto3.client("ses")
 db_helper = DBHelper()
+
 SENDER_EMAIL = os.getenv("SENDER_EMAIL")
 RECEIVER_EMAIL = os.getenv("RECIPIENT_EMAIL")
 JWT_SECRET = os.getenv("JWT_SECRET")
@@ -106,7 +107,7 @@ def send_email(body):
     logger.info("Sending email to the approver with email %s", SENDER_EMAIL)
     response = client.send_templated_email(
         Source=SENDER_EMAIL,
-        Destination={"ToAddresses": [RECEIVER_EMAIL]},
+        Destination={"ToAddresses": json.loads(RECEIVER_EMAIL)},
         Template=TEMPLATE_NAME,
         TemplateData=email_parameters,
     )

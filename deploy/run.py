@@ -208,7 +208,7 @@ def main():
     deploy_stack(**static_content_bucket_stack)
     deploy_stack(**cognito_stack)
     deploy_stack(**dynamodb_stack)
-    send_verification_mails(config.ADMIN_EMAIL)
+    send_verification_mails(config.EMAILS)
     deploy_stack(**get_iam_stack(outputs))
     install_requirements()
     apigateway_lambda_deploy_sam()
