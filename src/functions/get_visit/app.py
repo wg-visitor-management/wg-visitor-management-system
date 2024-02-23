@@ -20,15 +20,15 @@ def lambda_handler(event, context):
     """
     This function is used to get all the visits from the database with some filters.
     """
-    logger.debug("Received event: %s", event)
-    logger.debug("Received context: %s", context)
+    logger.debug(f"Received event: {event}")
+    logger.debug(f"Received context: {context}")
     query_params = event.get("queryStringParameters")
     start_date = query_params.get("start_date")
     end_date = query_params.get("end_date")
     organization = query_params.get("organization")
     approver = query_params.get("approver")
     visitor_id = query_params.get("visitor_id")
-    logger.debug("Query Params: %s", query_params)
+    logger.debug(f"Query Params: {query_params}")
     visit_helper = VisitHelper()
     if visitor_id:
         response = visit_helper.get_visits_by_visitor_id(visitor_id)

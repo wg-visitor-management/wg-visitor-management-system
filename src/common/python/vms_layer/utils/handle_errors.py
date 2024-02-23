@@ -29,9 +29,7 @@ def get_error_response(error):
     else:
         status_code = error_map.get(Exception)
     logger.error(
-                "Error Occurred: {}".format(
-                    traceback.format_exc()
-                )
+                f"Error Occurred: {traceback.format_exc()}"
             )
     return ParseResponse(
         error.message if hasattr(error, "message") else str(error),

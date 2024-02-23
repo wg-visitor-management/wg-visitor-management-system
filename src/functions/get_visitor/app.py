@@ -21,8 +21,8 @@ def lambda_handler(event, context):
     """
     This function is used as a handler for the get_visitor lambda function
     """
-    logger.debug("Received event: %s", event)
-    logger.debug("Received context: %s", context)
+    logger.debug(f"Received event: {event}")
+    logger.debug(f"Received context: {context}")
     query_params = event.get("queryStringParameters")
     search_key = query_params.get("name", "").lower()
     last_evaluated_key = query_params.get("nextPageToken")
@@ -40,7 +40,7 @@ def lambda_handler(event, context):
         last_evaluated_key,
         page_size,
     )
-    logger.info("Returning response: %s", response)
+    logger.info(f"Returning response: {response}")
     return response
 
 
@@ -54,7 +54,7 @@ def get_visitor_by_name(
     """
     This function is used to get the visitor by name
     """
-    logger.debug("Getting visitor by name: %s", search_key)
+    logger.debug(f"Getting visitor by name: {search_key}")
     if last_evaluated_key:
         last_evaluated_key = json.loads(base64_to_string(last_evaluated_key))
 
@@ -126,5 +126,5 @@ def query_items(
         last_evaluated_key = json.dumps(last_evaluated_key)
         last_evaluated_key = convert_to_base64(last_evaluated_key)
 
-    logger.debug("Items :%s", items)
+    logger.debug(f"Items : {items}")
     return items, last_evaluated_key

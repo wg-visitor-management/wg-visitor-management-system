@@ -25,8 +25,8 @@ def lambda_handler(event, context):
     """
     This function is used to get a visitor from the database.
     """
-    logger.debug(event)
-    logger.debug("Received context: %s", context)
+    logger.debug(f"Received event: {event}")
+    logger.debug(f"Received context: {context}")
 
     path_params = event.get("pathParameters", {})
     if not path_params or "id" not in path_params:

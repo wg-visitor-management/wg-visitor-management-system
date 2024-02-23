@@ -26,8 +26,8 @@ def lambda_handler(event, context):
     """
     Update the check out time for the visit and history partition
     """
-    logger.debug("Received event: %s", event)
-    logger.debug("Received context: %s", context)
+    logger.debug(f"Received event: {event}")
+    logger.debug(f"Received context: {context}")
     visit_id = event.get("pathParameters").get("id")
     db_helper = DBHelper()
     decoded_visit_id = base64.b64decode(visit_id).decode("utf-8")
@@ -49,8 +49,8 @@ def lambda_handler(event, context):
         update_expression="SET checkOutTime = :checkOutTime",
         expression_attribute_values={":checkOutTime": str(current_time)},
     )
-    logger.debug("Response from update_item: %s", response_visit)
-    logger.debug("Response from update_item: %s", response_history)
+    logger.debug(f"Response from update_item: {response_visit}")
+    logger.debug(f"Response from update_item: {response_history}")
 
     logger.info("Visit checked out successfully")
     return ParseResponse(

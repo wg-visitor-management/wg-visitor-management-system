@@ -25,8 +25,8 @@ def lambda_handler(event, context):
     """
     This function is used to authenticate a user.
     """
-    logger.debug("Received event: %s", event)
-    logger.debug("Received context: %s", context)
+    logger.debug(f"Received event: {event}")
+    logger.debug(f"Received context: {context}")
     body = json.loads(event.get("body"))
     email = body.get("username")
     password = body.get("password")

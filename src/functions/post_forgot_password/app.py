@@ -53,20 +53,20 @@ def change_password(alias, code, password):
 def lambda_handler(event, context):
     """This function is used to send an email to the approver"""
     body = json.loads(event.get("body"))
-    logger.debug("Received event: %s", event)
-    logger.debug("Received context: %s", context)
+    logger.debug(f"Received event: {event}")
+    logger.debug(f"Received context: {context}")
     action = body.get("action")
     message = ""
 
     if action == "get_token":
-        logger.debug("Getting token for %s", body.get("alias"))
+        logger.debug(f"Getting token for {body.get('alias')}")
         alias = body.get("alias")
         get_token(alias)
         logger.info("Token sent successfully")
         message = "Password reset link sent successfully"
 
     elif action == "change_password":
-        logger.debug("Changing password for %s", body.get("alias"))
+        logger.debug(f"Changing password for {body.get('alias')}")
         alias = body.get("alias")
         code = body.get("code")
         password = body.get("password")

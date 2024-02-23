@@ -23,8 +23,8 @@ def lambda_handler(event, context):
     """
     This function is used to get all the cards from the database.
     """
-    logger.debug("Received event: %s", event)
-    logger.debug("Received context: %s", context)
+    logger.debug(f"Received event: {event}")
+    logger.debug(f"Received context: {context}")
     data = db_helper.query_items(
         key_condition_expression="PK = :pk AND begins_with(SK, :sk)",
         expression_attribute_values={":pk": "card", ":sk": "card#"},

@@ -177,17 +177,17 @@ body_mail ="""
                                     border-top: 3px solid #d4dadf;
                                 "
                             >
-                                <h1
+                                <h4
                                     style="
                                         margin: 0;
-                                        font-size: 32px;
+                                        font-size: 28px;
                                         font-weight: 700;
                                         letter-spacing: -1px;
                                         line-height: 48px;
                                     "
                                 >
                                     A visitor has arrived!!
-                                </h1>
+                                </h4>
                             </td>
                         </tr>
                     </table>
@@ -397,6 +397,3 @@ def send_verification_mails(emails):
     for email in emails:
         client.verify_email_identity(EmailAddress=email)
 
-
-if __name__=="__main__":
-    send_verification_mails(["udbhavmani20@gmail.com","naugaria.ar.6@gmail.com", "ak9759250020@gmail.com", "abhi22hada@gmail.com"])

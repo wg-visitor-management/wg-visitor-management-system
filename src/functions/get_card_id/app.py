@@ -23,15 +23,15 @@ def lambda_handler(event, context):
     This function is used to get a card from the database.
     """
     card_id = event.get('pathParameters').get('id')
-    logger.debug("Received event: %s", event)
-    logger.debug("Received context: %s", context)
+    logger.debug(f"Received event: {event}")
+    logger.debug(f"Received context: {context}")
 
     data = db_helper.get_item({"PK": "card", "SK": f"card#{card_id}"})
     if data:
         data.pop("PK")
         data['card_id'] = data.get('SK').split("#")[-1]
         data.pop("SK")
-        logger.debug("Card Data: %s", data)
+        logger.info("Card Data Fetched Successfully")
         return ParseResponse(data, 200).return_response()
     logger.error("Invalid Card Id Provided")
     raise InvalidCardIdError("Invalid Card Id Provided")

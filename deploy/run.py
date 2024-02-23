@@ -2,9 +2,9 @@ import subprocess
 import boto3
 import logging
 
-import config 
-from run_helper import create_recursive_folders, get_stack_qualifier
-from ses_template import deploy_template, send_verification_mails, body_mail
+import deploy.config.config as config 
+from deploy.helpers.run_helper import create_recursive_folders, get_stack_qualifier
+from deploy.helpers.ses_helper import deploy_template, send_verification_mails, body_mail
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

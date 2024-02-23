@@ -32,8 +32,8 @@ def lambda_handler(event, context):
     """
     Create a new visit for the visitor
     """
-    logger.debug("Received event: %s", event)
-    logger.debug("Received context: %s", context)
+    logger.debug(f"Received event: {event}")
+    logger.debug(f"Received context: {context}")
     body = json.loads(event.get("body"))
 
     current_time = current_time_epoch()
@@ -47,7 +47,7 @@ def lambda_handler(event, context):
     visit = Visit(body, current_quarter, visitor_id, current_time, checked_in_by)
     item_data = visit.to_object()
 
-    logger.info("Creating visit for visitor %s with data: %s", visitor_id, item_data)
+    logger.info(f"Creating visit for visitor {visitor_id} with data: {item_data}")
 
     create_item_in_database(item_data, current_quarter, current_time, visitor_id)
     logger.info("Visit created successfully")
@@ -76,5 +76,5 @@ def create_item_in_database(item_data, current_quarter, current_time, visitor_id
         "SK": f"history#{current_time}#{visitor_id}",
         **item_data,
     }
-    logger.debug("Creating history item with data: %s", history_item_data)
+    logger.debug(f"Creating history item with data: {history_item_data}")
     db_helper.create_item(history_item_data)

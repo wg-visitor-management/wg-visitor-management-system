@@ -23,14 +23,14 @@ def lambda_handler(event, context):
     Update a card with a visit_id and status
     """
     body = json.loads(event.get("body"))
-    logger.debug("Received event: %s", event)
-    logger.debug("Received context: %s", context)
+    logger.debug(f"Received event: {event}")
+    logger.debug(f"Received context: {context}")
 
     card_id = event.get("pathParameters").get("id")
     visit_id = body.get("visitId")
     card_status = body.get("status")
 
-    logger.info("Updating card %s with visit_id %s and status %s", card_id, visit_id, card_status)
+    logger.info(f"Updating card with card id {card_id}, visit id {visit_id} and status {card_status}")
 
     response = db_helper.get_item(
         key={"PK": "card", "SK": f"card#{card_id}"}
@@ -51,7 +51,7 @@ def lambda_handler(event, context):
             ":cardStatus": card_status,
         },
     )
-    logger.debug("Response from update_item: %s", response)
+    logger.debug(f"Response from update_item: {response}")
     logger.info("Card updated successfully")
     return ParseResponse(
         {"message": "Card updated successfully", "response": response},

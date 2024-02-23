@@ -24,9 +24,10 @@ def lambda_handler(event, context):
     """
     This function is used to create a card
     """
-    logger.debug("Event - %s, Context - %s", event, context)
+    logger.debug(f"Received event: {event}")
+    logger.debug(f"Received context: {context}")
     cards = json.loads(event.get("body"))
-    logger.debug("Creating cards %s", cards)
+    logger.debug(f"Creating cards {cards}")
     for card_id in cards:
         check_if_card_exists(card_id)
         body = {}
@@ -52,7 +53,7 @@ def check_if_card_exists(card_id):
     card = db_helper.get_item({"PK": "card", "SK": f"card#{card_id}"})
     if card:
         if card.get("cardStatus") == "discarded":
-            logger.error("Card %s is already discarded",card_id)
+            logger.error(f"Card With {card_id} is already discarded")
             return False
         raise CardAlreadyExistsError(f"Card With {card_id} Id Already Exists")
     return False

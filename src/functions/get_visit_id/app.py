@@ -26,8 +26,8 @@ def lambda_handler(event, context):
     This function is used to get a visit from the database.
     """
     path_params = event.get("pathParameters")
-    logger.debug("Received event: %s",event)
-    logger.debug("Received context: %s",context)
+    logger.debug(f"Received event: {event}")
+    logger.debug(f"Received context: {context}")
     visit_id = path_params.get("id")
     decoded_visit_id = base64_to_string(visit_id)
     visitor_id = decoded_visit_id.split("#")[0]
@@ -42,11 +42,12 @@ def lambda_handler(event, context):
             "SK": f"visit#{visitor_id}#{visit_time}",
         }
     )
-    logger.debug("Response from db: %s",response)
+    logger.debug(f"Response from db: {response}")
     response.pop("PK")
     response.pop("SK")
     response["date"] = epoch_to_date(int(response["checkInTime"])).split("T")[0]
     response["checkInTime"] = epoch_to_date(int(response["checkInTime"])).split("T")[1]
-    logger.debug("Response after parsing: %s",response)
+    logger.debug(f"Response after parsing: {response}")
+    logger.info(f"Visit Data Fetched Successfully")
 
     return ParseResponse(response, 200).return_response()

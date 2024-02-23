@@ -28,7 +28,7 @@ BUCKET_NAME = os.getenv("BucketName")
 
 def update_visitor_data(visitor_data, visitor_id, raw_visitor_id):
     """Update visitor data."""
-    logger.debug("Updating visitor data for %s", visitor_id)
+    logger.debug(f"Updating visitor data for {visitor_id}")
     first_name = string_trim_lower(visitor_data.get("firstName"))
     last_name = string_trim_lower(visitor_data.get("lastName"))
     updated_visitor_id = f"detail#{first_name}{last_name}#{raw_visitor_id}"
@@ -59,7 +59,7 @@ def update_visitor_data(visitor_data, visitor_id, raw_visitor_id):
 
 def delete_old_visitor_data(visitor_id):
     """Delete old visitor data."""
-    logger.debug("Deleting old visitor data for %s", visitor_id)
+    logger.debug(f"Deleting old visitor data for {visitor_id}")
 
     db_helper.delete_item({"PK": "visitor", "SK": visitor_id})
 
@@ -67,7 +67,7 @@ def delete_old_visitor_data(visitor_id):
 def update_visitor_history(visitor_data, visitor_history_id):
     """Update visitor history."""
 
-    logger.debug("Updating visitor history for %s", visitor_history_id)
+    logger.debug(f"Updating visitor history for {visitor_history_id}")
     current_year = datetime.now().year
     epoch_current = current_time_epoch()
     history_pk_body = visitor_data.copy()
@@ -84,7 +84,7 @@ def update_visitor_history(visitor_data, visitor_history_id):
 def update_picture_urls(updated_data, bucket_name, picture_name_self, picture_name_id):
     """Update picture URLs."""
 
-    logger.debug("Updating picture URLs for %s and %s", picture_name_self, picture_name_id)
+    logger.debug(f"Updating picture URLs for {picture_name_self} and {picture_name_id}")
 
     profile_picture_url = generate_presigned_url(bucket_name, picture_name_self)
     id_proof_picture_url = generate_presigned_url(bucket_name, picture_name_id)
@@ -95,11 +95,11 @@ def update_picture_urls(updated_data, bucket_name, picture_name_self, picture_na
 @handle_errors
 @rbac
 @validate_schema(schema=visitor_schema)
-def lambda_handler(event, _):
+def lambda_handler(event, context):
     """Lambda handler function."""
 
-    logger.info("Processing event: %s", event)
-
+    logger.debug(f"Received event: {event}")
+    logger.debug(f"Received context: {context}")
     request_body = json.loads(event.get("body"))
 
     visitor_id = event["pathParameters"]["id"]
@@ -128,7 +128,7 @@ def lambda_handler(event, _):
     update_picture_urls(updated_data, BUCKET_NAME, picture_name_self, picture_name_id)
 
     response = ParseResponse(updated_data.get("Attributes"), 200).return_response()
-    logger.info("Finished processing event. Response: %s", response)
+    logger.info(f"Finished processing event. Response: {response}")
     return response
 
 def string_trim_lower(_string):
