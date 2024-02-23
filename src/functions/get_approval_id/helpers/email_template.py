@@ -59,7 +59,3 @@ def get_email_template(name, action, error=None):
         
             """
     return html_content
-
-
-if __name__ == "__main__":
-    print(get_email_template("test", "approved", "Eroorroro"))
