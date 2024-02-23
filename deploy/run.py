@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 outputs = {}
 
  
-def apigateway_lambda_deploy_sam():
+def apigateway_lambda_deploy_sam(outputs):
     package_command = (
         "sam package "
         f"--s3-bucket {config.S3_BUCKET_FOR_SAM} "
@@ -61,8 +61,10 @@ def main():
     outputs = deploy_stack(**config.dynamodb_stack)
     send_verification_mails(config.EMAILS)
     outputs = deploy_stack(**config.get_iam_stack(outputs))
+    outputs = get_outputs()
+    print(outputs)
     install_requirements()
-    apigateway_lambda_deploy_sam()
+    apigateway_lambda_deploy_sam(outputs)
     get_stack_outputs(config.SAM_STACK_NAME)
     outputs = get_outputs()
     APIGatewayEndpoint = outputs.get("VMSApiEndpoint")

@@ -29,7 +29,7 @@ SENDER_EMAIL = WG_MAIIL_FOR_SENDING
 RECIPIENT_EMAIL = ",".join(RECEIVER_MAILS)
 
 
-def get_iam_stack(outputs, ):
+def get_iam_stack(outputs ):
     iam_stack = {
         "stack_name": "iam-policy",
         "template_body_url": "cfn/iam_policy.yaml",

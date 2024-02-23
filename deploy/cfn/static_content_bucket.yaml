@@ -25,7 +25,7 @@ Resources:
   VMSStaticContentBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub "${Environment}-${BucketName}"
+      BucketName: !Ref BucketName
       Tags:
         - Key: "ApplicationName"
           Value: !Ref "ApplicationName"
