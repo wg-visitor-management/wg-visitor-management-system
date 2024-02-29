@@ -1,8 +1,7 @@
 import boto3
- 
+
 client = boto3.client("ses")
- 
- 
+
 def deploy_template(template_name, subject, html, text, api_gateway_url):
     try:
         html = html.replace("{{api_gateway_url}}", api_gateway_url)
@@ -26,10 +25,9 @@ def deploy_template(template_name, subject, html, text, api_gateway_url):
                 "TextPart": text,
             }
         )
-   
     return f"Template {template_name} created successfully"
- 
- 
+
+
 def send_email(template_name, sender, recipient, subject, body):
     client.send_templated_email(
         Source=sender,
@@ -38,9 +36,9 @@ def send_email(template_name, sender, recipient, subject, body):
         TemplateData=body,
     )
     return f"Email sent successfully"
- 
- 
-body_mail ="""
+
+
+body_mail = """
 <!DOCTYPE html>
 <html>
     <head>
@@ -392,8 +390,10 @@ body_mail ="""
     </body>
 </html>
 """
- 
-def send_verification_mails(emails):
-    for email in emails:
-        client.verify_email_identity(EmailAddress=email)
 
+
+def send_verification_mails(receiver_mails, sender_mail):
+    client.verify_email_identity(EmailAddress=sender_mail)
+    mails = receiver_mails.split(",")
+    for email in mails:
+        client.verify_email_identity(EmailAddress=email)

@@ -4,7 +4,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 def create_recursive_folders(folder_path, create_path):
-    "got to folder_path and create create_path folders"
+    "Go to folder_path and create create_path folders"
     current_path = os.getcwd()
     os.chdir(folder_path)
     _path_array = create_path.split("/")
@@ -17,7 +17,6 @@ def create_recursive_folders(folder_path, create_path):
         else:
             logger.warning(f"Folder already exists: {_sub_path}")
     os.chdir(current_path)
-    return
 
 def get_stack_qualifier(stack_name):
 

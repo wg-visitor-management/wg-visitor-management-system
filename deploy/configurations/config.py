@@ -1,35 +1,28 @@
 import os
 import dotenv
- 
+
 from helpers.run_helper import get_stack_qualifier
- 
- 
+
+
 dotenv.load_dotenv()
- 
+
 ENVIRONMENT = os.getenv("ENVIRONMENT")
 S3_BUCKET_FOR_SAM = os.getenv("BUCKET_NAME")
 JWT_SECRET = os.getenv("JWT_SECRET")
- 
-WG_MAIIL_FOR_SENDING = "abhi22hada@gmail.com"
-RECEIVER_MAILS = ["udbhavmani20@gmail.com","naugaria.ar.6@gmail.com", "ak9759250020@gmail.com"]
+SENDER_EMAIL = os.getenv("ADMIN_EMAIL")
+RECEIVER_MAILS = os.getenv("RECEIVER_MAILS")
+APPLICATION_NAME = os.getenv("APP_NAME")
+EMAIL_TEMPLATE = os.getenv("EMAIL_TEMPLATE")
 
-EMAILS = []
-EMAILS.append(WG_MAIIL_FOR_SENDING)
-EMAILS += RECEIVER_MAILS
-
-
-APPLICATION_NAME = "wg-visitor-mgmt-system"
 SAM_STACK_NAME = f"{get_stack_qualifier('api-gateway')}"
-BUCKET_NAME = f"{get_stack_qualifier('static-content-new')}"
+BUCKET_NAME = f"{get_stack_qualifier('static-content-bucket')}"
 USER_POOL_NAME = f"{get_stack_qualifier('user-pool')}"
 USER_POOL_CLIENT_NAME = f"{get_stack_qualifier('user-pool-client')}"
 TABLE_NAME = f"{get_stack_qualifier('database')}"
 ROLE_NAME = f"{get_stack_qualifier('lambda-role-common')}"
-SENDER_EMAIL = WG_MAIIL_FOR_SENDING
-RECIPIENT_EMAIL = ",".join(RECEIVER_MAILS)
 
 
-def get_iam_stack(outputs ):
+def get_iam_stack(outputs):
     iam_stack = {
         "stack_name": "iam-policy",
         "template_body_url": "cfn/iam_policy.yaml",
@@ -50,13 +43,13 @@ def get_iam_stack(outputs ):
             {
                 "ParameterKey": "ApplicationName",
                 "ParameterValue": APPLICATION_NAME,
-            }
+            },
         ],
         "capabilities": ["CAPABILITY_IAM", "CAPABILITY_NAMED_IAM"],
     }
     return iam_stack
- 
- 
+
+
 static_content_bucket_stack = {
     "stack_name": "static-content",
     "template_body_url": "cfn/static_content_bucket.yaml",
@@ -72,7 +65,7 @@ static_content_bucket_stack = {
         {
             "ParameterKey": "ApplicationName",
             "ParameterValue": APPLICATION_NAME,
-        }
+        },
     ],
     "capabilities": ["CAPABILITY_IAM"],
 }
@@ -95,7 +88,7 @@ cognito_stack = {
         {
             "ParameterKey": "ApplicationName",
             "ParameterValue": APPLICATION_NAME,
-        }
+        },
     ],
     "capabilities": ["CAPABILITY_IAM"],
 }
@@ -114,7 +107,7 @@ dynamodb_stack = {
         {
             "ParameterKey": "ApplicationName",
             "ParameterValue": APPLICATION_NAME,
-        }
+        },
     ],
     "capabilities": ["CAPABILITY_IAM"],
 }
