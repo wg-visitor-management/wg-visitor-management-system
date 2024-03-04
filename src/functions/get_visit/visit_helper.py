@@ -22,6 +22,7 @@ APP_NAME = os.getenv("ApplicationName")
 logger = get_logger(APP_NAME)
 db_helper = DBHelper()
 
+
 class VisitHelper:
     """
     This class is used to get the visits from the database with some filters.

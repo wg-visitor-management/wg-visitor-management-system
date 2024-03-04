@@ -15,7 +15,7 @@ def upload_mime_image_binary_to_s3(
 ):
     """Uploads a base64 encoded image to S3 bucket"""
     try:
-        response = s3.put_object(
+        s3.put_object(
             Bucket=bucket_name,
             Key=file_name,
             Body=base64.b64decode(binary_data.encode() + b"=="),

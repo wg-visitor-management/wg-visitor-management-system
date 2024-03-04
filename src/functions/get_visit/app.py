@@ -14,6 +14,7 @@ APP_NAME = os.getenv("ApplicationName")
 
 logger = get_logger(APP_NAME)
 
+
 @handle_errors
 @rbac
 def lambda_handler(event, context):

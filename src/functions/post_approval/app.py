@@ -96,7 +96,7 @@ def send_email(body):
     purpose = body.get("purpose")
     for receiver in RECEIVER_EMAIL.split(","):
         logger.debug(f"Sending email to {receiver}")
-        access_token = jwt.encode({"name": name, "exp": exp_time, "approver":receiver}, JWT_SECRET)
+        access_token = jwt.encode({"name": name, "exp": exp_time, "approver": receiver}, JWT_SECRET)
         email_parameters = json.dumps(
             {
                 "name": name,
@@ -116,5 +116,3 @@ def send_email(body):
         )
         logger.info(f"Email sent successfully: {response}")
     return
-
-

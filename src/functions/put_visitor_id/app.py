@@ -4,6 +4,7 @@ This module handles visitor details.
 
 from datetime import datetime
 import os
+import copy
 import json
 
 from helpers.body_parser import Body
@@ -38,8 +39,7 @@ def update_visitor_data(visitor_data, visitor_id, raw_visitor_id):
         {"PK": "visitor", "SK": updated_visitor_id},
         "SET firstName = :firstName, lastName = :lastName,\
               phoneNumber = :phoneNumber, email = :email,\
-                  organization = :organization, address = :address\
-                      idProofNumber = :idProofNumber,\
+                  organization = :organization, address = :address,\
                           profilePictureUrl = :profilePictureUrl,\
                               idProofPictureUrl = :idProofPictureUrl",
         {
@@ -49,12 +49,11 @@ def update_visitor_data(visitor_data, visitor_id, raw_visitor_id):
             ":email": visitor_data["email"],
             ":organization": visitor_data["organization"],
             ":address": visitor_data["address"],
-            ":idProofNumber": visitor_data["idProofNumber"],
             ":profilePictureUrl": visitor_data["profilePictureUrl"],
             ":idProofPictureUrl": visitor_data["idProofPictureUrl"],
         },
     )
-    return result
+    return result, updated_visitor_id
 
 
 def delete_old_visitor_data(visitor_id):
@@ -70,7 +69,7 @@ def update_visitor_history(visitor_data, visitor_history_id):
     logger.debug(f"Updating visitor history for {visitor_history_id}")
     current_year = datetime.now().year
     epoch_current = current_time_epoch()
-    history_pk_body = visitor_data.copy()
+    history_pk_body = copy.deepcopy(visitor_data)
     history_pk_body.update(
         {
             "PK": f"detail_history#{current_year}",
@@ -119,9 +118,10 @@ def lambda_handler(event, context):
 
     vistor_pk_body = Body(request_body, picture_name_self, picture_name_id).to_object()
 
-    updated_data = update_visitor_data(vistor_pk_body, visitor_id, raw_visitor_id)
-
-    delete_old_visitor_data(visitor_id)
+    updated_data, updated_visitor_id = update_visitor_data(vistor_pk_body, visitor_id, raw_visitor_id)
+    
+    if visitor_id != updated_visitor_id:
+        delete_old_visitor_data(visitor_id)
 
     update_visitor_history(vistor_pk_body, visitor_history_id)
 

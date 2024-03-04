@@ -2,8 +2,8 @@ import os
 
 from vms_layer.utils.custom_errors import UnauthorizedError
 from vms_layer.config.config import RBAC_CONFIG
-from vms_layer.helpers.response_parser import ParseResponse
 from vms_layer.utils.loggers import get_logger
+
 APP_NAME = os.getenv("ApplicationName")
 
 logger = get_logger(APP_NAME)

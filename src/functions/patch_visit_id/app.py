@@ -1,5 +1,5 @@
 """
-This module is responsible for updating the 
+This module is responsible for updating the
 check out time for the visit and history partition
 """
 import os

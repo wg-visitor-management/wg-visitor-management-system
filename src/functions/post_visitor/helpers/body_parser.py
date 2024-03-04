@@ -1,5 +1,5 @@
 """
-This module contains the Body class 
+This module contains the Body class
 which is used to parse the request body and return the required fields.
 """
 

@@ -6,7 +6,7 @@ import os
 from vms_layer.utils.loggers import get_logger
 from vms_layer.helpers.db_helper import DBHelper
 from vms_layer.helpers.rbac import rbac
-from vms_layer.helpers.response_parser import ParseResponse
+from vms_layer.helpers.response_parser import ParseResponse, remove_keys
 from vms_layer.utils.base64_parser import base64_to_string
 from vms_layer.utils.date_time_parser import (
     epoch_to_date,
@@ -43,11 +43,10 @@ def lambda_handler(event, context):
         }
     )
     logger.debug(f"Response from db: {response}")
-    response.pop("PK")
-    response.pop("SK")
+    response = remove_keys(response, ["PK", "SK"])
     response["date"] = epoch_to_date(int(response["checkInTime"])).split("T")[0]
     response["checkInTime"] = epoch_to_date(int(response["checkInTime"])).split("T")[1]
     logger.debug(f"Response after parsing: {response}")
-    logger.info(f"Visit Data Fetched Successfully")
+    logger.info("Visit Data Fetched Successfully")
 
     return ParseResponse(response, 200).return_response()

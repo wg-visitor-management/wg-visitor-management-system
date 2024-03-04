@@ -63,8 +63,7 @@ def lambda_handler(event, context):
     """
     The lambda handler for the POST /visitor endpoint.
     """
-    logger.debug(f"Received event: {event}")
-    logger.debug(f"Received context: {context}")
+
     current_year = datetime.now().year
     epoch_current = current_time_epoch()
     request_body = json.loads(event.get("body"))
@@ -90,7 +89,7 @@ def lambda_handler(event, context):
 
     profile_picture_url = generate_presigned_url(BUCKET_NAME, picture_name_self)
     id_proof_picture_url = generate_presigned_url(BUCKET_NAME, picture_name_id)
-    logger.info("Successfully processed visitor and history records")
+    logger.info(f"Successfully processed visitor and history records with records: {visitor_body} and {history_body}")
     return ParseResponse(
         {
             "visitorId": str(encoded_visitor_id),

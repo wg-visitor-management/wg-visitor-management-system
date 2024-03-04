@@ -1,6 +1,6 @@
 """
-This module is used to approve or reject a visit request. 
-It updates the visit and history tables with the approval status 
+This module is used to approve or reject a visit request.
+It updates the visit and history tables with the approval status
 and the admin who approved the request.
 """
 import os
@@ -11,7 +11,6 @@ from helpers.email_template import get_email_template
 
 from vms_layer.utils.loggers import get_logger
 from vms_layer.utils.base64_parser import base64_to_string
-from vms_layer.helpers.response_parser import ParseResponse
 from vms_layer.helpers.db_helper import DBHelper
 from vms_layer.utils.date_time_parser import (
     extract_quarters_from_date_range,
@@ -74,7 +73,7 @@ def lambda_handler(event, context):
     except jwt.ExpiredSignatureError:
         return {
             "statusCode": 200,
-            "body": get_email_template("","", f"Your token has expired, Please perform the action from portal"),
+            "body": get_email_template("", "", "Your token has expired, Please perform the action from portal"),
             "headers": {
                 "Content-Type": "text/html"
             }
@@ -141,5 +140,3 @@ def lambda_handler(event, context):
             "Content-Type": "text/html"
         }
     }
-
-

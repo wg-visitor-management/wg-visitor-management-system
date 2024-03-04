@@ -8,7 +8,7 @@ from vms_layer.helpers.rbac import rbac
 from vms_layer.helpers.db_helper import DBHelper
 from vms_layer.utils.handle_errors import handle_errors
 from vms_layer.utils.loggers import get_logger
-from vms_layer.helpers.response_parser import ParseResponse
+from vms_layer.helpers.response_parser import ParseResponse, remove_keys
 
 APP_NAME = os.getenv("ApplicationName")
 
@@ -84,9 +84,8 @@ def format_response(data, next_page_token):
     logger.debug("Formatting response")
     if data:
         for item in data:
-            item["visitor_id"] = convert_to_base64(item.get("SK").split("#")[-1])
-            item.pop("PK")
-            item.pop("SK")
+            item["visitorId"] = convert_to_base64(item.get("SK").split("#")[-1])
+            item = remove_keys(item, ["PK", "SK"])
         response = {
             "visitors": data,
             "nextPageToken": next_page_token,

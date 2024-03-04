@@ -28,9 +28,7 @@ def get_error_response(error):
         status_code = error_map.get(type(error))
     else:
         status_code = error_map.get(Exception)
-    logger.error(
-                f"Error Occurred: {traceback.format_exc()}"
-            )
+    logger.error(f"Error Occurred: {traceback.format_exc()}")
     return ParseResponse(
         error.message if hasattr(error, "message") else str(error),
         status_code).return_response()
@@ -42,5 +40,5 @@ def error_parser(error):
     try:
         message = error.schema.get("message").get(error.validator)
         return message
-    except Exception as e:
+    except Exception:
         return error.message.split("\n")[0]

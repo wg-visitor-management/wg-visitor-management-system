@@ -10,7 +10,7 @@ from vms_layer.utils.handle_errors import handle_errors
 from vms_layer.utils.loggers import get_logger
 from vms_layer.utils.base64_parser import convert_to_base64
 from vms_layer.utils.base64_parser import base64_to_string
-from vms_layer.helpers.response_parser import ParseResponse
+from vms_layer.helpers.response_parser import ParseResponse, remove_keys
 from vms_layer.helpers.rbac import rbac
 from vms_layer.helpers.db_helper import DBHelper
 from vms_layer.utils.date_time_parser import (
@@ -68,8 +68,7 @@ def create_item_in_database(item_data, current_quarter, current_time, visitor_id
     Create the visit and history items in the database
     """
     db_helper.create_item(item_data)
-    item_data.pop("PK")
-    item_data.pop("SK")
+    item_data = remove_keys(item_data, ["PK", "SK"])
 
     history_item_data = {
         "PK": f"history#{current_quarter}",
