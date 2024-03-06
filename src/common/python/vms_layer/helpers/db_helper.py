@@ -16,18 +16,16 @@ class DBHelper:
         try:
             response = self.table.put_item(Item=item)
             return response
-        except ClientError as e:
-            print(f"Error creating item: {e}")
-            return None
+        except ClientError as error:
+            return error
 
     def get_item(self, key):
         """Get an item from the table"""
         try:
             response = self.table.get_item(Key=key, ConsistentRead=True)
             return response.get("Item")
-        except ClientError as e:
-            print(f"Error getting item: {e}")
-            return None
+        except ClientError as error:
+            return error
 
     def update_item(self, key, update_expression, expression_attribute_values):
         """Update an item in the table"""
@@ -36,21 +34,19 @@ class DBHelper:
                 Key=key,
                 UpdateExpression=update_expression,
                 ExpressionAttributeValues=expression_attribute_values,
-                ReturnValues="UPDATED_NEW",
+                ReturnValues="ALL_NEW",
             )
             return response
-        except ClientError as e:
-            print(f"Error updating item: {e}")
-            return None
+        except ClientError as error:
+            return error
 
     def delete_item(self, key):
         """Delete an item from the table"""
         try:
             response = self.table.delete_item(Key=key)
             return response
-        except ClientError as e:
-            print(f"Error deleting item: {e}")
-            return None
+        except ClientError as error:
+            return error
 
     def query_items(
         self,
@@ -60,6 +56,7 @@ class DBHelper:
         starting_token=None,
         filter_expression=None,
         expression_attribute_names=None,
+        consistent_read=False
     ):
         """Query items from the table"""
         query_params = {
@@ -76,19 +73,20 @@ class DBHelper:
 
         if starting_token:
             query_params["ExclusiveStartKey"] = starting_token
+        
+        if consistent_read:
+            query_params["ConsistentRead"] = consistent_read
 
         try:
             response = self.table.query(**query_params)
             return response
-        except ClientError as e:
-            print(f"Error querying items: {e}")
-            return None
+        except ClientError as error:
+            return error
 
     def batch_get_items(self, keys):
         """Batch query items from the table"""
         try:
             response = self.table.batch_get_item(Keys=keys)
             return response
-        except ClientError as e:
-            print(f"Error batch getting items: {e}")
-            return None
+        except ClientError as error:
+            return error

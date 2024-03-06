@@ -10,7 +10,7 @@ visitor_schema = {
             }},
         "lastName": {
             "type": "string",
-            "pattern": "^[A-Za-z ]+$",
+            "pattern": "^[A-Za-z ]*$",
             "message": {
                 "required": "Last name is a required property.",
                 "pattern": "Last name should contain only alphabets and spaces.",
@@ -40,14 +40,14 @@ visitor_schema = {
             }},
         "address": {
             "type": "string",
-            "pattern": "^[#.0-9a-zA-Z\s,-]+$",
+            "pattern": "^[#.0-9a-zA-Z\s,-]*$",
             "message": {
                 "required": "Address is a required property.",
                 "pattern": "Address should contain only alphabets, numbers and spaces.",
             }},
         "idProofNumber": {
             "type": "string",
-            "pattern": "^[A-Za-z0-9 ]+$",
+            "pattern": "^[A-Za-z0-9 ]*$",
             "message": {
                 "required": "Id proof number is a required property.",
                 "pattern": "Id proof number should contain only alphabets, numbers and spaces.",
@@ -63,5 +63,5 @@ visitor_schema = {
                 "required": "Visitor photo blob is a required property.",
             }},
     },
-    "required": ["firstName", "lastName", "phoneNumber", "email", "organization", "address", "idProofNumber"],
+    "required": ["firstName", "lastName", "phoneNumber", "organization" ],
 }

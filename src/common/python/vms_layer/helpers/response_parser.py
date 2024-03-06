@@ -41,3 +41,9 @@ class ParseResponse:
         else:
             status = "failure"
         return status
+
+def remove_keys(body, keys):
+    """Remove keys from a dictionary."""
+    for key in keys:
+        body.pop(key)
+    return body

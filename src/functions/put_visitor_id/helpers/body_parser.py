@@ -22,7 +22,6 @@ class Body:
             "email": self.request_body["email"],
             "organization": self.request_body["organization"],
             "address": self.request_body["address"],
-            "idProofNumber": self.request_body["idProofNumber"],
             "profilePictureUrl": self.picture_name_self,
             "idProofPictureUrl": self.picture_name_id
         }

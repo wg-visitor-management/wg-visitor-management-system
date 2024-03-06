@@ -1,14 +1,16 @@
 """
 This module contains the code for the post_visit lambda function.
 """
+import os
 import json
+
 from helpers.body_parser import Visit
 from vms_layer.helpers.validate_schema import validate_schema
 from vms_layer.utils.handle_errors import handle_errors
 from vms_layer.utils.loggers import get_logger
 from vms_layer.utils.base64_parser import convert_to_base64
 from vms_layer.utils.base64_parser import base64_to_string
-from vms_layer.helpers.response_parser import ParseResponse
+from vms_layer.helpers.response_parser import ParseResponse, remove_keys
 from vms_layer.helpers.rbac import rbac
 from vms_layer.helpers.db_helper import DBHelper
 from vms_layer.utils.date_time_parser import (
@@ -18,9 +20,10 @@ from vms_layer.utils.date_time_parser import (
 )
 from vms_layer.config.schemas.visit_schema import post_visit_schema
 
-db_helper = DBHelper()
-logger = get_logger("POST /visit")
+APP_NAME = os.getenv("ApplicationName")
 
+logger = get_logger(APP_NAME)
+db_helper = DBHelper()
 
 @handle_errors
 @rbac
@@ -29,8 +32,8 @@ def lambda_handler(event, context):
     """
     Create a new visit for the visitor
     """
-    logger.debug("Received event: %s", event)
-    logger.debug("Received context: %s", context)
+    logger.debug(f"Received event: {event}")
+    logger.debug(f"Received context: {context}")
     body = json.loads(event.get("body"))
 
     current_time = current_time_epoch()
@@ -44,7 +47,7 @@ def lambda_handler(event, context):
     visit = Visit(body, current_quarter, visitor_id, current_time, checked_in_by)
     item_data = visit.to_object()
 
-    logger.info("Creating visit for visitor %s with data: %s", visitor_id, item_data)
+    logger.info(f"Creating visit for visitor {visitor_id} with data: {item_data}")
 
     create_item_in_database(item_data, current_quarter, current_time, visitor_id)
     logger.info("Visit created successfully")
@@ -65,13 +68,12 @@ def create_item_in_database(item_data, current_quarter, current_time, visitor_id
     Create the visit and history items in the database
     """
     db_helper.create_item(item_data)
-    item_data.pop("PK")
-    item_data.pop("SK")
+    item_data = remove_keys(item_data, ["PK", "SK"])
 
     history_item_data = {
         "PK": f"history#{current_quarter}",
         "SK": f"history#{current_time}#{visitor_id}",
         **item_data,
     }
-    logger.debug("Creating history item with data: %s", history_item_data)
+    logger.debug(f"Creating history item with data: {history_item_data}")
     db_helper.create_item(history_item_data)

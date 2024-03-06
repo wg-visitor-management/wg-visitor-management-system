@@ -1,52 +1,62 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: >
-    This CloudFormation template creates an S3 bucket for storing static content and defines a bucket policy to manage access permissions.
+  This CloudFormation template creates an S3 bucket for storing static content and defines a bucket policy to manage access permissions.
 
 Parameters:
-    BucketName:
-        Type: String
-        Description: "Name of the Log Bucket"
-        MinLength: 1
-        MaxLength: 80
-        Default: "vms-static-content"
+  BucketName:
+    Type: String
+    Description: "Name of the Log Bucket"
+    MinLength: 1
+    MaxLength: 80
+    Default: "vms-static-content"
+  Environment:
+    Type: String
+    Description: "The name of the Environment"
+    Default: "dev"
+    AllowedValues:
+      - dev
+      - prod
+  ApplicationName:
+    Type: String
+    Description: "The name of the application"
+    Default: "wg-visitor-mgmt-system"
 
 Resources:
-    VMSStaticContentBucket:
-        Type: AWS::S3::Bucket
-        Properties:
-            BucketName: !Ref BucketName
-            Tags:
-                - Key: Requirement
-                  Value: Storing Static Content
-                - Key: Type
-                  Value: Images
-    VmsBucketPolicy:
-        Type: AWS::S3::BucketPolicy
-        Properties:
-            Bucket: !Ref VMSStaticContentBucket
-            PolicyDocument:
-                Version: "2012-10-17"
-                Statement:
-                    - Effect: Allow
-                      Principal:
-                          AWS: !Ref "AWS::AccountId"
-                      Action:
-                          - "s3:PutObject"
-                          - "s3:GetObject"
-                      Resource:
-                          !Join ["", ["arn:aws:s3:::", !Ref BucketName, "/*"]]
-                    - Effect: Allow
-                      Principal:
-                          Service:
-                              - "s3.amazonaws.com"
-                      Action:
-                          - "s3:ListBucket"
-                      Resource: !Join ["", ["arn:aws:s3:::", !Ref BucketName]]
+  VMSStaticContentBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName
+      Tags:
+        - Key: "ApplicationName"
+          Value: !Ref "ApplicationName"
+        - Key: "ResourceName"
+          Value: !Ref BucketName
+  VmsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref VMSStaticContentBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Ref "AWS::AccountId"
+            Action:
+              - "s3:PutObject"
+              - "s3:GetObject"
+            Resource: !Join ["", ["arn:aws:s3:::", !Ref BucketName, "/*"]]
+          - Effect: Allow
+            Principal:
+              Service:
+                - "s3.amazonaws.com"
+            Action:
+              - "s3:ListBucket"
+            Resource: !Join ["", ["arn:aws:s3:::", !Ref BucketName]]
 
 Outputs:
-    BucketName:
-        Description: "Name of the Static Content Bucket"
-        Value: !Ref BucketName
-    BucketArn:
-        Description: "ARN of the Static Content Bucket"
-        Value: !GetAtt VMSStaticContentBucket.Arn
+  BucketName:
+    Description: "Name of the Static Content Bucket"
+    Value: !Ref BucketName
+  BucketArn:
+    Description: "ARN of the Static Content Bucket"
+    Value: !GetAtt VMSStaticContentBucket.Arn

@@ -12,3 +12,6 @@ gen/template-generated.yaml
 out
 cognito_operations.py
 gen/template-generated.yaml
+.vscode/settings.json
+pytest.ini
+.flake8

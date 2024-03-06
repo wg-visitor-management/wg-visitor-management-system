@@ -4,6 +4,7 @@ that is responsible for getting the visits from the database
 with some filters.
 """
 
+import os
 from body_parser import BodyParser
 
 from vms_layer.utils.base64_parser import base64_to_string
@@ -16,7 +17,9 @@ from vms_layer.utils.date_time_parser import (
     epoch_to_date,
 )
 
-logger = get_logger("GET /visit")
+APP_NAME = os.getenv("ApplicationName")
+
+logger = get_logger(APP_NAME)
 db_helper = DBHelper()
 
 
@@ -50,9 +53,9 @@ class VisitHelper:
                 approver,
             )
             response += items
-        logger.debug({"Response %s": response})
+        logger.debug(f"Response {response}")
         response_body = BodyParser(response).parse_response()
-        logger.info({"Response %s": response_body})
+        logger.info(f"Response {response_body}")
         return response_body
 
     def query_items_with_filters(
@@ -82,7 +85,7 @@ class VisitHelper:
             filter_expression=filter_expression,
             expression_attribute_values=expression_attribute_values,
         )
-        logger.info({"Response %s": response})
+        logger.info(f"Response {response}")
         return response
 
     def get_visits_by_visitor_id(self, visitor_id):
@@ -133,6 +136,6 @@ class VisitHelper:
             )
             items += response["Items"]
 
-        logger.debug("Items %s", items)
+        logger.debug(f"Items {items}")
         return items
     

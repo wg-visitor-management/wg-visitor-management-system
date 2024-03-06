@@ -4,6 +4,7 @@ This module handles visitor details.
 
 from datetime import datetime
 import os
+import copy
 import json
 
 from helpers.body_parser import Body
@@ -19,15 +20,16 @@ from vms_layer.utils.date_time_parser import current_time_epoch
 from vms_layer.utils.s3_signed_url_generator import generate_presigned_url
 from vms_layer.utils.custom_errors import VisitorNotFoundException
 
+APP_NAME = os.getenv("ApplicationName")
 
-logger = get_logger("PUT /visitor/:id")
 db_helper = DBHelper()
+logger = get_logger(APP_NAME)
 BUCKET_NAME = os.getenv("BucketName")
 
 
 def update_visitor_data(visitor_data, visitor_id, raw_visitor_id):
     """Update visitor data."""
-    logger.debug("Updating visitor data for %s", visitor_id)
+    logger.debug(f"Updating visitor data for {visitor_id}")
     first_name = string_trim_lower(visitor_data.get("firstName"))
     last_name = string_trim_lower(visitor_data.get("lastName"))
     updated_visitor_id = f"detail#{first_name}{last_name}#{raw_visitor_id}"
@@ -37,8 +39,7 @@ def update_visitor_data(visitor_data, visitor_id, raw_visitor_id):
         {"PK": "visitor", "SK": updated_visitor_id},
         "SET firstName = :firstName, lastName = :lastName,\
               phoneNumber = :phoneNumber, email = :email,\
-                  organization = :organization, address = :address\
-                      idProofNumber = :idProofNumber,\
+                  organization = :organization, address = :address,\
                           profilePictureUrl = :profilePictureUrl,\
                               idProofPictureUrl = :idProofPictureUrl",
         {
@@ -48,17 +49,16 @@ def update_visitor_data(visitor_data, visitor_id, raw_visitor_id):
             ":email": visitor_data["email"],
             ":organization": visitor_data["organization"],
             ":address": visitor_data["address"],
-            ":idProofNumber": visitor_data["idProofNumber"],
             ":profilePictureUrl": visitor_data["profilePictureUrl"],
             ":idProofPictureUrl": visitor_data["idProofPictureUrl"],
         },
     )
-    return result
+    return result, updated_visitor_id
 
 
 def delete_old_visitor_data(visitor_id):
     """Delete old visitor data."""
-    logger.debug("Deleting old visitor data for %s", visitor_id)
+    logger.debug(f"Deleting old visitor data for {visitor_id}")
 
     db_helper.delete_item({"PK": "visitor", "SK": visitor_id})
 
@@ -66,10 +66,10 @@ def delete_old_visitor_data(visitor_id):
 def update_visitor_history(visitor_data, visitor_history_id):
     """Update visitor history."""
 
-    logger.debug("Updating visitor history for %s", visitor_history_id)
+    logger.debug(f"Updating visitor history for {visitor_history_id}")
     current_year = datetime.now().year
     epoch_current = current_time_epoch()
-    history_pk_body = visitor_data.copy()
+    history_pk_body = copy.deepcopy(visitor_data)
     history_pk_body.update(
         {
             "PK": f"detail_history#{current_year}",
@@ -83,7 +83,7 @@ def update_visitor_history(visitor_data, visitor_history_id):
 def update_picture_urls(updated_data, bucket_name, picture_name_self, picture_name_id):
     """Update picture URLs."""
 
-    logger.debug("Updating picture URLs for %s and %s", picture_name_self, picture_name_id)
+    logger.debug(f"Updating picture URLs for {picture_name_self} and {picture_name_id}")
 
     profile_picture_url = generate_presigned_url(bucket_name, picture_name_self)
     id_proof_picture_url = generate_presigned_url(bucket_name, picture_name_id)
@@ -94,11 +94,11 @@ def update_picture_urls(updated_data, bucket_name, picture_name_self, picture_na
 @handle_errors
 @rbac
 @validate_schema(schema=visitor_schema)
-def lambda_handler(event, _):
+def lambda_handler(event, context):
     """Lambda handler function."""
 
-    logger.info("Processing event: %s", event)
-
+    logger.debug(f"Received event: {event}")
+    logger.debug(f"Received context: {context}")
     request_body = json.loads(event.get("body"))
 
     visitor_id = event["pathParameters"]["id"]
@@ -118,16 +118,17 @@ def lambda_handler(event, _):
 
     vistor_pk_body = Body(request_body, picture_name_self, picture_name_id).to_object()
 
-    updated_data = update_visitor_data(vistor_pk_body, visitor_id, raw_visitor_id)
-
-    delete_old_visitor_data(visitor_id)
+    updated_data, updated_visitor_id = update_visitor_data(vistor_pk_body, visitor_id, raw_visitor_id)
+    
+    if visitor_id != updated_visitor_id:
+        delete_old_visitor_data(visitor_id)
 
     update_visitor_history(vistor_pk_body, visitor_history_id)
 
     update_picture_urls(updated_data, BUCKET_NAME, picture_name_self, picture_name_id)
 
     response = ParseResponse(updated_data.get("Attributes"), 200).return_response()
-    logger.info("Finished processing event. Response: %s", response)
+    logger.info(f"Finished processing event. Response: {response}")
     return response
 
 def string_trim_lower(_string):

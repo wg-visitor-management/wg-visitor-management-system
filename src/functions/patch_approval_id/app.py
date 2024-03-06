@@ -3,7 +3,9 @@ PATCH /approval/:id
 This module contains the code for the patch_approval_id lambda function.
 """
 
+import os
 import json
+
 from vms_layer.utils.handle_errors import handle_errors
 from vms_layer.helpers.validate_schema import validate_schema
 from vms_layer.utils.loggers import get_logger
@@ -19,7 +21,9 @@ from vms_layer.utils.date_time_parser import (
 )
 from vms_layer.config.schemas.approval_schema import patch_approval_schema
 
-logger = get_logger("PATCH /approval/:id")
+APP_NAME = os.getenv("ApplicationName")
+
+logger = get_logger(APP_NAME)
 db_helper = DBHelper()
 
 
@@ -43,9 +47,7 @@ def update_partition(update_partition_data):
         "PK": f"{partition}#{quarter}",
         "SK": f"{partition}#{visitor_id}#{timestamp}",
     }
-    logger.debug(
-        "Updating %s with key %s and status %s", partition, history_key, status
-    )
+    logger.debug(f"Updating {partition} with {status} status for visitor {visitor_id}")
     if partition == "visit":
         key = visit_key
     else:
@@ -72,8 +74,8 @@ def lambda_handler(event, context):
     the patch_approval_id lambda function.
     """
     visit_id = event.get("pathParameters").get("id")
-    logger.debug("Received context: %s", context)
-    logger.debug("Received event: %s", event)
+    logger.debug(f"Received event: {event}")
+    logger.debug(f"Received context: {context}")
     update_partition_data = get_update_partition_data(visit_id, event)
     if update_partition_data.get("status") in ("approved", "rejected"):
         update_partition(update_partition_data)
@@ -107,9 +109,7 @@ def get_update_partition_data(visit_id, event):
     authorizer = event.get("requestContext").get("authorizer")
     approved_by = authorizer.get("claims").get("name")
     current_time = str(current_time_epoch())
-    logger.info(
-        "Updating approval status for visit %s with status %s", visit_id, status
-    )
+    logger.info(f"Updating approval status for visit {visit_id} and {status}")
 
     return {
         "partition": "visit",

@@ -16,18 +16,20 @@ from vms_layer.utils.handle_errors import handle_errors
 from vms_layer.utils.base64_parser import convert_to_base64
 from vms_layer.utils.loggers import get_logger
 
-logger = get_logger("POST /visitor")
+APP_NAME = os.getenv("ApplicationName")
+
+logger = get_logger(APP_NAME)
 db_helper = DBHelper()
-bucket_name = os.getenv("BucketName")
+BUCKET_NAME = os.getenv("BucketName")
 
 def process_visitor_photo(request_body, raw_visitor_id):
     """
     Process the visitor photo and upload it to S3
     """
-    logger.debug("Processing visitor photo with raw_visitor_id: %s", raw_visitor_id)
+    logger.debug(f"Processing visitor photo with raw_visitor_id: {raw_visitor_id}")
     picture_name_self = f"{raw_visitor_id}#photo_self"
     upload_mime_image_binary_to_s3(
-        bucket_name,
+        BUCKET_NAME,
         picture_name_self,
         request_body.get("vistorPhotoBlob"),
     )
@@ -37,10 +39,10 @@ def process_id_photo(request_body, raw_visitor_id):
     """
     Process the ID photo and upload it to S3
     """
-    logger.debug("Processing ID photo with raw_visitor_id: %s", raw_visitor_id)
+    logger.debug(f"Processing ID photo with raw_visitor_id: {raw_visitor_id}")
     picture_name_id = f"{raw_visitor_id}#photo_id"
     upload_mime_image_binary_to_s3(
-        bucket_name,
+        BUCKET_NAME,
         picture_name_id,
         request_body.get("idPhotoBlob"),
     )
@@ -61,8 +63,7 @@ def lambda_handler(event, context):
     """
     The lambda handler for the POST /visitor endpoint.
     """
-    logger.debug("Received event: %s", event)
-    logger.debug("Received context: %s", context)
+
     current_year = datetime.now().year
     epoch_current = current_time_epoch()
     request_body = json.loads(event.get("body"))
@@ -86,9 +87,9 @@ def lambda_handler(event, context):
 
     create_visitor_and_history(visitor_body, history_body)
 
-    profile_picture_url = generate_presigned_url(bucket_name, picture_name_self)
-    id_proof_picture_url = generate_presigned_url(bucket_name, picture_name_id)
-    logger.info("Successfully processed visitor and history records")
+    profile_picture_url = generate_presigned_url(BUCKET_NAME, picture_name_self)
+    id_proof_picture_url = generate_presigned_url(BUCKET_NAME, picture_name_id)
+    logger.info(f"Successfully processed visitor and history records with records: {visitor_body} and {history_body}")
     return ParseResponse(
         {
             "visitorId": str(encoded_visitor_id),

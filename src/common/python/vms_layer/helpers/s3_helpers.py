@@ -1,10 +1,12 @@
 import base64
+import os
 import boto3
 
 from vms_layer.utils.loggers import get_logger
 from vms_layer.utils.custom_errors import FailedToUploadImageError
+APP_NAME = os.getenv("ApplicationName")
 
-logger = get_logger(__name__)
+logger = get_logger(APP_NAME)
 s3 = boto3.client("s3")
 
 
@@ -13,7 +15,7 @@ def upload_mime_image_binary_to_s3(
 ):
     """Uploads a base64 encoded image to S3 bucket"""
     try:
-        response = s3.put_object(
+        s3.put_object(
             Bucket=bucket_name,
             Key=file_name,
             Body=base64.b64decode(binary_data.encode() + b"=="),

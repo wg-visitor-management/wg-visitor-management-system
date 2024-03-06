@@ -1,5 +1,7 @@
 """This module is used to create a card."""
+import os
 import json
+
 from vms_layer.helpers.rbac import rbac
 from vms_layer.helpers.validate_schema import validate_schema
 from vms_layer.config.schemas.card_schema import card_schema
@@ -10,9 +12,10 @@ from vms_layer.helpers.response_parser import ParseResponse
 from vms_layer.config.config import CARD_STATUS
 from vms_layer.utils.custom_errors import CardAlreadyExistsError
 
-db_helper = DBHelper()
-logger = get_logger("POST_/card")
+APP_NAME = os.getenv("ApplicationName")
 
+logger = get_logger(APP_NAME)
+db_helper = DBHelper()
 
 @handle_errors
 @validate_schema(schema=card_schema)
@@ -21,9 +24,10 @@ def lambda_handler(event, context):
     """
     This function is used to create a card
     """
-    logger.debug("Event - %s, Context - %s", event, context)
+    logger.debug(f"Received event: {event}")
+    logger.debug(f"Received context: {context}")
     cards = json.loads(event.get("body"))
-    logger.debug("Creating cards %s", cards)
+    logger.debug(f"Creating cards {cards}")
     for card_id in cards:
         check_if_card_exists(card_id)
         body = {}
@@ -49,9 +53,7 @@ def check_if_card_exists(card_id):
     card = db_helper.get_item({"PK": "card", "SK": f"card#{card_id}"})
     if card:
         if card.get("cardStatus") == "discarded":
-            logger.error("Card %s is already discarded",card_id)
-            raise CardAlreadyExistsError(
-                f"Card with ID {card_id} is revoked. Use some other ID."
-            )
+            logger.error(f"Card With {card_id} is already discarded")
+            return False
         raise CardAlreadyExistsError(f"Card With {card_id} Id Already Exists")
     return False
