@@ -15,9 +15,9 @@ def rbac(func):
     def wrapper(event, context):
         group = (
             event.get("requestContext")
-            .get("authorizer")
-            .get("claims")
-            .get("cognito:groups")
+            .get("authorizer") # .get("ROLE")
+            .get("claims") 
+            .get("cognito:groups") 
         )
         if group:
             http_method = event.get("httpMethod")

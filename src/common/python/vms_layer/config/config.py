@@ -1,16 +1,40 @@
-import json
 from vms_layer.utils.custom_errors import CardAlreadyExistsError, NotAuthorizedException, UnauthorizedError, ConflictError, AuthenticationError, FailedToUploadImageError, InvalidCardIdError, UserNotFoundException, VisitorNotFoundException
-def load_configuration():
-    """Load the configuration file and return the parameters"""
-   
-    with open('/opt/python/vms_layer/config/config.json', "r") as file:
-        config = json.load(file)
-        rbac_config = config.get("ACCESS_CONTROL_LIST")
-        log_config = config.get("LOG_CONFIGURATIONS")
-        card_status = config.get("CARD_STATUS")
-        return rbac_config, log_config, card_status
- 
-(RBAC_CONFIG, LOG_CONFIG, CARD_STATUS) = load_configuration()
+
+RBAC_CONFIG = {
+  "admin": {
+    "/card": ["GET", "POST"],
+    "/card/{id}": ["GET", "PUT", "DELETE"],
+    "/approval": ["GET", "POST"],
+    "/approval/{id}": ["GET", "PATCH"],
+    "/visitor": ["GET", "POST"],
+    "/visitor/{id}": ["GET", "PUT"],
+    "/visit": ["GET", "POST"],
+    "/visit/{id}": ["GET", "PATCH"]
+  },
+  "user": {
+    "/card": ["GET"],
+    "/card/{id}": ["GET", "PUT"],
+    "/approval": ["GET", "POST"],
+    "/approval/{id}": ["GET"],
+    "/visitor": ["GET", "POST"],
+    "/visitor/{id}": ["GET", "PUT"],
+    "/visit": ["GET", "POST"],
+    "/visit/{id}": ["GET", "PATCH"]
+  }
+}
+
+LOG_CONFIG = {
+  "LOG_LEVEL": "DEBUG",
+  "LOG_FORMAT": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+  "LOG_DATE_FORMAT": "%Y-%m-%d %H:%M:%S"
+}
+
+CARD_STATUS = {
+  "AVAILABLE": "available",
+  "OCCUPIED": "occupied",
+  "DISCARDED": "discarded"
+}
+
 error_map = {
         UnauthorizedError: 401,
         ConflictError: 409,

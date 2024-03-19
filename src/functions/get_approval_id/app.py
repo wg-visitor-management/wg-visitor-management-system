@@ -3,6 +3,7 @@ This module is used to approve or reject a visit request.
 It updates the visit and history tables with the approval status
 and the admin who approved the request.
 """
+
 import os
 import jwt
 import datetime
@@ -17,6 +18,7 @@ from vms_layer.utils.date_time_parser import (
     epoch_to_date,
     current_time_epoch,
 )
+
 APP_NAME = os.getenv("ApplicationName")
 
 logger = get_logger(APP_NAME)
@@ -44,7 +46,6 @@ def update_partition(update_partition_data):
         "SK": f"{partition}#{visitor_id}#{timestamp}",
     }
     logger.debug(f"Updating {partition} with {status} status")
-    
 
     query = "SET approvalStatus = :status, approvedBy = :approvedBy, approvalTime = :approvalTime"
     if partition == "visit":
@@ -73,10 +74,10 @@ def lambda_handler(event, context):
     except jwt.ExpiredSignatureError:
         return {
             "statusCode": 200,
-            "body": get_email_template("", "", "Your token has expired, Please perform the action from portal"),
-            "headers": {
-                "Content-Type": "text/html"
-            }
+            "body": get_email_template(
+                "", "", "Your token has expired, Please perform the action from portal"
+            ),
+            "headers": {"Content-Type": "text/html"},
         }
     name = token.get("name")
     approved_by = token.get("approver")
@@ -96,15 +97,19 @@ def lambda_handler(event, context):
     )
     if visit_data.get("approvalTime"):
         logger.debug("Visit has already been acted upon")
-        approval_time = datetime.datetime.fromtimestamp(int(visit_data.get("approvalTime"))) + datetime.timedelta(hours=5, minutes=30)
-        message = "Already approved" if visit_data.get("approvalStatus") == "approved" else "Visit has already been Rejected"
+        approval_time = datetime.datetime.fromtimestamp(
+            int(visit_data.get("approvalTime"))
+        ) + datetime.timedelta(hours=5, minutes=30)
+        message = (
+            "Already approved"
+            if visit_data.get("approvalStatus") == "approved"
+            else "Visit has already been Rejected"
+        )
         message = f"{message} by {visit_data.get('approvedBy')} at {approval_time}"
         return {
             "statusCode": 200,
             "body": get_email_template(name, message),
-            "headers": {
-                "Content-Type": "text/html"
-            }
+            "headers": {"Content-Type": "text/html"},
         }
     current_time = str(current_time_epoch())
     update_partition_data = {
@@ -132,11 +137,11 @@ def lambda_handler(event, context):
         update_partition(update_partition_data.get("visit"))
         update_partition(update_partition_data.get("history"))
     logger.debug("Returning response")
-    message = "Visit has been approved" if action == "approved" else "Visit has been rejected"
+    message = (
+        "Visit has been approved" if action == "approved" else "Visit has been rejected"
+    )
     return {
         "statusCode": 200,
         "body": get_email_template(name, message),
-        "headers": {
-            "Content-Type": "text/html"
-        }
+        "headers": {"Content-Type": "text/html"},
     }
